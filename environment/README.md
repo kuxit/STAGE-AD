@@ -10,5 +10,10 @@ The local and formal environments have different purposes.
   methods, and PyTorch 2.7.1 + CUDA 12.8 for MEMTO. Those two PyTorch installs
   must be recreated separately on the server.
 
+On a fresh Linux server, run `scripts/bootstrap_server.sh`. It creates both
+Python 3.10 environments on the large work disk, validates two-GPU visibility,
+and exports complete `pip freeze` manifests. The formal launcher selects the
+MEMTO interpreter through `STAGE_MEMTO_PYTHON`.
+
 A local smoke pass proves interface and dependency completeness. It does not
 authorize changing any frozen method, configuration, or metric implementation.

@@ -94,7 +94,7 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
     env.setdefault("OPENBLAS_NUM_THREADS", "2")
     if gpu is not None:
         env["CUDA_VISIBLE_DEVICES"] = gpu
-    python = str(args.python)
+    python = str(args.memto_python if method == "MEMTO" else args.python)
     common = [
         "--repo", str(args.repo), "--method", method, "--track", track,
         "--file", file_name, "--seed", str(args.seed), "--output", str(target),
@@ -153,7 +153,7 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
 
 def run_unit(args: argparse.Namespace, method: str, track: str, file_name: str, gpu: str | None) -> dict[str, Any]:
     target = standard_path(args.result, method, track, file_name)
-    if complete_record(target):
+    if complete_record_for_seed(target, args.seed):
         return {"status": "skipped", "method": method, "track": track, "file": file_name}
     log_path = args.result / "logs" / method / track / f"{Path(file_name).stem}.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -207,6 +207,11 @@ def main() -> int:
     parser.add_argument("--experiment", required=True, type=Path)
     parser.add_argument("--result", required=True, type=Path)
     parser.add_argument("--python", required=True, type=Path)
+    parser.add_argument(
+        "--memto-python",
+        type=Path,
+        help="Optional dedicated MEMTO interpreter; defaults to --python.",
+    )
     parser.add_argument("--stage-source", required=True, type=Path)
     parser.add_argument("--paano-root", required=True, type=Path)
     parser.add_argument("--paano-one", required=True, type=Path)
@@ -220,6 +225,21 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--gpus", default="0,1")
     parser.add_argument("--cpu-workers", type=int, default=8)
+    parser.add_argument(
+        "--scheduler",
+        choices=("strict", "throughput"),
+        default="strict",
+        help=(
+            "strict runs one GPU method phase at a time; throughput keeps one "
+            "regular GPU lane per device while overlapping CPU-heavy GBOC lanes"
+        ),
+    )
+    parser.add_argument(
+        "--gboc-workers-per-gpu",
+        type=int,
+        default=1,
+        help="Concurrent isolated GBOC processes per physical GPU in throughput mode.",
+    )
     parser.add_argument("--mode", choices=("smoke", "formal"), default="formal")
     parser.add_argument(
         "--phase",
@@ -231,9 +251,16 @@ def main() -> int:
     # Do not Path.resolve() the Python executable: resolving a venv symlink can
     # silently replace it with the system interpreter and lose site-packages.
     args.python = Path(os.path.abspath(args.python))
+    args.memto_python = Path(
+        os.path.abspath(args.memto_python if args.memto_python is not None else args.python)
+    )
     for name in ("repo", "experiment", "result", "stage_source", "paano_root", "paano_one", "gboc_root", "gboc_one", "gboc_config", "memto_root", "memto_one", "dcdetector_root", "dcdetector_one"):
         setattr(args, name, getattr(args, name).resolve())
     args.result.mkdir(parents=True, exist_ok=True)
+    if args.cpu_workers < 1:
+        raise ValueError("--cpu-workers must be positive")
+    if not 1 <= args.gboc_workers_per_gpu <= 16:
+        raise ValueError("--gboc-workers-per-gpu must be between 1 and 16")
     files = selected_files(args.repo)
     if args.mode == "smoke":
         files = {
@@ -285,6 +312,10 @@ def main() -> int:
             "baselines_first": True,
             "gpu_priority": list(BASELINE_GPU_ORDER),
             "target_after_baselines": True,
+            "scheduler": args.scheduler,
+            "cpu_workers": args.cpu_workers,
+            "gboc_workers_per_gpu": args.gboc_workers_per_gpu,
+            "memto_python": str(args.memto_python),
             "runtime_eligible_for_paper": False,
         },
         "source_sha256": {
@@ -338,18 +369,58 @@ def main() -> int:
                 job = queue.pop(0)
             update(run_unit(args, *job, gpu))
 
-    with ThreadPoolExecutor(max_workers=args.cpu_workers) as cpu_pool, ThreadPoolExecutor(max_workers=2) as gpu_pool:
-        cpu_futures = [cpu_pool.submit(run_unit, args, *job, None) for job in cpu_jobs]
-
-        # Baseline GPU methods are strict phases. This makes PaAno finish before
-        # the next GPU baseline begins and prevents STAGE from overlapping any
-        # admitted baseline.
-        for method in BASELINE_GPU_ORDER:
-            queue = [job for job in jobs if job[0] == method]
+    gboc_lanes = (
+        len(gpus) * args.gboc_workers_per_gpu
+        if args.scheduler == "throughput" and any(job[0] == "GBOC" for job in jobs)
+        else 0
+    )
+    with ThreadPoolExecutor(max_workers=args.cpu_workers) as cpu_pool, ThreadPoolExecutor(max_workers=2 + gboc_lanes) as gpu_pool:
+        # PaAno is always the first and exclusive GPU phase. Besides preserving
+        # the declared order, this gives its CPU-side memory-bank construction
+        # full host headroom before the heterogeneous throughput phase begins.
+        paano_queue = [job for job in jobs if job[0] == "PaAno"]
+        if paano_queue:
             queue_lock = threading.Lock()
-            phase = [gpu_pool.submit(gpu_worker, gpu, queue, queue_lock) for gpu in gpus]
+            phase = [gpu_pool.submit(gpu_worker, gpu, paano_queue, queue_lock) for gpu in gpus]
             for future in as_completed(phase):
                 future.result()
+
+        cpu_futures = [cpu_pool.submit(run_unit, args, *job, None) for job in cpu_jobs]
+
+        if args.scheduler == "throughput":
+            # GBOC spends substantial time in host-side granular-ball/KMeans
+            # construction. Multiple single-visible-GPU processes keep the CPU
+            # busy while one regular deep-baseline lane remains active on each
+            # device. This changes scheduling only; every unit still has an
+            # isolated scratch directory, fixed seed, and unchanged config.
+            gboc_queue = [job for job in jobs if job[0] == "GBOC"]
+            gboc_lock = threading.Lock()
+            gboc_futures = [
+                gpu_pool.submit(gpu_worker, gpu, gboc_queue, gboc_lock)
+                for gpu in gpus
+                for _ in range(args.gboc_workers_per_gpu)
+            ]
+            regular_order = tuple(
+                method for method in BASELINE_GPU_ORDER if method not in {"PaAno", "GBOC"}
+            )
+            for method in regular_order:
+                queue = [job for job in jobs if job[0] == method]
+                queue_lock = threading.Lock()
+                phase = [gpu_pool.submit(gpu_worker, gpu, queue, queue_lock) for gpu in gpus]
+                for future in as_completed(phase):
+                    future.result()
+            for future in as_completed(gboc_futures):
+                future.result()
+        else:
+            # Strict mode remains available for debugging and exclusive timing.
+            for method in BASELINE_GPU_ORDER:
+                if method == "PaAno":
+                    continue
+                queue = [job for job in jobs if job[0] == method]
+                queue_lock = threading.Lock()
+                phase = [gpu_pool.submit(gpu_worker, gpu, queue, queue_lock) for gpu in gpus]
+                for future in as_completed(phase):
+                    future.result()
 
         for future in as_completed(cpu_futures):
             result = future.result()

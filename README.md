@@ -97,6 +97,14 @@ for a fully frozen end-to-end run. Main-run timings are diagnostic only.
 Paper-ready Average Inference Time requires a separate, exclusive,
 identical-hardware rerun.
 
+On dual-GPU servers the launcher defaults to an audited heterogeneous
+throughput schedule. PaAno runs first and exclusively on both GPUs. Afterwards,
+one regular deep-baseline lane per GPU overlaps bounded GBOC lanes and the CPU
+baseline pool. Override `STAGE_GBOC_WORKERS_PER_GPU` only after a smoke/resource
+probe; this affects throughput, not method configurations or paper-eligible
+runtime. MEMTO can use its separately pinned interpreter through
+`STAGE_MEMTO_PYTHON`.
+
 ## Current local status
 
 - All 193 selected Eval files are present locally (122 U + 71 M), giving

@@ -21,6 +21,11 @@ hyperparameter selection. The important rules are:
    artifacts only. Do not retain checkpoints or anomaly-score arrays.
 6. Main-run timing is diagnostic. Report Average Inference Time only after a
    separate exclusive rerun with identical hardware and measurement rules.
+7. Formal accuracy runs may use the audited throughput scheduler: PaAno remains
+   the first and exclusive GPU phase, after which CPU-heavy GBOC processes can
+   overlap regular deep-baseline lanes. Scheduling and thread allocation may
+   not change data, seeds, configurations, fitting scope, or metric code; all
+   shared-run timing remains paper-ineligible.
 
 The two recent AAAI baselines remain behind a configuration/admission gate.
 Once both are frozen, the intended paper table contains sixteen baselines plus

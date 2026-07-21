@@ -59,7 +59,10 @@
     "phase_2": "verify baseline completeness and errors",
     "phase_3": "STAGE",
     "default_launcher_phase": "baseline",
-    "target_must_not_start_before_baselines_complete": true
+    "target_must_not_start_before_baselines_complete": true,
+    "accuracy_scheduler": "PaAno exclusive first; then bounded GBOC lanes overlap one regular deep-baseline lane per GPU and the CPU baseline pool",
+    "scheduling_may_change_method_configuration": false,
+    "shared_run_timing_is_paper_eligible": false
   },
   "result_policy": {
     "metrics": ["VUS-PR", "VUS-ROC", "R-based-F1", "AUC-PR", "AUC-ROC", "Standard-F1"],
