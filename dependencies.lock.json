@@ -1,0 +1,90 @@
+{
+  "schema_version": "duoba-upstream-lock-v1",
+  "sources": [
+    {
+      "name": "PaAno",
+      "repository": "https://github.com/jinnnju/PaAno",
+      "commit": "d4c67116190efa4592dc6a8a157ced0def68b6af",
+      "archive_url": "https://codeload.github.com/jinnnju/PaAno/zip/d4c67116190efa4592dc6a8a157ced0def68b6af",
+      "destination": "external/PaAno",
+      "required_files": [
+        "model.py",
+        "train.py",
+        "utils/data_preprocess.py",
+        "utils/utils.py",
+        "utils/evaluation.py",
+        "utils/metrics.py"
+      ],
+      "required_sha256": {
+        "model.py": "647becf1f60325946f459aeb3059bfeca7b04c6ac5486964dc52cae699fc864a",
+        "train.py": "bee3139ac9f65da05772ce86996c8e4e69ccf36ecac490cc4a87723ce38d3a79",
+        "utils/data_preprocess.py": "0068bce0f8c11af512f4e67ac9165fac6fdbf99b7330a99d5d43302db53e02e1",
+        "utils/utils.py": "5d2b3ee824137781140bbc8362fe5353dce37812f4fb127c64e84929091353bc",
+        "utils/evaluation.py": "2729f105d1c292a19773025d6d60a5eec5ec7939e5ed2ed933e6ed1bdfb62956",
+        "utils/metrics.py": "bebcda215e8571c9dc4a854ab1cfd0b1f89d3babc064cb2849c2850b5e0b0179"
+      }
+    },
+    {
+      "name": "GBOC",
+      "repository": "https://github.com/notshine/GBOC",
+      "commit": "55a2a31e95055a638b5839c6b19335cbe02bd148",
+      "archive_url": "https://codeload.github.com/notshine/GBOC/zip/55a2a31e95055a638b5839c6b19335cbe02bd148",
+      "destination": "external/GBOC_official_55a2a31",
+      "required_files": [
+        "models/GBOC.py",
+        "granularball_computing/granularball_generation.py",
+        "utils/dataset.py"
+      ],
+      "required_sha256": {
+        "models/GBOC.py": "a6073cbac8aa2127721962653ddeb007ca22f47eef90c5f5911ba9e8eb89a06b",
+        "granularball_computing/granularball_generation.py": "3caf0af98a3b2ffb27054f87f570bb543ea061cf34e50dcafbfb521426c113f2",
+        "utils/dataset.py": "b937ee35de7cd45733a4e7f8017e3531e36f45fa61968b5b47540dda1b0bc3c5"
+      }
+    },
+    {
+      "name": "MEMTO",
+      "repository": "https://github.com/gunny97/MEMTO",
+      "commit": "5a3287103021c5c7e7cac9377c626cf18bdea50c",
+      "archive_url": "https://codeload.github.com/gunny97/MEMTO/zip/5a3287103021c5c7e7cac9377c626cf18bdea50c",
+      "destination": "external/MEMTO_official",
+      "required_files": [
+        "model/Transformer.py"
+      ],
+      "required_sha256": {
+        "model/Transformer.py": "b5c2da5bc3e23d35e3b263d8b6057896ebae5cb85b308ce0d3a3837b4b9bb45a"
+      }
+    },
+    {
+      "name": "DCdetector",
+      "repository": "https://github.com/DAMO-DI-ML/KDD2023-DCdetector",
+      "commit": "9d107cae518ef24ee2eb2ad1b92107cdcd09ea10",
+      "archive_url": "https://codeload.github.com/DAMO-DI-ML/KDD2023-DCdetector/zip/9d107cae518ef24ee2eb2ad1b92107cdcd09ea10",
+      "destination": "external/DCdetector",
+      "required_files": [
+        "model/DCdetector.py"
+      ],
+      "required_sha256": {
+        "model/DCdetector.py": "d3c3d4b3455b78cb61e60a602d91fccbbcddfbe11915f50e5ad134fd939be7e8"
+      }
+    },
+    {
+      "name": "TSB-AD",
+      "repository": "https://github.com/TheDatumOrg/TSB-AD",
+      "commit": "e0975a5f7d3e65ab77e9fab24d1b5b51acda8f48",
+      "archive_url": "https://codeload.github.com/TheDatumOrg/TSB-AD/zip/e0975a5f7d3e65ab77e9fab24d1b5b51acda8f48",
+      "destination": "external/PAI/third_party/TSB-AD",
+      "required_files": [
+        "TSB_AD/HP_list.py",
+        "TSB_AD/model_wrapper.py",
+        "TSB_AD/evaluation/metrics.py",
+        "TSB_AD/utils/slidingWindows.py"
+      ],
+      "required_sha256": {
+        "TSB_AD/HP_list.py": "e3cc985542aa6b5ce20e37d85dfd3cc289f54079feba0d1527327ebb0ba113f0",
+        "TSB_AD/model_wrapper.py": "6c934615d9836c17fdbdfd0a848bd2a76db5238fbb292cf701d34399a7324730",
+        "TSB_AD/evaluation/metrics.py": "13957d15d3ebb2b743a4bebfa3a68af31e82a58ecc568557b4081ad90e38094d",
+        "TSB_AD/utils/slidingWindows.py": "0ba65735c6572cd80e586409d4f653253d847e08fbae8e1da6e474e142e74af6"
+      }
+    }
+  ]
+}

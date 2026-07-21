@@ -1,0 +1,131 @@
+{
+  "method": "GBOC",
+  "track": "M",
+  "dataset": "CATSv2",
+  "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "source_record": {
+    "subset": "M",
+    "track": "M",
+    "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv",
+    "method": "GBOC",
+    "seed": 2027,
+    "stochastic": true,
+    "normal_only": true,
+    "config": {
+      "config_name": "official_release_55a2a31",
+      "selection_source": "official GBOC HP_list.py at commit 55a2a31e95055a638b5839c6b19335cbe02bd148",
+      "selection_uses_eval": false,
+      "shared": {
+        "learning_rate": 0.0001,
+        "hidden_dim": 32,
+        "num_layers": 3,
+        "alpha": 0.9,
+        "outer_epochs": 50,
+        "inner_epochs": 10,
+        "batch_size": 32,
+        "optimizer": "AdamW",
+        "weight_decay": 1e-05,
+        "scheduler": "StepLR",
+        "scheduler_step_size": 5,
+        "scheduler_gamma": 0.9,
+        "validation_fraction": 0.2,
+        "early_stopping_patience": 10,
+        "distance": "minimum Euclidean distance to retained training granular-ball centers",
+        "discrimination_mode": "ball"
+      },
+      "tracks": {
+        "U": {
+          "window_size": 5
+        },
+        "M": {
+          "window_size": 10
+        }
+      },
+      "protocol_overrides": {
+        "normalization": "channel-wise z-score fitted on the official normal-only training prefix and applied unchanged to the full series",
+        "inference_centers": "granular-ball centers recomputed from the normal-only training prefix after restoring the best validation state; never constructed from Eval samples",
+        "numeric_stability": "clamp round-off-negative squared Euclidean distances to zero before sqrt; remove only a leading singleton reconstruction-target dimension that the released code broadcasts implicitly; discard empty KMeans clusters and cast non-empty membership indices to int64; treat a failed two-way split as unsplittable instead of duplicating the parent indefinitely; retain the largest support ball only if pruning would otherwise leave no center",
+        "metric_implementation": "installed official TSB-AD get_metrics with pred=None",
+        "checkpoint": false
+      }
+    },
+    "upstream_revision": "55a2a31e95055a638b5839c6b19335cbe02bd148",
+    "error": null,
+    "train_boundary": 5592,
+    "series_length": 195000,
+    "channels": 17,
+    "data_sha256": "33b611ef0da692eb7342ee43054ded17c96eed26b3107169ed0c78d9f4e562a9",
+    "normalization": {
+      "fit_scope": "normal-only training prefix",
+      "mean": [
+        0.013233190402388573,
+        -7.2403435707092285,
+        14.659815788269043,
+        0.6321842670440674,
+        -0.5077517032623291,
+        0.465844064950943,
+        0.6047925353050232,
+        1.3325865268707275,
+        0.2678851783275604,
+        6.950768947601318,
+        49.61301803588867,
+        -7.773927688598633,
+        0.6030024290084839,
+        0.270873486995697,
+        497.8695983886719,
+        -12.02929401397705,
+        42.92652893066406
+      ],
+      "std": [
+        0.11427193135023117,
+        1.650041103363037,
+        4.607475280761719,
+        0.025000564754009247,
+        0.265436053276062,
+        0.4988320767879486,
+        0.4888952374458313,
+        0.7351548671722412,
+        0.3650439381599426,
+        6.5440497398376465,
+        5.799077987670898,
+        1.9084736108779907,
+        0.6702423095703125,
+        0.04368967190384865,
+        91.02354431152344,
+        5.463546276092529,
+        6.136476039886475
+      ]
+    },
+    "retained_training_ball_count": 313,
+    "best_validation_loss": 0.16615257385585988,
+    "score_path": "/tmp/duoba-baseline-o96g8ub4/gboc/Canonical/gboc/M/seed_2027/scores/139_CATSv2_id_2_Sensor_tr_5592_1st_5692.npy",
+    "score_sha256": "f7eaa77a57590871a4b668866c9076e8a2a6daee6f27059736e25d95788e9df3",
+    "efficiency_records": {
+      "train": "/tmp/duoba-baseline-o96g8ub4/gboc/Canonical/gboc/M/seed_2027/efficiency/139_CATSv2_id_2_Sensor_tr_5592_1st_5692.train.json",
+      "inference": "/tmp/duoba-baseline-o96g8ub4/gboc/Canonical/gboc/M/seed_2027/efficiency/139_CATSv2_id_2_Sensor_tr_5592_1st_5692.inference.json",
+      "metric": "/tmp/duoba-baseline-o96g8ub4/gboc/Canonical/gboc/M/seed_2027/efficiency/139_CATSv2_id_2_Sensor_tr_5592_1st_5692.metric.json"
+    },
+    "metrics": {
+      "VUS-PR": 0.031289091400037355,
+      "VUS-ROC": 0.32172629805217784,
+      "R-based-F1": 0.2667053676390107,
+      "AUC-PR": 0.03666197310977587,
+      "AUC-ROC": 0.32869971249115354,
+      "Standard-F1": 0.08102465533628121
+    },
+    "runtime_s": 862.986700296402,
+    "completed_at_epoch_s": 1784540490.9536073
+  },
+  "metrics": {
+    "VUS-PR": 0.031289091400037355,
+    "VUS-ROC": 0.32172629805217784,
+    "R-based-F1": 0.2667053676390107,
+    "AUC-PR": 0.03666197310977587,
+    "AUC-ROC": 0.32869971249115354,
+    "Standard-F1": 0.08102465533628121
+  },
+  "runtime_s": 862.986700296402,
+  "error": null
+}

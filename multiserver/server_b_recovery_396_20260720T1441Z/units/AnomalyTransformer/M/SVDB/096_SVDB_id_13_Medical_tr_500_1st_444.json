@@ -1,0 +1,28 @@
+{
+  "method": "AnomalyTransformer",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 500,
+  "training_prefix_anomaly_count": 56,
+  "points": 230400,
+  "channels": 2,
+  "official_tsb_name": "AnomalyTransformer",
+  "hyperparameters": {
+    "win_size": 50,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.042059484912456695,
+    "VUS-ROC": 0.5424851245163038,
+    "R-based-F1": 0.06502560170463519,
+    "AUC-PR": 0.03519549803021207,
+    "AUC-ROC": 0.5324537227178958,
+    "Standard-F1": 0.08212160054886586
+  },
+  "runtime_s": 67.47515678405762
+}

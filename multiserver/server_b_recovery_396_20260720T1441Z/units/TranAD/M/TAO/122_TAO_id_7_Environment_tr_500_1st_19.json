@@ -1,0 +1,28 @@
+{
+  "method": "TranAD",
+  "track": "M",
+  "dataset": "TAO",
+  "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 500,
+  "training_prefix_anomaly_count": 42,
+  "points": 10000,
+  "channels": 3,
+  "official_tsb_name": "TranAD",
+  "hyperparameters": {
+    "win_size": 10,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.9232916078127261,
+    "VUS-ROC": 0.966294444082733,
+    "R-based-F1": 0.18281487027684562,
+    "AUC-PR": 0.09579627409123156,
+    "AUC-ROC": 0.5213607012274136,
+    "Standard-F1": 0.18147759013002812
+  },
+  "runtime_s": 207.02655959129333
+}

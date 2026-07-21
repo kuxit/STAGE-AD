@@ -1,0 +1,101 @@
+{
+  "method": "GBOC",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "source_record": {
+    "subset": "M",
+    "track": "M",
+    "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv",
+    "method": "GBOC",
+    "seed": 2027,
+    "stochastic": true,
+    "normal_only": true,
+    "config": {
+      "config_name": "official_release_55a2a31",
+      "selection_source": "official GBOC HP_list.py at commit 55a2a31e95055a638b5839c6b19335cbe02bd148",
+      "selection_uses_eval": false,
+      "shared": {
+        "learning_rate": 0.0001,
+        "hidden_dim": 32,
+        "num_layers": 3,
+        "alpha": 0.9,
+        "outer_epochs": 50,
+        "inner_epochs": 10,
+        "batch_size": 32,
+        "optimizer": "AdamW",
+        "weight_decay": 1e-05,
+        "scheduler": "StepLR",
+        "scheduler_step_size": 5,
+        "scheduler_gamma": 0.9,
+        "validation_fraction": 0.2,
+        "early_stopping_patience": 10,
+        "distance": "minimum Euclidean distance to retained training granular-ball centers",
+        "discrimination_mode": "ball"
+      },
+      "tracks": {
+        "U": {
+          "window_size": 5
+        },
+        "M": {
+          "window_size": 10
+        }
+      },
+      "protocol_overrides": {
+        "normalization": "channel-wise z-score fitted on the official normal-only training prefix and applied unchanged to the full series",
+        "inference_centers": "granular-ball centers recomputed from the normal-only training prefix after restoring the best validation state; never constructed from Eval samples",
+        "numeric_stability": "clamp round-off-negative squared Euclidean distances to zero before sqrt; remove only a leading singleton reconstruction-target dimension that the released code broadcasts implicitly; discard empty KMeans clusters and cast non-empty membership indices to int64; treat a failed two-way split as unsplittable instead of duplicating the parent indefinitely; retain the largest support ball only if pruning would otherwise leave no center",
+        "metric_implementation": "installed official TSB-AD get_metrics with pred=None",
+        "checkpoint": false
+      }
+    },
+    "upstream_revision": "55a2a31e95055a638b5839c6b19335cbe02bd148",
+    "error": null,
+    "train_boundary": 500,
+    "series_length": 230400,
+    "channels": 2,
+    "data_sha256": "81ba64df413d7a7d7975fd0c3798c985ad8fa0336127be2c096bbdc6b80ef633",
+    "normalization": {
+      "fit_scope": "normal-only training prefix",
+      "mean": [
+        -0.0529400035738945,
+        -0.08529999852180481
+      ],
+      "std": [
+        0.14523069560527802,
+        0.10328266769647598
+      ]
+    },
+    "retained_training_ball_count": 29,
+    "best_validation_loss": 0.28714147458473843,
+    "score_path": "/tmp/duoba-baseline-de29u35t/gboc/Canonical/gboc/M/seed_2027/scores/088_SVDB_id_5_Medical_tr_500_1st_168.npy",
+    "score_sha256": "7e5f71e7196e5f5f8a3c72742b737fa7d00fca0554004f5e68d2329691a0b5fa",
+    "efficiency_records": {
+      "train": "/tmp/duoba-baseline-de29u35t/gboc/Canonical/gboc/M/seed_2027/efficiency/088_SVDB_id_5_Medical_tr_500_1st_168.train.json",
+      "inference": "/tmp/duoba-baseline-de29u35t/gboc/Canonical/gboc/M/seed_2027/efficiency/088_SVDB_id_5_Medical_tr_500_1st_168.inference.json",
+      "metric": "/tmp/duoba-baseline-de29u35t/gboc/Canonical/gboc/M/seed_2027/efficiency/088_SVDB_id_5_Medical_tr_500_1st_168.metric.json"
+    },
+    "metrics": {
+      "VUS-PR": 0.10304987493902544,
+      "VUS-ROC": 0.50851880713901,
+      "R-based-F1": 0.17197343679741917,
+      "AUC-PR": 0.1028938505589798,
+      "AUC-ROC": 0.5085727409475307,
+      "Standard-F1": 0.18052912136210011
+    },
+    "runtime_s": 418.2415118217468,
+    "completed_at_epoch_s": 1784555157.813449
+  },
+  "metrics": {
+    "VUS-PR": 0.10304987493902544,
+    "VUS-ROC": 0.50851880713901,
+    "R-based-F1": 0.17197343679741917,
+    "AUC-PR": 0.1028938505589798,
+    "AUC-ROC": 0.5085727409475307,
+    "Standard-F1": 0.18052912136210011
+  },
+  "runtime_s": 418.2415118217468,
+  "error": null
+}

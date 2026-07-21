@@ -1,0 +1,40 @@
+{
+  "method": "DCdetector",
+  "track": "M",
+  "dataset": "CATSv2",
+  "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 30704,
+  "training_prefix_anomaly_count": 0,
+  "points": 350000,
+  "channels": 17,
+  "sliding_window": 100,
+  "hyperparameters": {
+    "window": 60,
+    "patch_sizes": [
+      3,
+      5
+    ],
+    "batch_size": 128,
+    "d_model": 256,
+    "n_heads": 1,
+    "encoder_layers": 3,
+    "learning_rate": 0.0001,
+    "epochs": 3,
+    "temperature": 50
+  },
+  "protocol_adapter": "official architecture, discrepancy objective and score; generic TSB-AD prefix loader; in-memory model selection",
+  "trained_epochs": 3,
+  "best_validation_loss": -2.7815500895182293e-07,
+  "metrics": {
+    "VUS-PR": 0.05043747987798727,
+    "VUS-ROC": 0.5007192812928073,
+    "R-based-F1": 0.08040012634316214,
+    "AUC-PR": 0.0489381677554175,
+    "AUC-ROC": 0.49876223423784244,
+    "Standard-F1": 0.09316173776605234
+  },
+  "runtime_s": 137.2199170589447
+}

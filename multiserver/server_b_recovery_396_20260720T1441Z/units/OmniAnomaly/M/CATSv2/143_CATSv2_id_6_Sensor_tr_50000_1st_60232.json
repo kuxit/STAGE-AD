@@ -1,0 +1,28 @@
+{
+  "method": "OmniAnomaly",
+  "track": "M",
+  "dataset": "CATSv2",
+  "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 50000,
+  "training_prefix_anomaly_count": 0,
+  "points": 200000,
+  "channels": 17,
+  "official_tsb_name": "OmniAnomaly",
+  "hyperparameters": {
+    "win_size": 100,
+    "lr": 0.002
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.13338311205251327,
+    "VUS-ROC": 0.7937585241728128,
+    "R-based-F1": 0.46807571616631927,
+    "AUC-PR": 0.21354671389030433,
+    "AUC-ROC": 0.8039050873724489,
+    "Standard-F1": 0.22805680720085486
+  },
+  "runtime_s": 67.28898477554321
+}

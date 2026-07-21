@@ -1,0 +1,25 @@
+{
+  "method": "PatchTST",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 5421,
+  "training_prefix_anomaly_count": 0,
+  "points": 230400,
+  "channels": 2,
+  "official_tsb_name": "PatchTST",
+  "hyperparameters": {},
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.16488903909231503,
+    "VUS-ROC": 0.770820580160336,
+    "R-based-F1": 0.11404397566912548,
+    "AUC-PR": 0.13608562524402276,
+    "AUC-ROC": 0.7052420765341869,
+    "Standard-F1": 0.2639977720203745
+  },
+  "runtime_s": 163.18879008293152
+}

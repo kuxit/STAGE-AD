@@ -1,0 +1,43 @@
+{
+  "method": "MEMTO",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 1115,
+  "training_prefix_anomaly_count": 0,
+  "points": 230400,
+  "channels": 2,
+  "sliding_window": 100,
+  "hyperparameters": {
+    "window": 100,
+    "stride": 100,
+    "batch_size": 256,
+    "d_model": 512,
+    "n_heads": 8,
+    "encoder_layers": 3,
+    "memory_items": 10,
+    "entropy_weight": 0.01,
+    "phase1_lr": 0.0001,
+    "phase2_lr": 5e-05,
+    "max_epochs_per_phase": 100,
+    "early_stopping_patience": 10,
+    "temperature": 0.1
+  },
+  "protocol_adapter": "official architecture and two-phase memory initialization; generic TSB-AD prefix loader; in-memory early stopping; sklearn KMeans",
+  "phase1_epochs": 96,
+  "phase2_epochs": 100,
+  "phase1_best_validation_loss": 0.009900171309709549,
+  "phase2_best_validation_loss": 0.01522175595164299,
+  "metrics": {
+    "VUS-PR": 0.10076520706758937,
+    "VUS-ROC": 0.5108735489513414,
+    "R-based-F1": 0.08432020681160442,
+    "AUC-PR": 0.07104851617811167,
+    "AUC-ROC": 0.5028570278326298,
+    "Standard-F1": 0.13281667331357835
+  },
+  "runtime_s": 90.7025351524353
+}

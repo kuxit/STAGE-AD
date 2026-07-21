@@ -1,0 +1,25 @@
+{
+  "method": "PatchTST",
+  "track": "M",
+  "dataset": "TAO",
+  "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 500,
+  "training_prefix_anomaly_count": 51,
+  "points": 10000,
+  "channels": 3,
+  "official_tsb_name": "PatchTST",
+  "hyperparameters": {},
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.8939744165718391,
+    "VUS-ROC": 0.9733302163810311,
+    "R-based-F1": 0.1713497202970694,
+    "AUC-PR": 0.11088416625334083,
+    "AUC-ROC": 0.5847265656146632,
+    "Standard-F1": 0.20210230508136745
+  },
+  "runtime_s": 124.75584864616394
+}

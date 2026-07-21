@@ -1,0 +1,28 @@
+{
+  "method": "USAD",
+  "track": "M",
+  "dataset": "CATSv2",
+  "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 50000,
+  "training_prefix_anomaly_count": 0,
+  "points": 200000,
+  "channels": 17,
+  "official_tsb_name": "USAD",
+  "hyperparameters": {
+    "win_size": 100,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.11582683780400903,
+    "VUS-ROC": 0.7810212551178064,
+    "R-based-F1": 0.4662114963455093,
+    "AUC-PR": 0.20119048159216876,
+    "AUC-ROC": 0.7772930076530613,
+    "Standard-F1": 0.2536418573556657
+  },
+  "runtime_s": 87.27660775184631
+}

@@ -1,0 +1,63 @@
+{
+  "method": "PaAno",
+  "track": "M",
+  "dataset": "TAO",
+  "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "source_record": {
+    "method": "official_paano",
+    "track": "M",
+    "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv",
+    "seed": 2027,
+    "points": 10000,
+    "channels": 3,
+    "train_index": 500,
+    "training_prefix_policy": "filename_declared_label_blind",
+    "training_prefix_anomaly_count": 81,
+    "sliding_window": 21,
+    "parameter_count": 373121,
+    "memory_rows": 404,
+    "peak_cuda_bytes": 753881088,
+    "training_seconds": 3.077455385122448,
+    "memory_seconds": 0.14003764907829463,
+    "query_seconds": 0.12912720208987594,
+    "metric_seconds": 24.404320151079446,
+    "elapsed_seconds": 27.751393139827996,
+    "config": {
+      "patch_size": 96,
+      "num_iters": 100,
+      "batch_size": 512,
+      "learning_rate": 0.0001,
+      "use_revin": true,
+      "memory_bank_ratio": 0.1,
+      "top_k": 3
+    },
+    "source_sha256": {
+      "model.py": "647becf1f60325946f459aeb3059bfeca7b04c6ac5486964dc52cae699fc864a",
+      "train.py": "bee3139ac9f65da05772ce86996c8e4e69ccf36ecac490cc4a87723ce38d3a79",
+      "utils/data_preprocess.py": "0068bce0f8c11af512f4e67ac9165fac6fdbf99b7330a99d5d43302db53e02e1",
+      "utils/utils.py": "5d2b3ee824137781140bbc8362fe5353dce37812f4fb127c64e84929091353bc",
+      "utils/evaluation.py": "2729f105d1c292a19773025d6d60a5eec5ec7939e5ed2ed933e6ed1bdfb62956",
+      "utils/metrics.py": "bebcda215e8571c9dc4a854ab1cfd0b1f89d3babc064cb2849c2850b5e0b0179"
+    },
+    "metrics": {
+      "VUS-PR": 0.6288340395124266,
+      "VUS-ROC": 0.7504298780512428,
+      "R-based-F1": 0.18114622492250348,
+      "AUC-PR": 0.12353240953195929,
+      "AUC-ROC": 0.45807222190982566,
+      "Standard-F1": 0.2453608494801954
+    }
+  },
+  "metrics": {
+    "VUS-PR": 0.6288340395124266,
+    "VUS-ROC": 0.7504298780512428,
+    "R-based-F1": 0.18114622492250348,
+    "AUC-PR": 0.12353240953195929,
+    "AUC-ROC": 0.45807222190982566,
+    "Standard-F1": 0.2453608494801954
+  },
+  "runtime_s": 27.751393139827996,
+  "error": null
+}

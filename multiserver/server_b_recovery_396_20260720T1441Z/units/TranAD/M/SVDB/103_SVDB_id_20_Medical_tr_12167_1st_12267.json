@@ -1,0 +1,28 @@
+{
+  "method": "TranAD",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 12167,
+  "training_prefix_anomaly_count": 0,
+  "points": 230400,
+  "channels": 2,
+  "official_tsb_name": "TranAD",
+  "hyperparameters": {
+    "win_size": 10,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.04534630101198802,
+    "VUS-ROC": 0.66052651504775,
+    "R-based-F1": 0.07204290282123571,
+    "AUC-PR": 0.03272192629780446,
+    "AUC-ROC": 0.5596150409362278,
+    "Standard-F1": 0.07712310951475193
+  },
+  "runtime_s": 123.91960334777832
+}

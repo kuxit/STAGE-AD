@@ -1,0 +1,28 @@
+{
+  "method": "AnomalyTransformer",
+  "track": "M",
+  "dataset": "TAO",
+  "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 500,
+  "training_prefix_anomaly_count": 26,
+  "points": 10000,
+  "channels": 3,
+  "official_tsb_name": "AnomalyTransformer",
+  "hyperparameters": {
+    "win_size": 50,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.7517474704421812,
+    "VUS-ROC": 0.8499750431325979,
+    "R-based-F1": 0.02217209152433129,
+    "AUC-PR": 0.048814148236086194,
+    "AUC-ROC": 0.4854257304931064,
+    "Standard-F1": 0.09378484764727747
+  },
+  "runtime_s": 24.168177366256714
+}

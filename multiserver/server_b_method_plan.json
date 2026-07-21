@@ -1,0 +1,132 @@
+{
+  "PatchTST": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "AnomalyTransformer": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "TimesNet": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "TranAD": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "USAD": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "OmniAnomaly": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "PaAno": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "GBOC": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "DCdetector": {
+    "python": "/root/autodl-tmp/duoba-env/bin/python",
+    "parity_report": "parity_report_torch28_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.8.0+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 91002,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+    }
+  },
+  "MEMTO": {
+    "python": "/root/autodl-tmp/duoba-env27/bin/python",
+    "parity_report": "parity_report_torch27_memto_common_frozen.json",
+    "environment": {
+      "python_executable": "/root/autodl-tmp/duoba-env27/bin/python3.10",
+      "python": "3.10.20",
+      "torch": "2.7.1+cu128",
+      "torch_cuda": "12.8",
+      "cudnn": 90701,
+      "devices": ["NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090"],
+      "pip_freeze_sha256": "967d1891d7cb9c0930cc5c86c7ceb2318e34a3dbf972c8e4f722af42d1d758e7"
+    }
+  }
+}

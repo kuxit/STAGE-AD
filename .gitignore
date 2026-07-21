@@ -1,0 +1,59 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Secrets and machine-local configuration
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+codex_duoba_server_*
+
+# Runtime logs and scratch files
+*.log
+*.tmp
+*.tmp.*
+logs/
+multiserver/logs/
+results/smoke/
+
+# Superseded emergency snapshot (the validated 396-record recovery is kept)
+multiserver/server_b_shutdown_snapshot_*/
+multiserver/server_b_recovered_valid_268_*.tar.gz
+
+# Local result backup archives; final reviewed metrics remain trackable
+results/backups/
+results/staging/
+
+# Forbidden experiment artifacts
+**/score/
+**/scores/
+**/checkpoint/
+**/checkpoints/
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Raw data and archives belong outside this repository
+data/
+datasets/
+
+# Exact upstream commits are declared in dependencies.lock.json and fetched
+# locally. Third-party source trees are not redistributed in this repository.
+external/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

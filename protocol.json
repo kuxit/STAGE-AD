@@ -1,0 +1,39 @@
+{
+  "protocol_version": "duoba-10subset-seed2027-v2",
+  "seed": 2027,
+  "tracks": {
+    "U": ["UCR", "Exathlon", "MSL", "SED", "TODS"],
+    "M": ["CATSv2", "GHL", "LTDB", "SVDB", "TAO"]
+  },
+  "non_deep_baselines": ["KMeansAD", "KNN", "PCA", "IForest", "LOF"],
+  "deep_baselines": [
+    "PaAno",
+    "GBOC",
+    "MEMTO",
+    "PatchTST",
+    "DCdetector",
+    "AnomalyTransformer",
+    "TimesNet",
+    "TranAD",
+    "USAD",
+    "OmniAnomaly"
+  ],
+  "target_method": "DuoBa",
+  "metrics": {
+    "VP": "VUS-PR",
+    "VR": "VUS-ROC",
+    "RF": "R-based-F1",
+    "AP": "AUC-PR",
+    "AR": "AUC-ROC",
+    "PF": "Standard-F1"
+  },
+  "fit_scope": "filename-declared tr_<N> prefix, label blind",
+  "dataset_partition": "official TSB-AD Tuning/Eval split from Liu and Paparrizos (2024)",
+  "tuning_role": "hyperparameter selection only",
+  "eval_role": "final performance reporting only",
+  "evaluation_scope": "complete series",
+  "metric_threshold_policy": "pred=None, version=opt, thre=250",
+  "selection_policy": "TSB-AD official Tuning-selected U/M hyperparameters or released method configurations; no Eval selection",
+  "storage_policy": "full-precision metrics only; no checkpoint or score array",
+  "paper_rounding_decimals": 3
+}

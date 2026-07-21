@@ -1,0 +1,28 @@
+{
+  "method": "TimesNet",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 6264,
+  "training_prefix_anomaly_count": 0,
+  "points": 230400,
+  "channels": 2,
+  "official_tsb_name": "TimesNet",
+  "hyperparameters": {
+    "win_size": 96,
+    "lr": 0.0001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.041092065709831094,
+    "VUS-ROC": 0.501319185131931,
+    "R-based-F1": 0.05791969132903787,
+    "AUC-PR": 0.0325139992373259,
+    "AUC-ROC": 0.4158090291155227,
+    "Standard-F1": 0.07022599244595054
+  },
+  "runtime_s": 99.02025723457336
+}

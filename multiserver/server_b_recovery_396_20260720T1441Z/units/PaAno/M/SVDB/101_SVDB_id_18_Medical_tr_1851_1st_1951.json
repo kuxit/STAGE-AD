@@ -1,0 +1,63 @@
+{
+  "method": "PaAno",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "source_record": {
+    "method": "official_paano",
+    "track": "M",
+    "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv",
+    "seed": 2027,
+    "points": 230400,
+    "channels": 2,
+    "train_index": 1851,
+    "training_prefix_policy": "filename_declared_label_blind",
+    "training_prefix_anomaly_count": 0,
+    "sliding_window": 125,
+    "parameter_count": 372225,
+    "memory_rows": 500,
+    "peak_cuda_bytes": 945518080,
+    "training_seconds": 3.259213101118803,
+    "memory_seconds": 0.47392762009985745,
+    "query_seconds": 1.4980557460803539,
+    "metric_seconds": 191.97458560904488,
+    "elapsed_seconds": 197.20626801881008,
+    "config": {
+      "patch_size": 96,
+      "num_iters": 100,
+      "batch_size": 512,
+      "learning_rate": 0.0001,
+      "use_revin": true,
+      "memory_bank_ratio": 0.1,
+      "top_k": 3
+    },
+    "source_sha256": {
+      "model.py": "647becf1f60325946f459aeb3059bfeca7b04c6ac5486964dc52cae699fc864a",
+      "train.py": "bee3139ac9f65da05772ce86996c8e4e69ccf36ecac490cc4a87723ce38d3a79",
+      "utils/data_preprocess.py": "0068bce0f8c11af512f4e67ac9165fac6fdbf99b7330a99d5d43302db53e02e1",
+      "utils/utils.py": "5d2b3ee824137781140bbc8362fe5353dce37812f4fb127c64e84929091353bc",
+      "utils/evaluation.py": "2729f105d1c292a19773025d6d60a5eec5ec7939e5ed2ed933e6ed1bdfb62956",
+      "utils/metrics.py": "bebcda215e8571c9dc4a854ab1cfd0b1f89d3babc064cb2849c2850b5e0b0179"
+    },
+    "metrics": {
+      "VUS-PR": 0.3712681184300383,
+      "VUS-ROC": 0.8472054381577682,
+      "R-based-F1": 0.37180234968404696,
+      "AUC-PR": 0.2978079695507979,
+      "AUC-ROC": 0.7845976858399945,
+      "Standard-F1": 0.41219366060788226
+    }
+  },
+  "metrics": {
+    "VUS-PR": 0.3712681184300383,
+    "VUS-ROC": 0.8472054381577682,
+    "R-based-F1": 0.37180234968404696,
+    "AUC-PR": 0.2978079695507979,
+    "AUC-ROC": 0.7845976858399945,
+    "Standard-F1": 0.41219366060788226
+  },
+  "runtime_s": 197.20626801881008,
+  "error": null
+}

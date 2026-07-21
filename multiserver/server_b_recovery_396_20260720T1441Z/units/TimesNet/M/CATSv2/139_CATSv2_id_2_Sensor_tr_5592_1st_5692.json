@@ -1,0 +1,28 @@
+{
+  "method": "TimesNet",
+  "track": "M",
+  "dataset": "CATSv2",
+  "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 5592,
+  "training_prefix_anomaly_count": 0,
+  "points": 195000,
+  "channels": 17,
+  "official_tsb_name": "TimesNet",
+  "hyperparameters": {
+    "win_size": 96,
+    "lr": 0.0001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.05790187652471338,
+    "VUS-ROC": 0.6074101923138776,
+    "R-based-F1": 0.0837441844316367,
+    "AUC-PR": 0.053782535078783965,
+    "AUC-ROC": 0.583680452213215,
+    "Standard-F1": 0.11307360116620453
+  },
+  "runtime_s": 70.94871401786804
+}

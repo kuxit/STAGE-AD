@@ -1,0 +1,25 @@
+{
+  "method": "PatchTST",
+  "track": "M",
+  "dataset": "CATSv2",
+  "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 30704,
+  "training_prefix_anomaly_count": 0,
+  "points": 350000,
+  "channels": 17,
+  "official_tsb_name": "PatchTST",
+  "hyperparameters": {},
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.09906872074808268,
+    "VUS-ROC": 0.6298476439743278,
+    "R-based-F1": 0.24325477941006027,
+    "AUC-PR": 0.10325741058112965,
+    "AUC-ROC": 0.6181433127978653,
+    "Standard-F1": 0.18381541284215536
+  },
+  "runtime_s": 135.76974296569824
+}

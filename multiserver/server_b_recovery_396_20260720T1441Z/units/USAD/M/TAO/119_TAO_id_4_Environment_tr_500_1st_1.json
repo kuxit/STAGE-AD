@@ -1,0 +1,28 @@
+{
+  "method": "USAD",
+  "track": "M",
+  "dataset": "TAO",
+  "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 500,
+  "training_prefix_anomaly_count": 56,
+  "points": 10000,
+  "channels": 3,
+  "official_tsb_name": "USAD",
+  "hyperparameters": {
+    "win_size": 100,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.8977245020084071,
+    "VUS-ROC": 0.9346673139496396,
+    "R-based-F1": 0.1775419841983675,
+    "AUC-PR": 0.10844219441637377,
+    "AUC-ROC": 0.5541604948010248,
+    "Standard-F1": 0.19123849745618887
+  },
+  "runtime_s": 35.14057755470276
+}

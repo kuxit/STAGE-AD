@@ -1,0 +1,40 @@
+{
+  "method": "DCdetector",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 2674,
+  "training_prefix_anomaly_count": 0,
+  "points": 230400,
+  "channels": 2,
+  "sliding_window": 100,
+  "hyperparameters": {
+    "window": 60,
+    "patch_sizes": [
+      3,
+      5
+    ],
+    "batch_size": 128,
+    "d_model": 256,
+    "n_heads": 1,
+    "encoder_layers": 3,
+    "learning_rate": 0.0001,
+    "epochs": 3,
+    "temperature": 50
+  },
+  "protocol_adapter": "official architecture, discrepancy objective and score; generic TSB-AD prefix loader; in-memory model selection",
+  "trained_epochs": 3,
+  "best_validation_loss": -5.7220458984375e-07,
+  "metrics": {
+    "VUS-PR": 0.05768278041326127,
+    "VUS-ROC": 0.5078177039289267,
+    "R-based-F1": 0.08452101034966891,
+    "AUC-PR": 0.0527699896258906,
+    "AUC-ROC": 0.5023032121481632,
+    "Standard-F1": 0.09980853783114711
+  },
+  "runtime_s": 96.39004397392273
+}

@@ -1,0 +1,28 @@
+{
+  "method": "OmniAnomaly",
+  "track": "M",
+  "dataset": "TAO",
+  "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 500,
+  "training_prefix_anomaly_count": 81,
+  "points": 10000,
+  "channels": 3,
+  "official_tsb_name": "OmniAnomaly",
+  "hyperparameters": {
+    "win_size": 100,
+    "lr": 0.002
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.935698419044549,
+    "VUS-ROC": 0.954953717777644,
+    "R-based-F1": 0.2435106343671588,
+    "AUC-PR": 0.15786332311236118,
+    "AUC-ROC": 0.5508857690889892,
+    "Standard-F1": 0.25720988487308954
+  },
+  "runtime_s": 50.52188754081726
+}

@@ -1,0 +1,63 @@
+{
+  "method": "PaAno",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "source_record": {
+    "method": "official_paano",
+    "track": "M",
+    "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv",
+    "seed": 2027,
+    "points": 230400,
+    "channels": 2,
+    "train_index": 2674,
+    "training_prefix_policy": "filename_declared_label_blind",
+    "training_prefix_anomaly_count": 0,
+    "sliding_window": 128,
+    "parameter_count": 372225,
+    "memory_rows": 500,
+    "peak_cuda_bytes": 945528320,
+    "training_seconds": 3.0697731419932097,
+    "memory_seconds": 0.4693024209700525,
+    "query_seconds": 1.3006598418578506,
+    "metric_seconds": 67.83780452492647,
+    "elapsed_seconds": 72.67799205891788,
+    "config": {
+      "patch_size": 96,
+      "num_iters": 100,
+      "batch_size": 512,
+      "learning_rate": 0.0001,
+      "use_revin": true,
+      "memory_bank_ratio": 0.1,
+      "top_k": 3
+    },
+    "source_sha256": {
+      "model.py": "647becf1f60325946f459aeb3059bfeca7b04c6ac5486964dc52cae699fc864a",
+      "train.py": "bee3139ac9f65da05772ce86996c8e4e69ccf36ecac490cc4a87723ce38d3a79",
+      "utils/data_preprocess.py": "0068bce0f8c11af512f4e67ac9165fac6fdbf99b7330a99d5d43302db53e02e1",
+      "utils/utils.py": "5d2b3ee824137781140bbc8362fe5353dce37812f4fb127c64e84929091353bc",
+      "utils/evaluation.py": "2729f105d1c292a19773025d6d60a5eec5ec7939e5ed2ed933e6ed1bdfb62956",
+      "utils/metrics.py": "bebcda215e8571c9dc4a854ab1cfd0b1f89d3babc064cb2849c2850b5e0b0179"
+    },
+    "metrics": {
+      "VUS-PR": 0.8333096862721662,
+      "VUS-ROC": 0.9822249330839922,
+      "R-based-F1": 0.5590001997592475,
+      "AUC-PR": 0.9015504298137312,
+      "AUC-ROC": 0.9869436185700459,
+      "Standard-F1": 0.8512822007958143
+    }
+  },
+  "metrics": {
+    "VUS-PR": 0.8333096862721662,
+    "VUS-ROC": 0.9822249330839922,
+    "R-based-F1": 0.5590001997592475,
+    "AUC-PR": 0.9015504298137312,
+    "AUC-ROC": 0.9869436185700459,
+    "Standard-F1": 0.8512822007958143
+  },
+  "runtime_s": 72.67799205891788,
+  "error": null
+}

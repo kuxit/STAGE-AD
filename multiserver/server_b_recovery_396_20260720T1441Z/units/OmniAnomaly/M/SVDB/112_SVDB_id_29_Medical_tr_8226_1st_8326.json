@@ -1,0 +1,28 @@
+{
+  "method": "OmniAnomaly",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 8226,
+  "training_prefix_anomaly_count": 0,
+  "points": 230400,
+  "channels": 2,
+  "official_tsb_name": "OmniAnomaly",
+  "hyperparameters": {
+    "win_size": 100,
+    "lr": 0.002
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.03389784414188034,
+    "VUS-ROC": 0.6142172823171385,
+    "R-based-F1": 0.2777601692733763,
+    "AUC-PR": 0.03953831959864576,
+    "AUC-ROC": 0.5391746028835205,
+    "Standard-F1": 0.10544630166170167
+  },
+  "runtime_s": 78.27503895759583
+}

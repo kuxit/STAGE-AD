@@ -1,0 +1,28 @@
+{
+  "method": "USAD",
+  "track": "M",
+  "dataset": "SVDB",
+  "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 1791,
+  "training_prefix_anomaly_count": 0,
+  "points": 230400,
+  "channels": 2,
+  "official_tsb_name": "USAD",
+  "hyperparameters": {
+    "win_size": 100,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.8124801878602308,
+    "VUS-ROC": 0.9068612612800286,
+    "R-based-F1": 0.8366374085888068,
+    "AUC-PR": 0.7947003050588415,
+    "AUC-ROC": 0.8594710646958672,
+    "Standard-F1": 0.8125495251232591
+  },
+  "runtime_s": 198.51370286941528
+}

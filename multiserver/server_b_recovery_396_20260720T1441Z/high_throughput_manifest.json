@@ -1,0 +1,4835 @@
+{
+  "protocol": "duoba-server-b-high-throughput-accuracy-v1",
+  "seed": 2027,
+  "scheduler_sha256": "47ebe28dcad3dcfc64b0062779ef71067eec928c5f72f13e785ca0367ed73d4b",
+  "controller_command_builder_sha256": "88a394978d2547608e2ee58e30e9797a58a6bc950ca950c8c802a8b567dd8d78",
+  "command_sha256": "8a462eeb1966665be7eb0cde8cb20e15d6dde27214cc5f92900990af4eb3f228",
+  "job_source": {
+    "mode": "verified_split_plan",
+    "path": "/root/autodl-tmp/AAAI/server_b_split_plan.json",
+    "sha256": "543c884bfc761f5fa767392b5bc29c9b7c3db6f56a07d2abd641cd3f14c90178",
+    "input_digest": {
+      "tree_sha256": "0ed191fde5e5e2bb4d8b2a290238e5092b1799ef3146f391ccb5118293c2bd7b",
+      "file_count": 9143,
+      "total_bytes": 767676814,
+      "selected_data_files": 44
+    }
+  },
+  "requested_jobs": [
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    }
+  ],
+  "scheduled_jobs": [
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv"
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv"
+    }
+  ],
+  "input_inventory": [
+    {
+      "track": "M",
+      "file": "084_SVDB_id_1_Medical_tr_12973_1st_13073.csv",
+      "size": 2954911,
+      "sha256": "2f8fa76a800164e256ec16429b21460d6ef78cae93b4c18edf9ff9daec331ced"
+    },
+    {
+      "track": "M",
+      "file": "085_SVDB_id_2_Medical_tr_50000_1st_54982.csv",
+      "size": 2998309,
+      "sha256": "611b4c73f90e263f2fcc9bce60af5ef1b76a3412ae087258680c61e40922d872"
+    },
+    {
+      "track": "M",
+      "file": "086_SVDB_id_3_Medical_tr_533_1st_633.csv",
+      "size": 2909135,
+      "sha256": "1a5754daeb93c64fb6e89841757f486e9478a137df1170e58fc74a8437554e7a"
+    },
+    {
+      "track": "M",
+      "file": "087_SVDB_id_4_Medical_tr_5421_1st_5521.csv",
+      "size": 3602559,
+      "sha256": "bea6b876eafe26b4f36cd5d80e99d986f7cbd5901d870dc4923f93f2d9f3abd3"
+    },
+    {
+      "track": "M",
+      "file": "088_SVDB_id_5_Medical_tr_500_1st_168.csv",
+      "size": 3593688,
+      "sha256": "81ba64df413d7a7d7975fd0c3798c985ad8fa0336127be2c096bbdc6b80ef633"
+    },
+    {
+      "track": "M",
+      "file": "089_SVDB_id_6_Medical_tr_50000_1st_83083.csv",
+      "size": 3593793,
+      "sha256": "c37459c63f607967c2bdaf31566cc33583f5ba487b9211b2c4db624aaf664e10"
+    },
+    {
+      "track": "M",
+      "file": "091_SVDB_id_8_Medical_tr_500_1st_126.csv",
+      "size": 2972561,
+      "sha256": "a4c8fd671d9e68ea4d06ffc9f958b28d886b357c83fb0f012604381ccc985705"
+    },
+    {
+      "track": "M",
+      "file": "092_SVDB_id_9_Medical_tr_2674_1st_2774.csv",
+      "size": 2929598,
+      "sha256": "d6e4e220f3d41b6f06f454c8c581e83b8312e59e0233a14ea2a28ad2af232f9b"
+    },
+    {
+      "track": "M",
+      "file": "093_SVDB_id_10_Medical_tr_500_1st_37.csv",
+      "size": 2871616,
+      "sha256": "82e5e2139d1c2399681a0d1656074dfe36a38b58e8a131062f7f7ff0274b15c7"
+    },
+    {
+      "track": "M",
+      "file": "094_SVDB_id_11_Medical_tr_20100_1st_23611.csv",
+      "size": 1029105,
+      "sha256": "26eab516a2cc45e78eba17d5edbedfbcca53ca9a573bac9a137e5f583ab0387d"
+    },
+    {
+      "track": "M",
+      "file": "095_SVDB_id_12_Medical_tr_6264_1st_6364.csv",
+      "size": 2949065,
+      "sha256": "8e79cb7eba090738bae2d21321627235e550bbe320371d8b55f9678ff438faa0"
+    },
+    {
+      "track": "M",
+      "file": "096_SVDB_id_13_Medical_tr_500_1st_444.csv",
+      "size": 2944278,
+      "sha256": "87a4baba2977966de680aeb9c8cd6a8d357a394d590f7e4b099471eb2e3d4353"
+    },
+    {
+      "track": "M",
+      "file": "097_SVDB_id_14_Medical_tr_1031_1st_1131.csv",
+      "size": 2995798,
+      "sha256": "9b2eae12ccd1d5387d50116ee7ae47259020744294c141f695724bf88a07657f"
+    },
+    {
+      "track": "M",
+      "file": "098_SVDB_id_15_Medical_tr_500_1st_303.csv",
+      "size": 2979079,
+      "sha256": "98797796ad121fe7321edd8ffdd6f6129d7cded73e05b3031fe3645423fd72b9"
+    },
+    {
+      "track": "M",
+      "file": "099_SVDB_id_16_Medical_tr_1115_1st_1215.csv",
+      "size": 2947177,
+      "sha256": "f640c6b91cb99c6c2604843cf73275a72d78d0ed140f67553d03d7febc352787"
+    },
+    {
+      "track": "M",
+      "file": "100_SVDB_id_17_Medical_tr_17803_1st_17903.csv",
+      "size": 1643188,
+      "sha256": "e956a79615a26480c1854933b375af023a39b701760c35d696eb2d1a39a54b30"
+    },
+    {
+      "track": "M",
+      "file": "101_SVDB_id_18_Medical_tr_1851_1st_1951.csv",
+      "size": 2932874,
+      "sha256": "75c1de3292e1792526d5a5543a1d1207dba124b5f5a6ecf4bc136c0acd77d60a"
+    },
+    {
+      "track": "M",
+      "file": "102_SVDB_id_19_Medical_tr_50000_1st_107354.csv",
+      "size": 3021945,
+      "sha256": "8ad299d482cd5ec125f9b59f5942abcecbb27306658fb8ecd3aa73a911d050d7"
+    },
+    {
+      "track": "M",
+      "file": "103_SVDB_id_20_Medical_tr_12167_1st_12267.csv",
+      "size": 3661820,
+      "sha256": "f54937607de8968af1a40bb5cb6a0ad55ea4422d9b33c8b167e151ee8bf7a4df"
+    },
+    {
+      "track": "M",
+      "file": "104_SVDB_id_21_Medical_tr_50000_1st_106634.csv",
+      "size": 3036924,
+      "sha256": "722e2909cf9d450550c5c7a5152dfefdf84b848f5263d72ea6a0905a8c0516e3"
+    },
+    {
+      "track": "M",
+      "file": "105_SVDB_id_22_Medical_tr_500_1st_417.csv",
+      "size": 1967548,
+      "sha256": "d88968bf82ae3482d2715ea24a7da5990e36c281600a6f0ed8188f9c97289882"
+    },
+    {
+      "track": "M",
+      "file": "106_SVDB_id_23_Medical_tr_37500_1st_121963.csv",
+      "size": 1979017,
+      "sha256": "199fdd8c6bd67351d02dbab79f031ed3e1f7d1f56748db35ed2e77a695153286"
+    },
+    {
+      "track": "M",
+      "file": "108_SVDB_id_25_Medical_tr_1238_1st_1338.csv",
+      "size": 2912453,
+      "sha256": "51c5d2d92671027377656b10768d138f519a2747273f5901908509f23b5229bd"
+    },
+    {
+      "track": "M",
+      "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv",
+      "size": 3301546,
+      "sha256": "05a20015fe61a1854c6dc4cee2242768acdc6e9653a27998e5a339f186354645"
+    },
+    {
+      "track": "M",
+      "file": "110_SVDB_id_27_Medical_tr_30824_1st_30924.csv",
+      "size": 3313293,
+      "sha256": "2f65c67e49f479e6aceaef76ea42c6e3487eb804c42fcf7ee52ebd826b8d19d3"
+    },
+    {
+      "track": "M",
+      "file": "111_SVDB_id_28_Medical_tr_1791_1st_1891.csv",
+      "size": 3607787,
+      "sha256": "b22c93c8135b62d984c7c31ac887e7acaffe4ee87922b93c9afbc9f077464377"
+    },
+    {
+      "track": "M",
+      "file": "112_SVDB_id_29_Medical_tr_8226_1st_8326.csv",
+      "size": 2974259,
+      "sha256": "350efa6461b5bc2ece867df52b99bcf2b4c24f014bb4fc929c9629d083561d12"
+    },
+    {
+      "track": "M",
+      "file": "114_SVDB_id_31_Medical_tr_25000_1st_63090.csv",
+      "size": 1307370,
+      "sha256": "1c6fae836493867ef8ca2959551e35f306b4454576883f9b3b046e2ac33b46ba"
+    },
+    {
+      "track": "M",
+      "file": "116_TAO_id_1_Environment_tr_500_1st_3.csv",
+      "size": 205701,
+      "sha256": "db19cb384cc448d14a567ca2c3f4f334d45458d5b026215f574e91cc98c45ec3"
+    },
+    {
+      "track": "M",
+      "file": "117_TAO_id_2_Environment_tr_500_1st_1.csv",
+      "size": 216840,
+      "sha256": "05be428985b5a68212b98620d183c3a367b8fde3eece8430a3e804471d8146b2"
+    },
+    {
+      "track": "M",
+      "file": "118_TAO_id_3_Environment_tr_500_1st_7.csv",
+      "size": 205924,
+      "sha256": "19134c4ecc19a92aabad173a4cbbcbfe7673e0a38ad56097f6f8e631ce459f17"
+    },
+    {
+      "track": "M",
+      "file": "119_TAO_id_4_Environment_tr_500_1st_1.csv",
+      "size": 211253,
+      "sha256": "3cb1f08c1894614b3b65070de3d7053427f53f53c1f1736ada4ca7f4b7e35448"
+    },
+    {
+      "track": "M",
+      "file": "121_TAO_id_6_Environment_tr_500_1st_7.csv",
+      "size": 217362,
+      "sha256": "8a2fe90f98f946f3d3fd24df1abbe1b38dc38520555b5a272380ef342b349d1d"
+    },
+    {
+      "track": "M",
+      "file": "122_TAO_id_7_Environment_tr_500_1st_19.csv",
+      "size": 211921,
+      "sha256": "67508aa9cad071e68a6dbcf51eeccfa4a8d6cd46a89a933555762e5a6f53f578"
+    },
+    {
+      "track": "M",
+      "file": "123_TAO_id_8_Environment_tr_500_1st_62.csv",
+      "size": 205809,
+      "sha256": "468d70a358ea781ee59c03119c164a0542d11a41193ae1adf79c0dc9cc23d1fa"
+    },
+    {
+      "track": "M",
+      "file": "125_TAO_id_10_Environment_tr_500_1st_9.csv",
+      "size": 211492,
+      "sha256": "e7116ebb512e1839a459b15203e1f71fff045f90341c96e89aadd4b3e701c3df"
+    },
+    {
+      "track": "M",
+      "file": "127_TAO_id_12_Environment_tr_500_1st_24.csv",
+      "size": 206084,
+      "sha256": "dad4edea69e6376822b7484c94fd67e7facd7dc1c0509b7d4717c6f7762c9409"
+    },
+    {
+      "track": "M",
+      "file": "128_TAO_id_13_Environment_tr_500_1st_7.csv",
+      "size": 217362,
+      "sha256": "8a2fe90f98f946f3d3fd24df1abbe1b38dc38520555b5a272380ef342b349d1d"
+    },
+    {
+      "track": "M",
+      "file": "138_CATSv2_id_1_Sensor_tr_16568_1st_16668.csv",
+      "size": 26330863,
+      "sha256": "6a5a90996453e2046863c7874a82a80978e12b57e041574db749e4348584fde2"
+    },
+    {
+      "track": "M",
+      "file": "139_CATSv2_id_2_Sensor_tr_5592_1st_5692.csv",
+      "size": 51378626,
+      "sha256": "33b611ef0da692eb7342ee43054ded17c96eed26b3107169ed0c78d9f4e562a9"
+    },
+    {
+      "track": "M",
+      "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv",
+      "size": 51121682,
+      "sha256": "31072767a6a5306a9fe7c0e6dcace6d2fa72c28f3632fc828ee0edbcb5d88aa1"
+    },
+    {
+      "track": "M",
+      "file": "142_CATSv2_id_5_Sensor_tr_30704_1st_30804.csv",
+      "size": 92129380,
+      "sha256": "7bfbe04a23161b3dbea71de6a46b450ea2cccda9172f6a4326f54b2559210d9a"
+    },
+    {
+      "track": "M",
+      "file": "143_CATSv2_id_6_Sensor_tr_50000_1st_60232.csv",
+      "size": 52636244,
+      "sha256": "2616b6fd1503254b5fff848899ede46f8309571c58f8e9ef14c3e5398f8bb87b"
+    }
+  ],
+  "input_inventory_sha256": "64e55c32456095ec4f4c470d67fa75f0f0044269616576e7e858abfa23409339",
+  "methods": [
+    "AnomalyTransformer",
+    "DCdetector",
+    "GBOC",
+    "MEMTO",
+    "OmniAnomaly",
+    "PaAno",
+    "PatchTST",
+    "TimesNet",
+    "TranAD",
+    "USAD"
+  ],
+  "method_execution": {
+    "AnomalyTransformer": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "DCdetector": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "GBOC": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "MEMTO": {
+      "python": "/root/autodl-tmp/duoba-env27/bin/python",
+      "parity_report": "parity_report_torch27_memto_common_frozen.json",
+      "parity_report_sha256": "b951db11e79accfd5edcd5350d9a117d8fd8dee3baf5b250a1b626f4fdc7314b",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env27/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.7.1+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 90701,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "967d1891d7cb9c0930cc5c86c7ceb2318e34a3dbf972c8e4f722af42d1d758e7"
+      }
+    },
+    "OmniAnomaly": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "PaAno": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "PatchTST": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "TimesNet": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "TranAD": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "USAD": {
+      "python": "/root/autodl-tmp/duoba-env/bin/python",
+      "parity_report": "parity_report_torch28_common_frozen.json",
+      "parity_report_sha256": "dbbde30f23daa0d70d15099216a15cf4a67bc18a2f4be53cbc0ed40d64d8adc8",
+      "environment": {
+        "python_executable": "/root/autodl-tmp/duoba-env/bin/python3.10",
+        "python": "3.10.20",
+        "torch": "2.8.0+cu128",
+        "torch_cuda": "12.8",
+        "cudnn": 91002,
+        "devices": [
+          "NVIDIA GeForce RTX 5090",
+          "NVIDIA GeForce RTX 5090"
+        ],
+        "pip_freeze_sha256": "9910e50a6c4ea5a8b54ec41f4cf23c7e3edd9f573d9c885030885ddd226d2b85"
+      }
+    },
+    "method_plan_sha256": "1710602b5874a116282a792d8c20286a9cb256e164c46a423fb2ffda4ab53a52"
+  },
+  "source_sha256": {
+    "common": "e1c8cb0d732dd18bde179ef552577eeea06151903e8f8821a1afe31e6e67ba59",
+    "duoba": "94f31c50641c1c097b4b60cad50994d99dd6148148f2ae35cddc51579d242dd3",
+    "controller": "88a394978d2547608e2ee58e30e9797a58a6bc950ca950c8c802a8b567dd8d78",
+    "deep_runner": "a8bfb73293005ba5e9da9c3fc321e4f1b9cbae7db908434ac03568abd459840f",
+    "classical_runner": "d97a1e4083bd1157c73afc3255b35eb871add08361c95c8e52cf8a95f90ca83c",
+    "paano_one": "00437318c9a6b6ded357fd88892b336ea6cebc5fe6c7755a08bfa909d67ddf75",
+    "gboc_one": "3861da207667fe4944a45712088a9072abec07fa7ce2167bbcb8751f29082e19",
+    "gboc_config": "1839041de874a6a0586628274c51a14a4b6b66a049c2a7d46d38e2513d511fab",
+    "memto_one": "e923c6187b0954e0c01cc3fb09eade7a037b3e66148386bab19327f3d6901371",
+    "dcdetector_one": "2fb559dcfb3a7deb5b0a5c745ac5b524969f1cabf95946d2b05d1178dae1bb38"
+  },
+  "metrics": [
+    "VUS-PR",
+    "VUS-ROC",
+    "R-based-F1",
+    "AUC-PR",
+    "AUC-ROC",
+    "Standard-F1"
+  ],
+  "gpu_workers": {
+    "0": 2,
+    "1": 2
+  },
+  "method_limits": {
+    "USAD": 2,
+    "TimesNet": 2,
+    "OmniAnomaly": 2,
+    "GBOC": 4,
+    "AnomalyTransformer": 2,
+    "TranAD": 2,
+    "MEMTO": 2,
+    "DCdetector": 2,
+    "PaAno": 2,
+    "PatchTST": 2
+  },
+  "schedule_order": "lpt",
+  "deferred_methods": [
+    "GBOC"
+  ],
+  "expected_units": 430,
+  "accuracy_only": true,
+  "paper_efficiency_valid": false,
+  "efficiency_invalid_reason": "multiple concurrent units may share each GPU and host resources",
+  "persistent_scores": false,
+  "persistent_checkpoints": false,
+  "fail_stop_policy": "stop assigning new units after the first failed unit",
+  "protocol_sha256": "66d657cf470e9e7620ba2431a9f6cbc7cc9e368125d65dad73c91ea68c90f3a7",
+  "status": "running",
+  "started_at": "2026-07-20T10:36:09.191649+00:00",
+  "resumed_at": null,
+  "resume_count": 0,
+  "previous_error_units": 0,
+  "completed_units": 396,
+  "error_units": 0,
+  "pending_units": 30,
+  "active_workers": 4,
+  "last_unit": {
+    "status": "complete",
+    "method": "GBOC",
+    "track": "M",
+    "file": "109_SVDB_id_26_Medical_tr_1038_1st_1138.csv",
+    "gpu": "0",
+    "elapsed_s": 431.9924702644348,
+    "worker": "gpu0-slot2"
+  },
+  "updated_at": "2026-07-20T13:56:41.121581+00:00"
+}

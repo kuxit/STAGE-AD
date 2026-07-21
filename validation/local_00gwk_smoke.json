@@ -1,0 +1,514 @@
+{
+  "schema_version": "duoba-local-smoke-evidence-v1",
+  "status": "complete",
+  "generated_at": "2026-07-21T15:43:14.006516+00:00",
+  "purpose": "dependency, interface, and six-metric portability validation",
+  "runtime_eligible_for_paper": false,
+  "runtime_note": "All elapsed-time fields are intentionally omitted.",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "methods": [
+    "KMeansAD",
+    "KNN",
+    "PCA",
+    "IForest",
+    "LOF",
+    "PatchTST",
+    "AnomalyTransformer",
+    "TimesNet",
+    "TranAD",
+    "USAD",
+    "OmniAnomaly",
+    "PaAno",
+    "GBOC",
+    "MEMTO",
+    "DCdetector",
+    "DuoBa"
+  ],
+  "tracks": [
+    "U",
+    "M"
+  ],
+  "expected_records": 32,
+  "valid_records": 32,
+  "error_records": 0,
+  "files": {
+    "U": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+    "M": "124_TAO_id_9_Environment_tr_500_1st_1.csv"
+  },
+  "metrics": [
+    "VUS-PR",
+    "VUS-ROC",
+    "R-based-F1",
+    "AUC-PR",
+    "AUC-ROC",
+    "Standard-F1"
+  ],
+  "environment": {
+    "python": "3.8.20",
+    "python_executable": "C:\\Users\\wyyxx\\.conda\\envs\\00gwk\\python.exe",
+    "platform": "Windows-10-10.0.26100-SP0",
+    "torch": {
+      "version": "2.4.1+cu118",
+      "cuda_available": true,
+      "cuda_version": "11.8",
+      "device": "NVIDIA GeForce RTX 4060 Laptop GPU"
+    }
+  },
+  "integrity": {
+    "protocol_sha256": "abfce5d251d5a2e62e84364b2a5c0e9c715b78c8ff5a565cc4f64e31d4df4f78",
+    "formal_paano_adapter_sha256": "00437318c9a6b6ded357fd88892b336ea6cebc5fe6c7755a08bfa909d67ddf75",
+    "windows_smoke_paano_adapter_sha256": "96966c5b49eb4ef359323ba4fef36c4f0f4860b7fb56e977fdfb6dff07d15f0b"
+  },
+  "compatibility_note": "On Windows smoke tests only, PaAno receives a POSIX-form path because the released loader splits paths on '/'. Formal Linux runs use the frozen adapter.",
+  "records": [
+    {
+      "method": "AnomalyTransformer",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8154328297963206,
+        "VUS-ROC": 0.8793363761186836,
+        "R-based-F1": 0.09316097119436,
+        "AUC-PR": 0.060903198504931484,
+        "AUC-ROC": 0.5194504287957193,
+        "Standard-F1": 0.09214831490685008
+      }
+    },
+    {
+      "method": "AnomalyTransformer",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.07937116616570136,
+        "VUS-ROC": 0.5099381291903005,
+        "R-based-F1": 0.34246575342465757,
+        "AUC-PR": 0.057647178859300076,
+        "AUC-ROC": 0.5041322314049587,
+        "Standard-F1": 0.09486385527570239
+      }
+    },
+    {
+      "method": "DCdetector",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.7008306010517353,
+        "VUS-ROC": 0.8904279554064582,
+        "R-based-F1": 0.004677997816934352,
+        "AUC-PR": 0.0478218639200847,
+        "AUC-ROC": 0.3931256500571822,
+        "Standard-F1": 0.09214831490685008
+      }
+    },
+    {
+      "method": "DCdetector",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.06108976445235971,
+        "VUS-ROC": 0.27988293014608107,
+        "R-based-F1": 0.34246575342465757,
+        "AUC-PR": 0.050228518035971385,
+        "AUC-ROC": 0.10603316522840912,
+        "Standard-F1": 0.09486385527570239
+      }
+    },
+    {
+      "method": "DuoBa",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.7514969524116064,
+        "VUS-ROC": 0.8610128359739283,
+        "R-based-F1": 0.10750465075698667,
+        "AUC-PR": 0.04651232884928665,
+        "AUC-ROC": 0.4923909725888793,
+        "Standard-F1": 0.09357174631762116
+      }
+    },
+    {
+      "method": "DuoBa",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.9996409849330056,
+        "VUS-ROC": 0.9999883560251166,
+        "R-based-F1": 0.9728353140916809,
+        "AUC-PR": 0.9976046146681201,
+        "AUC-ROC": 0.9998711473966405,
+        "Standard-F1": 0.9679950051457735
+      }
+    },
+    {
+      "method": "GBOC",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.058598483891309,
+        "VUS-ROC": 0.41724485490917007,
+        "R-based-F1": 0.187030673960204,
+        "AUC-PR": 0.0677660152305971,
+        "AUC-ROC": 0.5808425850570114,
+        "Standard-F1": 0.1349460785232978
+      }
+    },
+    {
+      "method": "GBOC",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.07937116616570136,
+        "VUS-ROC": 0.5099381291903005,
+        "R-based-F1": 0.3780160857908847,
+        "AUC-PR": 0.08905893956399008,
+        "AUC-ROC": 0.5206611570247934,
+        "Standard-F1": 0.09486385527570239
+      }
+    },
+    {
+      "method": "IForest",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8248849209465926,
+        "VUS-ROC": 0.8792200490337714,
+        "R-based-F1": 0.3118264556846215,
+        "AUC-PR": 0.06967645975085668,
+        "AUC-ROC": 0.5564736395218233,
+        "Standard-F1": 0.13018516086849433
+      }
+    },
+    {
+      "method": "IForest",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.0716992592170822,
+        "VUS-ROC": 0.505854280266886,
+        "R-based-F1": 0.0,
+        "AUC-PR": 0.04979423868312757,
+        "AUC-ROC": 0.5,
+        "Standard-F1": 0.09486385527570239
+      }
+    },
+    {
+      "method": "KMeansAD",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8586393275322617,
+        "VUS-ROC": 0.9467758371455107,
+        "R-based-F1": 0.14239235865642308,
+        "AUC-PR": 0.09342138541323625,
+        "AUC-ROC": 0.7060739733257104,
+        "Standard-F1": 0.15567865150019558
+      }
+    },
+    {
+      "method": "KMeansAD",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.9996908651683905,
+        "VUS-ROC": 0.9999900298665334,
+        "R-based-F1": 0.9728353140916809,
+        "AUC-PR": 0.9976046146681199,
+        "AUC-ROC": 0.9998854643525693,
+        "Standard-F1": 0.9679950051457735
+      }
+    },
+    {
+      "method": "KNN",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8690883826976602,
+        "VUS-ROC": 0.9466621443875257,
+        "R-based-F1": 0.5842712050507823,
+        "AUC-PR": 0.4163296116513252,
+        "AUC-ROC": 0.4411821843922753,
+        "Standard-F1": 0.5810177392380335
+      }
+    },
+    {
+      "method": "KNN",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.9996908651683905,
+        "VUS-ROC": 0.9999900298665334,
+        "R-based-F1": 0.9728353140916809,
+        "AUC-PR": 0.9976046146681199,
+        "AUC-ROC": 0.9998854643525693,
+        "Standard-F1": 0.9679950051457735
+      }
+    },
+    {
+      "method": "LOF",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8668707584791846,
+        "VUS-ROC": 0.9475909869364079,
+        "R-based-F1": 0.5807639836289222,
+        "AUC-PR": 0.41534352183866263,
+        "AUC-ROC": 0.4674281241522471,
+        "Standard-F1": 0.5768073942334802
+      }
+    },
+    {
+      "method": "LOF",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.9996908651683905,
+        "VUS-ROC": 0.9999900298665334,
+        "R-based-F1": 0.9728353140916809,
+        "AUC-PR": 0.9976046146681199,
+        "AUC-ROC": 0.9998854643525693,
+        "Standard-F1": 0.9679950051457735
+      }
+    },
+    {
+      "method": "MEMTO",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.7977363204347814,
+        "VUS-ROC": 0.8591793702958527,
+        "R-based-F1": 0.36673565172401057,
+        "AUC-PR": 0.25482519966911477,
+        "AUC-ROC": 0.61777127167664,
+        "Standard-F1": 0.3697714489940205
+      }
+    },
+    {
+      "method": "MEMTO",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.07955131546270702,
+        "VUS-ROC": 0.5099438165591744,
+        "R-based-F1": 0.34246575342465757,
+        "AUC-PR": 0.057924361459714996,
+        "AUC-ROC": 0.503326902633962,
+        "Standard-F1": 0.09486385527570239
+      }
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.9980663231933342,
+        "VUS-ROC": 0.9997333500760486,
+        "R-based-F1": 0.9933774834437086,
+        "AUC-PR": 0.9928423041622696,
+        "AUC-ROC": 0.9988806126815456,
+        "Standard-F1": 0.9937450002204676
+      }
+    },
+    {
+      "method": "OmniAnomaly",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.0712582910596384,
+        "VUS-ROC": 0.5645439626592229,
+        "R-based-F1": 0.34246575342465757,
+        "AUC-PR": 0.06141953294724933,
+        "AUC-ROC": 0.45495706702840844,
+        "Standard-F1": 0.09655655035820816
+      }
+    },
+    {
+      "method": "PCA",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.9204148696423405,
+        "VUS-ROC": 0.9742143179918613,
+        "R-based-F1": 0.7719029151919525,
+        "AUC-PR": 0.609395874205406,
+        "AUC-ROC": 0.7435113932548729,
+        "Standard-F1": 0.7066331215361505
+      }
+    },
+    {
+      "method": "PCA",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.9996908651683905,
+        "VUS-ROC": 0.9999900298665333,
+        "R-based-F1": 0.9728353140916809,
+        "AUC-PR": 0.9976046146681201,
+        "AUC-ROC": 0.9998854643525693,
+        "Standard-F1": 0.9679950051457735
+      }
+    },
+    {
+      "method": "PaAno",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8095519793236864,
+        "VUS-ROC": 0.89886563215709,
+        "R-based-F1": 0.15088474267953358,
+        "AUC-PR": 0.05297820953097504,
+        "AUC-ROC": 0.5271352712841856,
+        "Standard-F1": 0.09774543306174933
+      }
+    },
+    {
+      "method": "PaAno",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.0716992592170822,
+        "VUS-ROC": 0.505854280266886,
+        "R-based-F1": 0.0,
+        "AUC-PR": 0.04979423868312757,
+        "AUC-ROC": 0.5,
+        "Standard-F1": 0.09486385527570239
+      }
+    },
+    {
+      "method": "PatchTST",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8648055556960158,
+        "VUS-ROC": 0.928563261475565,
+        "R-based-F1": 0.14014173143000877,
+        "AUC-PR": 0.08523164849078226,
+        "AUC-ROC": 0.6448969708994104,
+        "Standard-F1": 0.14614444490350476
+      }
+    },
+    {
+      "method": "PatchTST",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.8317524634704326,
+        "VUS-ROC": 0.9111109177378529,
+        "R-based-F1": 0.9253996447602131,
+        "AUC-PR": 0.8350882563003774,
+        "AUC-ROC": 0.9103669077880661,
+        "Standard-F1": 0.9049724207392349
+      }
+    },
+    {
+      "method": "TimesNet",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8610456972620841,
+        "VUS-ROC": 0.922201558615354,
+        "R-based-F1": 0.1589334867562605,
+        "AUC-PR": 0.08534237738813519,
+        "AUC-ROC": 0.645323906593214,
+        "Standard-F1": 0.14714348118504084
+      }
+    },
+    {
+      "method": "TimesNet",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.2882350392062162,
+        "VUS-ROC": 0.4575630175172657,
+        "R-based-F1": 0.5831381733021077,
+        "AUC-PR": 0.2957284144711113,
+        "AUC-ROC": 0.3771569388916528,
+        "Standard-F1": 0.4182973454915814
+      }
+    },
+    {
+      "method": "TranAD",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.9992896021100902,
+        "VUS-ROC": 0.9998001527621921,
+        "R-based-F1": 0.9978021978021978,
+        "AUC-PR": 0.9964755460702402,
+        "AUC-ROC": 0.9988000115734924,
+        "Standard-F1": 0.9979203112498929
+      }
+    },
+    {
+      "method": "TranAD",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.07597257185878589,
+        "VUS-ROC": 0.5065629153417734,
+        "R-based-F1": 0.34246575342465757,
+        "AUC-PR": 0.05440674629589804,
+        "AUC-ROC": 0.4669421487603306,
+        "Standard-F1": 0.09486385527570239
+      }
+    },
+    {
+      "method": "USAD",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "metrics": {
+        "VUS-PR": 0.8224125028968067,
+        "VUS-ROC": 0.8995210466033761,
+        "R-based-F1": 0.13474717516944754,
+        "AUC-PR": 0.06452813281952281,
+        "AUC-ROC": 0.5929797413846553,
+        "Standard-F1": 0.1159344137596107
+      }
+    },
+    {
+      "method": "USAD",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "metrics": {
+        "VUS-PR": 0.8235461401817592,
+        "VUS-ROC": 0.906071474761474,
+        "R-based-F1": 0.9253996447602131,
+        "AUC-PR": 0.8350882563003774,
+        "AUC-ROC": 0.9132231404958677,
+        "Standard-F1": 0.9049724207392349
+      }
+    }
+  ]
+}

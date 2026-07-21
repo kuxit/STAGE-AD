@@ -1,0 +1,28 @@
+{
+  "method": "TranAD",
+  "track": "M",
+  "dataset": "CATSv2",
+  "file": "141_CATSv2_id_4_Sensor_tr_41727_1st_41827.csv",
+  "seed": 2027,
+  "training_prefix_policy": "filename_declared_label_blind",
+  "error": null,
+  "train_index": 41727,
+  "training_prefix_anomaly_count": 0,
+  "points": 195000,
+  "channels": 17,
+  "official_tsb_name": "TranAD",
+  "hyperparameters": {
+    "win_size": 10,
+    "lr": 0.001
+  },
+  "sliding_window": 100,
+  "metrics": {
+    "VUS-PR": 0.28183463962785776,
+    "VUS-ROC": 0.7767159782686704,
+    "R-based-F1": 0.21483777141915836,
+    "AUC-PR": 0.32607305819510907,
+    "AUC-ROC": 0.7556927780118132,
+    "Standard-F1": 0.3702122263313162
+  },
+  "runtime_s": 336.536395072937
+}
