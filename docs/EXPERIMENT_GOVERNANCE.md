@@ -14,7 +14,9 @@ hyperparameter selection. The important rules are:
    individual Eval series may not. Exathlon gets no extra budget and no Eval
    exception.
 4. Run all admitted baselines first, with PaAno first on the GPU queue. Verify
-   baseline completeness and zero errors before starting STAGE.
+   baseline completeness and zero errors before starting STAGE. The formal
+   launcher defaults to `baseline`; `target` is blocked until all same-seed
+   baseline JSONs are complete.
 5. Store the six metrics at full precision. Three-decimal values are rendering
    artifacts only. Do not retain checkpoints or anomaly-score arrays.
 6. Main-run timing is diagnostic. Report Average Inference Time only after a

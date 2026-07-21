@@ -1,7 +1,7 @@
 {
   "schema_version": "stage-local-smoke-evidence-v1",
   "status": "complete",
-  "generated_at": "2026-07-21T17:34:13.692215+00:00",
+  "generated_at": "2026-07-21T17:36:26.160295+00:00",
   "purpose": "dependency, interface, and six-metric portability validation",
   "runtime_eligible_for_paper": false,
   "runtime_note": "All elapsed-time fields are intentionally omitted.",
@@ -56,9 +56,9 @@
   },
   "integrity": {
     "protocol_sha256": "eb4b99bfc834af063b23706015c898e01fc6b16f4ec387f941a738fdd129edc4",
-    "experiment_policy_sha256": "41617c4a434fce25db4db447e0b931ca2adc727566d5c1c122ea69b28e6144f5",
+    "experiment_policy_sha256": "c14302d006fe7ae8ef4ac3313fd58cafb47fd7ef82bdc4db8e90f91e60bed984",
     "stage_source_sha256": "f57784bf84f2fc1bafbb080d7865d19cb89f3a3bd4aad3c9c6a8de2a6e297d63",
-    "controller_sha256": "2159c4d62723dfda4c1cd8d8a77b825661d9cb9475d83731c6f98f9fc23eac07",
+    "controller_sha256": "538dc570f2ef75a9c1bbd3d521632ed46bc793686196c0b612faf62e9f5c9443",
     "formal_paano_adapter_sha256": "00437318c9a6b6ded357fd88892b336ea6cebc5fe6c7755a08bfa909d67ddf75",
     "windows_smoke_paano_adapter_sha256": "96966c5b49eb4ef359323ba4fef36c4f0f4860b7fb56e977fdfb6dff07d15f0b"
   },

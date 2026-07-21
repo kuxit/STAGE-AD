@@ -90,9 +90,12 @@ subset-level configuration selected on official Tuning with an equal search
 budget for all ten subsets. No Eval metric is an input to configuration choice,
 including for Exathlon.
 
-The formal scheduler completes baselines before STAGE and places PaAno first on
-the GPU queue. Main-run timings are diagnostic only. Paper-ready Average
-Inference Time requires a separate, exclusive, identical-hardware rerun.
+The formal launcher defaults to the `baseline` phase and places PaAno first on
+the GPU queue. The separate `target` phase refuses to start unless every
+same-seed baseline unit is complete in the result root. `all` is available only
+for a fully frozen end-to-end run. Main-run timings are diagnostic only.
+Paper-ready Average Inference Time requires a separate, exclusive,
+identical-hardware rerun.
 
 ## Current local status
 

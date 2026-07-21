@@ -24,4 +24,5 @@ exec "$PY" "$EXP/controller.py" \
   --seed 2026 \
   --gpus 0,1 \
   --cpu-workers 8 \
+  --phase "${STAGE_PHASE:-baseline}" \
   "$@"

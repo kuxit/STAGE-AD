@@ -1,7 +1,7 @@
 {
   "schema_version": "stage-aaai-recent-smoke-evidence-v1",
   "status": "complete",
-  "generated_at": "2026-07-21T17:34:15.747498+00:00",
+  "generated_at": "2026-07-21T17:36:28.256820+00:00",
   "purpose": "implementation and six-metric portability validation only",
   "formal_eval_eligible": false,
   "formal_eval_note": "Formal settings remain blocked until official-Tuning freeze.",
@@ -39,7 +39,7 @@
   },
   "integrity": {
     "base_protocol_sha256": "eb4b99bfc834af063b23706015c898e01fc6b16f4ec387f941a738fdd129edc4",
-    "experiment_policy_sha256": "41617c4a434fce25db4db447e0b931ca2adc727566d5c1c122ea69b28e6144f5",
+    "experiment_policy_sha256": "c14302d006fe7ae8ef4ac3313fd58cafb47fd7ef82bdc4db8e90f91e60bed984",
     "extension_protocol_sha256": "0e82a0409f4826660d744b9b3d3f172fd2d81c2336d74e468234143cb8d575fb",
     "model_source_sha256": "fa3e8b5a5b8048eeaf9f5db9f9e4b8f605f7f3a7c259ac8fa54341b1acd28f56",
     "runner_source_sha256": "55ef1401703430959035bff2a01559ca16c54f9833cc0273afd1bbc713b15312"

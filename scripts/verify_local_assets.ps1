@@ -100,6 +100,7 @@ try {
         (-not [bool]$policy.stage_tuning_policy.exathlon_exception) -and
         ([int]$policy.stage_tuning_policy.max_trials_per_subset -eq 24) -and
         ([string]$policy.execution_order.gpu_first_method -eq 'PaAno') -and
+        ([string]$policy.execution_order.default_launcher_phase -eq 'baseline') -and
         ([bool]$policy.execution_order.target_must_not_start_before_baselines_complete) -and
         ([bool]$policy.result_policy.store_full_precision) -and
         (-not [bool]$policy.runtime_policy.paper_runtime_from_shared_hardware)

@@ -56,6 +56,16 @@ def standard_path(result: Path, method: str, track: str, file_name: str) -> Path
     return result / "units" / method / track / dataset_name(file_name) / f"{Path(file_name).stem}.json"
 
 
+def complete_record_for_seed(path: Path, seed: int) -> bool:
+    if not complete_record(path):
+        return False
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return int(payload.get("seed")) == int(seed)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError):
+        return False
+
+
 def normalized_external_record(method: str, source: dict[str, Any], track: str, file_name: str, seed: int) -> dict[str, Any]:
     metrics = source.get("metrics")
     if metrics is None and method == "STAGE":
@@ -211,6 +221,12 @@ def main() -> int:
     parser.add_argument("--gpus", default="0,1")
     parser.add_argument("--cpu-workers", type=int, default=8)
     parser.add_argument("--mode", choices=("smoke", "formal"), default="formal")
+    parser.add_argument(
+        "--phase",
+        choices=("baseline", "target", "all"),
+        default="baseline",
+        help="Default is baseline-only; target requires complete same-seed baselines.",
+    )
     args = parser.parse_args()
     # Do not Path.resolve() the Python executable: resolving a venv symlink can
     # silently replace it with the system interpreter and lose site-packages.
@@ -224,7 +240,29 @@ def main() -> int:
             track: [min(names, key=lambda name: (args.repo / "data" / f"TSB-AD-{track}" / name).stat().st_size)]
             for track, names in files.items()
         }
-    methods = METHOD_ORDER
+    if args.phase == "baseline":
+        methods = (*NON_DEEP, *BASELINE_GPU_ORDER)
+    elif args.phase == "target":
+        methods = ("STAGE",)
+    else:
+        methods = METHOD_ORDER
+
+    if args.phase == "target":
+        missing_baselines = [
+            (method, track, file_name)
+            for method in (*NON_DEEP, *BASELINE_GPU_ORDER)
+            for track in ("U", "M")
+            for file_name in files[track]
+            if not complete_record_for_seed(
+                standard_path(args.result, method, track, file_name), args.seed
+            )
+        ]
+        if missing_baselines:
+            sample = missing_baselines[:5]
+            raise RuntimeError(
+                f"target phase blocked: {len(missing_baselines)} same-seed baseline "
+                f"units are incomplete; sample={sample}"
+            )
     jobs = [
         (method, track, file_name)
         for method in methods
@@ -235,6 +273,7 @@ def main() -> int:
         "protocol": "stage-10subset-seed2026-v1",
         "status": "running",
         "mode": args.mode,
+        "phase": args.phase,
         "seed": args.seed,
         "started_at": now(),
         "files": {track: len(names) for track, names in files.items()},
@@ -262,7 +301,7 @@ def main() -> int:
         "completed_units": 0,
         "error_units": 0,
     }
-    manifest_path = args.result / "run_manifest.json"
+    manifest_path = args.result / f"run_manifest_{args.phase}.json"
     atomic_json(manifest_path, manifest)
     lock = threading.Lock()
     completed = 0
@@ -317,13 +356,13 @@ def main() -> int:
             if isinstance(result, dict):
                 update(result)
 
-        if errors == 0:
+        if "STAGE" in methods and errors == 0:
             queue = [job for job in jobs if job[0] == "STAGE"]
             queue_lock = threading.Lock()
             phase = [gpu_pool.submit(gpu_worker, gpu, queue, queue_lock) for gpu in gpus]
             for future in as_completed(phase):
                 future.result()
-        else:
+        elif "STAGE" in methods:
             manifest["target_skipped_due_to_baseline_error"] = True
             manifest["updated_at"] = now()
             atomic_json(manifest_path, manifest)
@@ -331,6 +370,8 @@ def main() -> int:
     manifest["status"] = "complete" if errors == 0 and completed == len(jobs) else "incomplete"
     manifest["completed_at"] = now()
     atomic_json(manifest_path, manifest)
+    if args.phase == "baseline":
+        return 0 if manifest["status"] == "complete" else 1
     summarize = subprocess.run(
         [str(args.python), str(args.experiment / "summarize.py"), "--protocol", str(args.experiment / "protocol.json"), "--result", str(args.result)],
         check=False,

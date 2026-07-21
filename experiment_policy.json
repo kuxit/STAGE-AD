@@ -58,6 +58,7 @@
     "gpu_first_method": "PaAno",
     "phase_2": "verify baseline completeness and errors",
     "phase_3": "STAGE",
+    "default_launcher_phase": "baseline",
     "target_must_not_start_before_baselines_complete": true
   },
   "result_policy": {
