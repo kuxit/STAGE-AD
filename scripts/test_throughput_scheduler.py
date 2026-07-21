@@ -61,6 +61,7 @@ def main() -> int:
             "--scheduler", "throughput",
             "--gpus", "0,1",
             "--cpu-workers", "8",
+            "--paano-workers-per-gpu", "4",
             "--gboc-workers-per-gpu", "4",
         ]
         with patch.object(controller, "selected_files", return_value=selected), \
@@ -88,6 +89,21 @@ def main() -> int:
     )
     if not cpu_paano_overlap:
         raise AssertionError("CPU-only baselines did not overlap the PaAno GPU phase")
+
+    paano_events = sorted(
+        [(start, 1) for _, _, start, _ in paano]
+        + [(finish, -1) for _, _, _, finish in paano],
+        key=lambda item: (item[0], -item[1]),
+    )
+    paano_active = 0
+    paano_peak = 0
+    for _, delta in paano_events:
+        paano_active += delta
+        paano_peak = max(paano_peak, paano_active)
+    if paano_peak < 4:
+        raise AssertionError(
+            f"expected concurrent PaAno lanes, observed peak={paano_peak}"
+        )
 
     gboc = [item for item in intervals if item[0] == "GBOC"]
     regular = [
@@ -117,6 +133,7 @@ def main() -> int:
             {
                 "status": "PASS",
                 "exclusive_paano_units": len(paano),
+                "paano_peak_concurrency": paano_peak,
                 "cpu_paano_overlap": cpu_paano_overlap,
                 "gboc_peak_concurrency": peak,
                 "gboc_regular_overlap": overlap,

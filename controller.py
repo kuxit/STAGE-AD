@@ -267,6 +267,12 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--paano-workers-per-gpu",
+        type=int,
+        default=1,
+        help="Concurrent isolated PaAno processes per physical GPU.",
+    )
+    parser.add_argument(
         "--gboc-workers-per-gpu",
         type=int,
         default=1,
@@ -291,6 +297,8 @@ def main() -> int:
     args.result.mkdir(parents=True, exist_ok=True)
     if args.cpu_workers < 1:
         raise ValueError("--cpu-workers must be positive")
+    if not 1 <= args.paano_workers_per_gpu <= 8:
+        raise ValueError("--paano-workers-per-gpu must be between 1 and 8")
     if not 1 <= args.gboc_workers_per_gpu <= 16:
         raise ValueError("--gboc-workers-per-gpu must be between 1 and 16")
     gpus = tuple(item.strip() for item in args.gpus.split(",") if item.strip())
@@ -350,6 +358,7 @@ def main() -> int:
             "target_after_baselines": True,
             "scheduler": args.scheduler,
             "cpu_workers": args.cpu_workers,
+            "paano_workers_per_gpu": args.paano_workers_per_gpu,
             "gboc_workers_per_gpu": args.gboc_workers_per_gpu,
             "gpu_cpu_map": args.gpu_cpu_map,
             "memto_python": str(args.memto_python),
@@ -407,14 +416,22 @@ def main() -> int:
         if args.scheduler == "throughput" and any(job[0] == "GBOC" for job in jobs)
         else 0
     )
-    with ThreadPoolExecutor(max_workers=args.cpu_workers) as cpu_pool, ThreadPoolExecutor(max_workers=2 + gboc_lanes) as gpu_pool:
+    gpu_pool_workers = max(
+        len(gpus) * args.paano_workers_per_gpu,
+        len(gpus) + gboc_lanes,
+    )
+    with ThreadPoolExecutor(max_workers=args.cpu_workers) as cpu_pool, ThreadPoolExecutor(max_workers=gpu_pool_workers) as gpu_pool:
         # CPU-only baselines start immediately and remain independent of the
         # GPU queue. PaAno is still the first and exclusive GPU phase.
         cpu_futures = [cpu_pool.submit(run_unit, args, *job, None) for job in cpu_jobs]
         paano_queue = [job for job in jobs if job[0] == "PaAno"]
         if paano_queue:
             queue_lock = threading.Lock()
-            phase = [gpu_pool.submit(gpu_worker, gpu, paano_queue, queue_lock) for gpu in gpus]
+            phase = [
+                gpu_pool.submit(gpu_worker, gpu, paano_queue, queue_lock)
+                for gpu in gpus
+                for _ in range(args.paano_workers_per_gpu)
+            ]
             for future in as_completed(phase):
                 future.result()
 

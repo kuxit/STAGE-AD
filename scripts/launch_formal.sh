@@ -28,6 +28,7 @@ exec "$PY" "$EXP/controller.py" \
   --gpu-cpu-map "${STAGE_GPU_CPU_MAP:-}" \
   --cpu-workers "${STAGE_CPU_WORKERS:-32}" \
   --scheduler "${STAGE_SCHEDULER:-throughput}" \
+  --paano-workers-per-gpu "${STAGE_PAANO_WORKERS_PER_GPU:-4}" \
   --gboc-workers-per-gpu "${STAGE_GBOC_WORKERS_PER_GPU:-4}" \
   --phase "${STAGE_PHASE:-baseline}" \
   "$@"
