@@ -85,7 +85,8 @@ try {
     $protocolPath = Join-Path $ProjectRoot 'protocol.json'
     $protocol = Get-Content -LiteralPath $protocolPath -Raw | ConvertFrom-Json
     $methodCount = @($protocol.non_deep_baselines).Count + @($protocol.deep_baselines).Count + 1
-    $protocolOk = ([int]$protocol.seed -eq 2027) -and ($methodCount -eq 16)
+    $protocolOk = ([int]$protocol.seed -eq 2027) -and ($methodCount -eq 15) -and
+        (-not (@($protocol.non_deep_baselines) -contains 'KNN'))
     Add-Check 'Frozen protocol' $protocolOk "seed=$($protocol.seed); methods=$methodCount"
 
     $dataRoot = Join-Path $ProjectRoot 'data'
@@ -123,7 +124,7 @@ try {
     }
     $uniqueSelected = @($selectedFiles | Group-Object Track, File)
     $unitCount = $uniqueSelected.Count * $methodCount
-    $dataOk = ($missingData.Count -eq 0) -and ($uniqueSelected.Count -eq 193) -and ($unitCount -eq 3088)
+    $dataOk = ($missingData.Count -eq 0) -and ($uniqueSelected.Count -eq 193) -and ($unitCount -eq 2895)
     Add-Check 'Official Eval data' $dataOk $(
         if ($missingData.Count -eq 0) {
             "$($trackDetails -join ', '); series=$($uniqueSelected.Count); units=$unitCount"
@@ -224,7 +225,7 @@ try {
     $plan = Get-Content -LiteralPath $planPath -Raw | ConvertFrom-Json
     $expectedPlanHash = '543c884bfc761f5fa767392b5bc29c9b7c3db6f56a07d2abd641cd3f14c90178'
     $planOk = ([string]$plan.plan_sha256).ToLowerInvariant() -eq $expectedPlanHash
-    Add-Check 'Split plan identity' $planOk "embedded plan_sha256=$($plan.plan_sha256)"
+    Add-Check 'Historical split plan identity' $planOk "embedded plan_sha256=$($plan.plan_sha256)"
 }
 catch {
     Add-Check 'Verifier execution' $false $_.Exception.Message
@@ -232,9 +233,9 @@ catch {
 
 $checks | Format-Table -AutoSize -Wrap
 if ($failed) {
-    Write-Error 'Local asset verification failed. Do not launch the frozen experiment.'
+    Write-Error 'Local asset verification failed. Do not launch the active experiment.'
     exit 1
 }
 
-Write-Host 'PASS: local frozen assets, official Eval selection, and 396 recovered metrics are internally consistent.' -ForegroundColor Green
+Write-Host 'PASS: local active assets, official Eval selection, and 396 recovered metrics are internally consistent.' -ForegroundColor Green
 exit 0

@@ -1,7 +1,7 @@
 {
   "schema_version": "duoba-local-smoke-evidence-v1",
   "status": "complete",
-  "generated_at": "2026-07-21T15:43:14.006516+00:00",
+  "generated_at": "2026-07-21T16:07:05.731904+00:00",
   "purpose": "dependency, interface, and six-metric portability validation",
   "runtime_eligible_for_paper": false,
   "runtime_note": "All elapsed-time fields are intentionally omitted.",
@@ -9,7 +9,6 @@
   "training_prefix_policy": "filename_declared_label_blind",
   "methods": [
     "KMeansAD",
-    "KNN",
     "PCA",
     "IForest",
     "LOF",
@@ -29,8 +28,8 @@
     "U",
     "M"
   ],
-  "expected_records": 32,
-  "valid_records": 32,
+  "expected_records": 30,
+  "valid_records": 30,
   "error_records": 0,
   "files": {
     "U": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
@@ -56,7 +55,7 @@
     }
   },
   "integrity": {
-    "protocol_sha256": "abfce5d251d5a2e62e84364b2a5c0e9c715b78c8ff5a565cc4f64e31d4df4f78",
+    "protocol_sha256": "f9891725a87f3ad6777276b46cc63cc1ebdbe591800f57edc5231bcfb6b7db44",
     "formal_paano_adapter_sha256": "00437318c9a6b6ded357fd88892b336ea6cebc5fe6c7755a08bfa909d67ddf75",
     "windows_smoke_paano_adapter_sha256": "96966c5b49eb4ef359323ba4fef36c4f0f4860b7fb56e977fdfb6dff07d15f0b"
   },
@@ -218,34 +217,6 @@
     },
     {
       "method": "KMeansAD",
-      "track": "U",
-      "dataset": "MSL",
-      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
-      "metrics": {
-        "VUS-PR": 0.9996908651683905,
-        "VUS-ROC": 0.9999900298665334,
-        "R-based-F1": 0.9728353140916809,
-        "AUC-PR": 0.9976046146681199,
-        "AUC-ROC": 0.9998854643525693,
-        "Standard-F1": 0.9679950051457735
-      }
-    },
-    {
-      "method": "KNN",
-      "track": "M",
-      "dataset": "TAO",
-      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
-      "metrics": {
-        "VUS-PR": 0.8690883826976602,
-        "VUS-ROC": 0.9466621443875257,
-        "R-based-F1": 0.5842712050507823,
-        "AUC-PR": 0.4163296116513252,
-        "AUC-ROC": 0.4411821843922753,
-        "Standard-F1": 0.5810177392380335
-      }
-    },
-    {
-      "method": "KNN",
       "track": "U",
       "dataset": "MSL",
       "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",

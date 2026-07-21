@@ -1,18 +1,11 @@
 {
-  "protocol_version": "duoba-10subset-seed2027-v3-no-knn",
-  "supersedes": "duoba-10subset-seed2027-v2",
-  "change_control": {
-    "decision_date": "2026-07-21",
-    "removed_methods": ["KNN"],
-    "reason": "author decision: exclude KNN from the formal comparison",
-    "legacy_protocol": "legacy/seed2027_v2_16method/protocol.json"
-  },
+  "protocol_version": "duoba-10subset-seed2027-v2",
   "seed": 2027,
   "tracks": {
     "U": ["UCR", "Exathlon", "MSL", "SED", "TODS"],
     "M": ["CATSv2", "GHL", "LTDB", "SVDB", "TAO"]
   },
-  "non_deep_baselines": ["KMeansAD", "PCA", "IForest", "LOF"],
+  "non_deep_baselines": ["KMeansAD", "KNN", "PCA", "IForest", "LOF"],
   "deep_baselines": [
     "PaAno",
     "GBOC",

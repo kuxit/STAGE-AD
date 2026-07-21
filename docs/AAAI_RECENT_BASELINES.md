@@ -1,9 +1,10 @@
 # AAAI 2024/2025 recent-baseline extension
 
 This document records the selection decision for two recent AAAI baselines.
-They are an **extension** to the frozen 16-method comparison, not a mutation of
-`protocol.json`. The original comparison therefore remains 16 methods, 193
-series, and 3,088 method-series units.
+They are an **extension** to the active no-KNN 15-method comparison, not a
+mutation of `protocol.json`. The base comparison therefore remains 15 methods,
+193 series, and 2,895 method-series units; admitting both extensions would
+produce 17 methods and 3,281 method-series units.
 
 ## Decision
 
@@ -28,7 +29,7 @@ is a directly relevant AAAI-24 time-series anomaly-detection paper, but its
 central contribution is test-time adaptation on test observations. The frozen
 DuoBa comparison permits fitting only on the filename-declared `tr_<N>` prefix.
 Using Eval observations for parameter updates would therefore make its results
-incomparable with the locked 16-method table. It remains a related-work item,
+incomparable with the active 15-method table. It remains a related-work item,
 not a baseline in this protocol.
 
 ## Time-series adapter shared by both methods
@@ -53,6 +54,34 @@ chosen on the official Tuning split, recorded in
 `extensions/aaai_recent/protocol_extension.json`, and frozen before Eval. It
 must not be chosen from Eval runtime or accuracy.
 
+## Implementation status and provenance
+
+The local implementation is now complete at the portability-smoke level:
+
+- `extensions/aaai_recent/models.py` contains a bias-free DPAD projection,
+  the detached dynamic pair weights and anti-collapse layer-norm penalty from
+  the paper equation, plus the DNE four-layer MLP, five-block ResMLP, and
+  Algorithm-1-style diverse Gaussian noise generator;
+- `extensions/aaai_recent/run_one_recent.py` applies the shared prefix-only
+  time-series adapter, scores the complete sequence, and invokes the unchanged
+  six-metric evaluator;
+- `validation/aaai_recent_local_00gwk_smoke.json` records 4/4 valid U/M smoke
+  units without runtime fields.
+
+No official public source URL was found for either selected method. The code
+is therefore identified as a paper-derived reimplementation, not author code.
+DPAD's paper gives its objective, no-bias constraint, 100-epoch experiments,
+and kNN scoring, but does not fully specify a tabular network and optimizer.
+Consequently its three-epoch local settings, hidden widths, Adam optimizer,
+pairwise-mean scaling, and 512-window ceiling are explicitly smoke-only.
+
+DNE is more fully specified: the implementation follows the appendix's hidden
+width rule, ResMLP depth, AMSGrad learning rate and weight decay, Gaussian
+noise level construction, three noise ratios, maximum aggregation, and the
+epoch-100 learning-rate decay. Only the local epoch count is reduced from 500
+to 3. Even so, the time-series window choice and final formal parameters must
+still pass the Tuning-only freeze gate.
+
 ## Provenance and acceptance gates
 
 The two implementations must pass all of the following before formal results
@@ -65,8 +94,11 @@ are accepted:
 4. the complete Tuning-only configuration is frozen and hashed;
 5. no Eval label or Eval score influences configuration;
 6. no persistent checkpoint or score array is produced;
-7. formal results use a separate result root and never overwrite the locked
-   16-method results.
+7. formal results use a separate result root and never overwrite the active
+   15-method results.
+
+Gates 1-3 and 6 have passed for the smoke profile. Gates 4, 5, and 7 remain
+mandatory before the 386-unit extension may run on Eval.
 
 Runtime ordering is deliberately not claimed here. Whether either method is
 slower than DuoBa and faster than GBOC must be measured later on exclusive,

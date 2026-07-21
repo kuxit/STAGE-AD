@@ -15,7 +15,8 @@ Audit date: 2026-07-21. Sizes are approximate and were measured under
 | `tmp/source_audit` | 38.7 MiB | Upstream provenance clones; keep until pinned sources are packaged |
 
 The official Eval lists select exactly 193 existing CSV files: 122 U and 71 M.
-With 16 methods this gives 3,088 units.
+With 15 active methods this gives 2,895 units. The old 16-method/3,088-unit
+contract is retained under `legacy/seed2027_v2_16method/` for audit only.
 
 The validated recovery set is
 `multiserver/server_b_recovery_396_20260720T1441Z`: 396 valid JSON records,

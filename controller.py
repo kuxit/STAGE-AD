@@ -20,7 +20,7 @@ import pandas as pd
 from common import METRICS, atomic_json, complete_record, dataset_name, sha256
 
 
-NON_DEEP = ("KMeansAD", "KNN", "PCA", "IForest", "LOF")
+NON_DEEP = ("KMeansAD", "PCA", "IForest", "LOF")
 TSB_DEEP = (
     "PatchTST",
     "AnomalyTransformer",
@@ -225,7 +225,7 @@ def main() -> int:
     methods = (*NON_DEEP, *TSB_DEEP, *EXTERNAL_DEEP)
     jobs = [(method, track, file_name) for track in ("U", "M") for file_name in files[track] for method in methods]
     manifest = {
-        "protocol": "duoba-10subset-seed2027-v2",
+        "protocol": "duoba-10subset-seed2027-v3-no-knn",
         "status": "running",
         "mode": args.mode,
         "seed": args.seed,

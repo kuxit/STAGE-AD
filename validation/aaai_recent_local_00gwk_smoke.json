@@ -1,0 +1,116 @@
+{
+  "schema_version": "duoba-aaai-recent-smoke-evidence-v1",
+  "status": "complete",
+  "generated_at": "2026-07-21T16:10:22.824337+00:00",
+  "purpose": "implementation and six-metric portability validation only",
+  "formal_eval_eligible": false,
+  "formal_eval_note": "Formal settings remain blocked until official-Tuning freeze.",
+  "runtime_eligible_for_paper": false,
+  "runtime_note": "All elapsed-time fields are intentionally omitted.",
+  "seed": 2027,
+  "methods": [
+    "DPAD_AAAI24",
+    "DNE_AAAI25"
+  ],
+  "tracks": [
+    "U",
+    "M"
+  ],
+  "valid_records": 4,
+  "error_records": 0,
+  "metrics": [
+    "VUS-PR",
+    "VUS-ROC",
+    "R-based-F1",
+    "AUC-PR",
+    "AUC-ROC",
+    "Standard-F1"
+  ],
+  "environment": {
+    "python": "3.8.20",
+    "python_executable": "C:\\Users\\wyyxx\\.conda\\envs\\00gwk\\python.exe",
+    "platform": "Windows-10-10.0.26100-SP0",
+    "torch": {
+      "version": "2.4.1+cu118",
+      "cuda_available": true,
+      "cuda_version": "11.8",
+      "device": "NVIDIA GeForce RTX 4060 Laptop GPU"
+    }
+  },
+  "integrity": {
+    "base_protocol_sha256": "f9891725a87f3ad6777276b46cc63cc1ebdbe591800f57edc5231bcfb6b7db44",
+    "extension_protocol_sha256": "50919056bdc8fa54ee4972cd01f82490ce3488f7c967e13f05bd59c62d1288a1",
+    "model_source_sha256": "fa3e8b5a5b8048eeaf9f5db9f9e4b8f605f7f3a7c259ac8fa54341b1acd28f56",
+    "runner_source_sha256": "a5245600c47a77246462f9d47139cd9bec820e1626cbe1439c1f4cf62bb3fc18"
+  },
+  "records": [
+    {
+      "method": "DNE_AAAI25",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "profile": "smoke",
+      "window": 1,
+      "training_windows_used": 500,
+      "metrics": {
+        "VUS-PR": 0.9997453074619156,
+        "VUS-ROC": 0.9999905383803182,
+        "R-based-F1": 0.9978118161925601,
+        "AUC-PR": 0.9973607685338739,
+        "AUC-ROC": 0.9998918792153781,
+        "Standard-F1": 0.9979288843439162
+      }
+    },
+    {
+      "method": "DNE_AAAI25",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "profile": "smoke",
+      "window": 125,
+      "training_windows_used": 406,
+      "metrics": {
+        "VUS-PR": 0.9991609738465875,
+        "VUS-ROC": 0.9999682434904656,
+        "R-based-F1": 0.9574809160305343,
+        "AUC-PR": 0.9942166396462434,
+        "AUC-ROC": 0.9996850269695657,
+        "Standard-F1": 0.9558182971503539
+      }
+    },
+    {
+      "method": "DPAD_AAAI24",
+      "track": "M",
+      "dataset": "TAO",
+      "file": "124_TAO_id_9_Environment_tr_500_1st_1.csv",
+      "profile": "smoke",
+      "window": 1,
+      "training_windows_used": 500,
+      "metrics": {
+        "VUS-PR": 0.7701722360621832,
+        "VUS-ROC": 0.8606896320403307,
+        "R-based-F1": 0.05792816769871966,
+        "AUC-PR": 0.03837325701819323,
+        "AUC-ROC": 0.030600575063344203,
+        "Standard-F1": 0.09214831490685008
+      }
+    },
+    {
+      "method": "DPAD_AAAI24",
+      "track": "U",
+      "dataset": "MSL",
+      "file": "140_MSL_id_1_Sensor_tr_530_1st_630.csv",
+      "profile": "smoke",
+      "window": 125,
+      "training_windows_used": 406,
+      "metrics": {
+        "VUS-PR": 0.9997807791143586,
+        "VUS-ROC": 0.99999331427807,
+        "R-based-F1": 0.9763113367174281,
+        "AUC-PR": 0.998595772402006,
+        "AUC-ROC": 0.9999248359813736,
+        "Standard-F1": 0.9758014545651318
+      }
+    }
+  ]
+}

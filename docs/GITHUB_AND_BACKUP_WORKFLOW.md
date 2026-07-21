@@ -22,7 +22,8 @@ order:
 2. Initialize Git in this directory with branch `main`.
 3. Commit documentation, frozen code, configs, checksum files, and the validated
    396-record recovery.
-4. Tag the immutable protocol commit as `protocol-seed2027-v2-frozen`.
+4. Preserve the baseline commit/tag for the superseded v2 protocol and tag the
+   audited no-KNN protocol as `protocol-seed2027-v3-no-knn`.
 5. Create a private GitHub repository and push `main` plus the tag.
 6. Create a run branch such as `run/server-b-seed2027-v3`. Formal runs deploy
    from the frozen tag or an audited descendant with no method/config changes.
@@ -45,7 +46,7 @@ Recommended cadence:
 - Create a local immutable snapshot every hour and whenever progress crosses
   another 10%, a method completes, or an error occurs.
 - Push a batched result commit from the local computer at those milestones.
-- At completion, commit all 3,088 full-precision unit JSONs, the final manifest,
+- At completion, commit all 2,895 active full-precision unit JSONs, the final manifest,
   full-precision and three-decimal CSV/Markdown summaries, and a SHA256
   inventory. Add a signed/tagged release such as `seed2027-v3-complete`.
 

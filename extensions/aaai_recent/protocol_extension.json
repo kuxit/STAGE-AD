@@ -1,21 +1,32 @@
 {
   "schema_version": "duoba-aaai-recent-extension-v1",
-  "status": "design_selected_implementation_pending",
+  "status": "implementation_smoke_passed_tuning_freeze_pending",
   "base_protocol": "../../protocol.json",
-  "base_protocol_sha256": "abfce5d251d5a2e62e84364b2a5c0e9c715b78c8ff5a565cc4f64e31d4df4f78",
+  "base_protocol_sha256": "f9891725a87f3ad6777276b46cc63cc1ebdbe591800f57edc5231bcfb6b7db44",
   "seed": 2027,
   "series_count": 193,
   "extension_method_count": 2,
   "extension_unit_count": 386,
-  "combined_method_count": 18,
-  "combined_unit_count": 3474,
+  "combined_method_count": 17,
+  "combined_unit_count": 3281,
   "methods": {
     "DPAD_AAAI24": {
       "venue": "AAAI-24 main technical track",
       "paper_url": "https://ojs.aaai.org/index.php/AAAI/article/view/28682",
       "doi": "10.1609/aaai.v38i8.28682",
-      "implementation_provenance": "paper-faithful reimplementation; author source URL must be pinned if located before freeze",
+      "implementation_provenance": "paper-derived provisional reimplementation; author source URL must be pinned if located before freeze",
+      "implementation_files": ["models.py", "run_one_recent.py"],
       "uses_auxiliary_negative_samples": false,
+      "local_smoke": {
+        "profile": "smoke-only",
+        "epochs": 3,
+        "gamma": 0.01,
+        "lambda": 10.0,
+        "learning_rate": 0.001,
+        "k": 5,
+        "max_train_windows": 512,
+        "formal_eval_eligible": false
+      },
       "formal_hyperparameters": null
     },
     "DNE_AAAI25": {
@@ -23,9 +34,17 @@
       "paper_url": "https://ojs.aaai.org/index.php/AAAI/article/view/33257",
       "full_paper_url": "https://arxiv.org/abs/2412.11461",
       "doi": "10.1609/aaai.v39i11.33257",
-      "implementation_provenance": "paper-faithful reimplementation; no author source URL pinned",
+      "implementation_provenance": "paper-derived provisional reimplementation; no author source URL pinned",
+      "implementation_files": ["models.py", "run_one_recent.py"],
       "uses_auxiliary_negative_samples": true,
       "negative_construction": "diverse Gaussian noise generated only from training-prefix windows",
+      "local_smoke": {
+        "profile": "paper settings with smoke-reduced epochs",
+        "architecture": "ResMLP",
+        "epochs": 3,
+        "paper_epochs": 500,
+        "formal_eval_eligible": false
+      },
       "formal_hyperparameters": null
     }
   },
@@ -33,6 +52,6 @@
   "evaluation_scope": "complete series",
   "configuration_gate": "official Tuning split only; freeze and hash before Eval",
   "storage_policy": "full-precision six metrics only; no checkpoint or score array",
-  "results_root_policy": "separate from the frozen 16-method result root",
+  "results_root_policy": "separate from the active no-KNN 15-method result root",
   "runtime_policy": "no paper runtime until exclusive identical-hardware rerun"
 }

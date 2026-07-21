@@ -2,11 +2,11 @@
 
 ## Frozen experiment identity
 
-- Protocol: `duoba-10subset-seed2027-v2`
+- Protocol: `duoba-10subset-seed2027-v3-no-knn`
 - Seed: `2027`
-- Methods: 16
+- Methods: 15 (KNN excluded by author decision)
 - Eval series: 193 (122 univariate, 71 multivariate)
-- Units: 3,088
+- Units: 2,895
 - Metrics: VUS-PR, VUS-ROC, R-based-F1, AUC-PR, AUC-ROC,
   Standard-F1
 - Fit scope: the filename-declared `tr_<N>` prefix, label blind
@@ -14,6 +14,10 @@
 - Selection: official TSB-AD Tuning parameters or released configurations;
   Eval metrics must never affect configuration
 - Storage: full-precision metrics only; no checkpoint or score array
+
+The superseded 16-method protocol is preserved in
+`legacy/seed2027_v2_16method/`; it must not be used to schedule or summarize
+the active comparison.
 
 ## Local readiness matrix (2026-07-21)
 
@@ -28,16 +32,17 @@
 | Official Eval file lists | Ready | 193 selected entries |
 | Selected raw CSV files | Ready | 193/193 present locally |
 | Recovered Server B metrics | Ready | 396 valid, 0 invalid |
-| PaAno released source tree | Present elsewhere | Located under `../phasead_pipeline/external/PaAno`; launch layout still needs normalization |
-| GBOC released source tree | Partial/audit copy | Audit clone exists under `../tmp/source_audit/GBOC`; exact run layout must be recovered or rebuilt |
-| MEMTO released source tree | Missing locally | Must be copied from a trusted source and pinned |
-| DCdetector released source tree | Missing locally | Must be copied from a trusted source and pinned |
+| PaAno released source tree | Ready | Exact pinned source restored under `external/PaAno` |
+| GBOC released source tree | Ready | Exact pinned source restored under `external/GBOC` |
+| MEMTO released source tree | Ready | Exact pinned source restored under `external/MEMTO` |
+| DCdetector released source tree | Ready | Exact pinned source restored under `external/DCdetector` |
+| TSB-AD/PAI source tree | Ready | Exact pinned source restored under `external/PAI` |
 | Frozen server Python environments | Server-only | Recreate from an exported lock/manifest before launch |
 
-The local workspace therefore preserves the scientific protocol, selected data,
-all frozen entry points, and recovered metrics, but it is not yet a standalone
-offline deployment. The missing upstream trees must be restored and verified
-before calling Server B complete.
+The local workspace preserves the scientific protocol, selected data, all
+active entry points, five pinned upstream trees, and recovered metrics. A
+server deployment is still incomplete until its Python/CUDA environment and
+all hashes pass the pre-run gate.
 
 ## Mandatory pre-run gate
 
