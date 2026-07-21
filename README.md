@@ -103,7 +103,9 @@ one regular deep-baseline lane per GPU overlaps bounded GBOC lanes and the CPU
 baseline pool. Override `STAGE_GBOC_WORKERS_PER_GPU` only after a smoke/resource
 probe; this affects throughput, not method configurations or paper-eligible
 runtime. MEMTO can use its separately pinned interpreter through
-`STAGE_MEMTO_PYTHON`.
+`STAGE_MEMTO_PYTHON`. On NUMA hosts, `STAGE_GPU_CPU_MAP` can bind each GPU lane
+to its local CPU node with `taskset`; the selected map is recorded in the run
+manifest.
 
 ## Current local status
 

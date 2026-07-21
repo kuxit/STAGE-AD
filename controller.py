@@ -42,6 +42,30 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def parse_gpu_cpu_map(value: str, gpus: tuple[str, ...]) -> dict[str, str]:
+    if not value.strip():
+        return {}
+    parsed: dict[str, str] = {}
+    for item in value.split(";"):
+        gpu, separator, cpu_list = item.partition("=")
+        gpu = gpu.strip()
+        cpu_list = cpu_list.strip()
+        if not separator or not gpu or not cpu_list:
+            raise ValueError(
+                "--gpu-cpu-map must use GPU=CPU-LIST entries separated by semicolons"
+            )
+        if gpu in parsed:
+            raise ValueError(f"duplicate GPU in --gpu-cpu-map: {gpu}")
+        parsed[gpu] = cpu_list
+    if set(parsed) != set(gpus):
+        raise ValueError(
+            f"--gpu-cpu-map keys {sorted(parsed)} do not match GPUs {sorted(gpus)}"
+        )
+    if shutil.which("taskset") is None:
+        raise RuntimeError("--gpu-cpu-map requires the Linux taskset executable")
+    return parsed
+
+
 def selected_files(repo: Path) -> dict[str, list[str]]:
     output: dict[str, list[str]] = {}
     for track, datasets in TARGETS.items():
@@ -95,22 +119,25 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
     if gpu is not None:
         env["CUDA_VISIBLE_DEVICES"] = gpu
     python = str(args.memto_python if method == "MEMTO" else args.python)
+    launcher = [python]
+    if gpu is not None and args.gpu_cpu_map:
+        launcher = ["taskset", "-c", args.gpu_cpu_map[gpu], python]
     common = [
         "--repo", str(args.repo), "--method", method, "--track", track,
         "--file", file_name, "--seed", str(args.seed), "--output", str(target),
         "--stage-source", str(args.stage_source), "--paano-root", str(args.paano_root),
     ]
     if method in NON_DEEP:
-        return [python, str(args.experiment / "run_one_classical.py"), *common], env, None
+        return [*launcher, str(args.experiment / "run_one_classical.py"), *common], env, None
     if method in TSB_DEEP:
         return [
-            python, str(args.experiment / "run_one_deep.py"), *common,
+            *launcher, str(args.experiment / "run_one_deep.py"), *common,
             "--require-physical-gpu", str(gpu),
         ], env, None
     if method == "PaAno":
         raw = scratch / "paano.json"
         return [
-            python, str(args.paano_one), "--paano-root", str(args.paano_root),
+            *launcher, str(args.paano_one), "--paano-root", str(args.paano_root),
             "--data-file", str(args.repo / "data" / f"TSB-AD-{track}" / file_name),
             "--track", track, "--output", str(raw), "--seed", str(args.seed),
             "--require-physical-gpu", str(gpu),
@@ -119,14 +146,14 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
         raw_root = scratch / "gboc"
         raw = raw_root / "Canonical" / "gboc" / track / f"seed_{args.seed}" / "metrics_parts" / f"{Path(file_name).stem}.json"
         return [
-            python, str(args.gboc_one), "--repo", str(args.repo),
+            *launcher, str(args.gboc_one), "--repo", str(args.repo),
             "--upstream", str(args.gboc_root), "--output", str(raw_root),
             "--config", str(args.gboc_config), "--track", track,
             "--file", file_name, "--seed", str(args.seed),
         ], env, raw
     if method == "MEMTO":
         return [
-            python, str(args.memto_one), "--repo", str(args.repo),
+            *launcher, str(args.memto_one), "--repo", str(args.repo),
             "--memto-root", str(args.memto_root), "--track", track,
             "--file", file_name, "--seed", str(args.seed), "--output", str(target),
             "--stage-source", str(args.stage_source), "--paano-root", str(args.paano_root),
@@ -134,7 +161,7 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
         ], env, None
     if method == "DCdetector":
         return [
-            python, str(args.dcdetector_one), "--repo", str(args.repo),
+            *launcher, str(args.dcdetector_one), "--repo", str(args.repo),
             "--dcdetector-root", str(args.dcdetector_root), "--track", track,
             "--file", file_name, "--seed", str(args.seed), "--output", str(target),
             "--stage-source", str(args.stage_source), "--paano-root", str(args.paano_root),
@@ -144,7 +171,7 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
         raw_root = scratch / "stage"
         raw = raw_root / "series" / f"{Path(file_name).stem}.json"
         return [
-            python, str(args.stage_source), "--data-root", str(args.repo / "data" / f"TSB-AD-{track}"),
+            *launcher, str(args.stage_source), "--data-root", str(args.repo / "data" / f"TSB-AD-{track}"),
             "--files", file_name, "--output", str(raw_root), "--metrics-root", str(args.paano_root.parent),
             "--device", "cuda:0", "--require-physical-gpu", str(gpu), "--seed", str(args.seed),
         ], env, raw
@@ -224,6 +251,11 @@ def main() -> int:
     parser.add_argument("--dcdetector-one", required=True, type=Path)
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--gpus", default="0,1")
+    parser.add_argument(
+        "--gpu-cpu-map",
+        default="",
+        help="Optional taskset map, for example 0=0-31,64-95;1=32-63,96-127.",
+    )
     parser.add_argument("--cpu-workers", type=int, default=8)
     parser.add_argument(
         "--scheduler",
@@ -261,6 +293,10 @@ def main() -> int:
         raise ValueError("--cpu-workers must be positive")
     if not 1 <= args.gboc_workers_per_gpu <= 16:
         raise ValueError("--gboc-workers-per-gpu must be between 1 and 16")
+    gpus = tuple(item.strip() for item in args.gpus.split(",") if item.strip())
+    if len(gpus) != 2:
+        raise ValueError("this locked run requires exactly two physical GPUs")
+    args.gpu_cpu_map = parse_gpu_cpu_map(args.gpu_cpu_map, gpus)
     files = selected_files(args.repo)
     if args.mode == "smoke":
         files = {
@@ -315,6 +351,7 @@ def main() -> int:
             "scheduler": args.scheduler,
             "cpu_workers": args.cpu_workers,
             "gboc_workers_per_gpu": args.gboc_workers_per_gpu,
+            "gpu_cpu_map": args.gpu_cpu_map,
             "memto_python": str(args.memto_python),
             "runtime_eligible_for_paper": False,
         },
@@ -357,10 +394,6 @@ def main() -> int:
             print(f"[{completed + errors}/{len(jobs)}] {item}", flush=True)
 
     cpu_jobs = [job for job in jobs if job[0] in NON_DEEP]
-    gpus = tuple(item.strip() for item in args.gpus.split(",") if item.strip())
-    if len(gpus) != 2:
-        raise ValueError("this locked run requires exactly two physical GPUs")
-
     def gpu_worker(gpu: str, queue: list[tuple[str, str, str]], queue_lock: threading.Lock) -> None:
         while True:
             with queue_lock:

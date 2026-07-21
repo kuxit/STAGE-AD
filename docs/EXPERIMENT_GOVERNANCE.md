@@ -26,6 +26,8 @@ hyperparameter selection. The important rules are:
    overlap regular deep-baseline lanes. Scheduling and thread allocation may
    not change data, seeds, configurations, fitting scope, or metric code; all
    shared-run timing remains paper-ineligible.
+   Optional NUMA-aware CPU affinity is a scheduling control and must be recorded
+   in the run manifest.
 
 The two recent AAAI baselines remain behind a configuration/admission gate.
 Once both are frozen, the intended paper table contains sixteen baselines plus

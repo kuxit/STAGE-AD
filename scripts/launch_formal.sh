@@ -25,6 +25,7 @@ exec "$PY" "$EXP/controller.py" \
   --dcdetector-one "$EXP/run_one_dcdetector.py" \
   --seed 2026 \
   --gpus 0,1 \
+  --gpu-cpu-map "${STAGE_GPU_CPU_MAP:-}" \
   --cpu-workers "${STAGE_CPU_WORKERS:-32}" \
   --scheduler "${STAGE_SCHEDULER:-throughput}" \
   --gboc-workers-per-gpu "${STAGE_GBOC_WORKERS_PER_GPU:-4}" \
