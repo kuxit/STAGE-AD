@@ -51,6 +51,12 @@
     "eval_feedback": false,
     "freeze_before_eval": true
   },
+  "multi_seed_policy": {
+    "selection_seed": 2026,
+    "continuation_seeds": [2027, 2028],
+    "reuse_seed2026_locked_parameters": true,
+    "retune_on_eval_or_later_seeds": false
+  },
   "execution_order": "baselines first, with PaAno first on the GPU queue; STAGE only after all admitted baselines",
   "storage_policy": "full-precision metrics only; no checkpoint or score array",
   "runtime_policy": "main-run timings are diagnostic and paper-ineligible; Average Inference Time is reported only after a separate exclusive, identical-hardware rerun",

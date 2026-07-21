@@ -64,6 +64,18 @@
     "scheduling_may_change_method_configuration": false,
     "shared_run_timing_is_paper_eligible": false
   },
+  "autonomous_continuation": {
+    "baseline_gate": "all 2702 admitted baseline Eval units at seed 2026 are valid, finite, and error-free",
+    "selection_then_eval": "complete the declared official-Tuning search and freeze its content hash before opening Eval",
+    "seed2026_success_gate": "STAGE strictly exceeds the strongest admitted baseline in all six global macro-per-series metrics and all twelve U/M track-metric cells",
+    "on_seed2026_success": {
+      "reuse_identical_locked_parameters": true,
+      "run_target_seeds": [2027, 2028],
+      "retune_per_seed": false
+    },
+    "on_seed2026_gate_failure": "write the full comparison report and stop; never use Eval feedback to launch another search",
+    "script": "scripts/stage_autopilot.py"
+  },
   "result_policy": {
     "metrics": ["VUS-PR", "VUS-ROC", "R-based-F1", "AUC-PR", "AUC-ROC", "Standard-F1"],
     "store_full_precision": true,

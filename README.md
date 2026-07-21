@@ -130,3 +130,18 @@ manifest.
 - Shared-resource timings are invalid for the paper efficiency table.
 - Never commit SSH keys, passwords, `.env` files, raw data, checkpoints, or
   anomaly-score arrays.
+
+## Leakage-safe STAGE continuation
+
+After the baseline phase is strictly complete, `scripts/stage_autopilot.py`
+can run the target method without manual bookkeeping.  It uses exactly the 22
+matching official TSB-AD Tuning series, applies the same deterministic
+24-candidate budget to every `(track, dataset)` subset, and freezes one
+configuration per subset before any Eval result is read.  The frozen manifest
+is content-hashed and can be committed from `configs/stage_locked_seed2026.json`.
+
+`scripts/launch_stage_autopilot.sh` then evaluates all 193 Eval series at seed
+2026.  Seeds 2027 and 2028 are launched with the identical frozen parameters
+only if STAGE strictly beats the strongest admitted baseline in all six global
+metrics and all twelve U/M track-metric cells.  A failed gate produces a report
+and stops; Eval feedback is never used to launch another parameter search.
