@@ -14,19 +14,14 @@ env/
 *.pem
 *.key
 id_rsa*
-codex_duoba_server_*
+codex_stage_server_*
 
 # Runtime logs and scratch files
 *.log
 *.tmp
 *.tmp.*
 logs/
-multiserver/logs/
 results/smoke/
-
-# Superseded emergency snapshot (the validated 396-record recovery is kept)
-multiserver/server_b_shutdown_snapshot_*/
-multiserver/server_b_recovered_valid_268_*.tar.gz
 
 # Local result backup archives; final reviewed metrics remain trackable
 results/backups/

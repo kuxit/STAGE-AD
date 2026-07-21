@@ -1,5 +1,5 @@
 {
-  "schema_version": "duoba-upstream-lock-v1",
+  "schema_version": "stage-upstream-lock-v1",
   "sources": [
     {
       "name": "PaAno",

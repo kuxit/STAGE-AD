@@ -34,7 +34,7 @@ function Assert-RequiredFiles {
 
 foreach ($source in @($lock.sources)) {
     $destination = [IO.Path]::GetFullPath((Join-Path $ProjectRoot ([string]$source.destination)))
-    $markerPath = Join-Path $destination '.duoba-source.json'
+    $markerPath = Join-Path $destination '.stage-source.json'
     if (Test-Path -LiteralPath $destination -PathType Container) {
         Assert-RequiredFiles $source $destination
         if (Test-Path -LiteralPath $markerPath -PathType Leaf) {
@@ -47,7 +47,7 @@ foreach ($source in @($lock.sources)) {
         continue
     }
 
-    $temporary = Join-Path $tempBase ("duoba-source-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    $temporary = Join-Path $tempBase ("stage-source-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
     $temporary = [IO.Path]::GetFullPath($temporary)
     if (-not $temporary.StartsWith($tempBase, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Unsafe temporary path: $temporary"
@@ -74,7 +74,7 @@ foreach ($source in @($lock.sources)) {
             $requiredHashes[[string]$relative] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
         }
         [ordered]@{
-            schema_version = 'duoba-source-marker-v1'
+            schema_version = 'stage-source-marker-v1'
             name = [string]$source.name
             repository = [string]$source.repository
             commit = [string]$source.commit

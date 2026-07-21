@@ -76,8 +76,8 @@ def dataset_name(file_name: str) -> str:
     return parts[1]
 
 
-def load_frozen_duoba(source: Path):
-    spec = importlib.util.spec_from_file_location("duoba_frozen_metrics", source)
+def load_stage_source(source: Path):
+    spec = importlib.util.spec_from_file_location("stage_frozen_metrics", source)
     if spec is None or spec.loader is None:
         raise ImportError(f"cannot import {source}")
     module = importlib.util.module_from_spec(spec)
@@ -90,7 +90,7 @@ def official_metrics(
     scores: np.ndarray,
     labels: np.ndarray,
     values: np.ndarray,
-    frozen_duoba_source: Path,
+    stage_source: Path,
     paano_root: Path,
 ) -> tuple[dict[str, float], int]:
     scores = np.nan_to_num(
@@ -99,7 +99,7 @@ def official_metrics(
         posinf=np.finfo(np.float64).max,
         neginf=0.0,
     )
-    module = load_frozen_duoba(frozen_duoba_source)
+    module = load_stage_source(stage_source)
     sliding_window = int(module.estimate_sliding_window(values))
     result = module.official_metrics(scores, labels, sliding_window, paano_root)
     metrics = {name: float(result[name]) for name in METRICS}

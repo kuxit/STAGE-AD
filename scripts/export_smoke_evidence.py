@@ -43,7 +43,7 @@ def main() -> int:
         type=Path,
         default=PROJECT / "validation" / "local_00gwk_smoke.json",
     )
-    parser.add_argument("--seed", type=int, default=2027)
+    parser.add_argument("--seed", type=int, default=2026)
     args = parser.parse_args()
 
     result = args.result.resolve()
@@ -95,10 +95,10 @@ def main() -> int:
     except Exception as exc:  # pragma: no cover - diagnostic fallback
         torch_info = {"import_error": f"{type(exc).__name__}: {exc}"}
 
-    formal_paano = PROJECT / "GROVE-AD-V3" / "paano_official_one.py"
+    formal_paano = PROJECT / "compat" / "paano_official_one_linux.py"
     local_paano = PROJECT / "compat" / "paano_official_one_windows.py"
     evidence = {
-        "schema_version": "duoba-local-smoke-evidence-v1",
+        "schema_version": "stage-local-smoke-evidence-v1",
         "status": "complete",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "purpose": "dependency, interface, and six-metric portability validation",
@@ -121,6 +121,9 @@ def main() -> int:
         },
         "integrity": {
             "protocol_sha256": sha256(PROJECT / "protocol.json"),
+            "experiment_policy_sha256": sha256(PROJECT / "experiment_policy.json"),
+            "stage_source_sha256": sha256(PROJECT / "STAGE" / "stage.py"),
+            "controller_sha256": sha256(PROJECT / "controller.py"),
             "formal_paano_adapter_sha256": sha256(formal_paano),
             "windows_smoke_paano_adapter_sha256": sha256(local_paano),
         },

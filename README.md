@@ -1,21 +1,27 @@
-# DuoBa seed=2027 reproducibility package
+# STAGE: Structure-Preserving Timestamp Alignment for Geometry Enhancement
 
-This directory is the canonical entry point for the locked DuoBa comparison
-requested on 2026-07-18.  It contains the frozen experiment controller,
-per-method adapters, protocol, multi-server tooling, recovery assets, and the
-documentation needed to audit or hand off the run.
+This repository is the canonical implementation and evaluation package for
+STAGE, a framework for debiased time-series anomaly detection. It contains the
+model, frozen experiment controller, per-method adapters, protocol, local
+validation evidence, and server deployment entry point.
 
 Start here:
 
 - [`protocol.json`](protocol.json): active no-KNN scientific protocol.
+- [`docs/METHOD_IDENTITY.md`](docs/METHOD_IDENTITY.md): official method name,
+  acronym semantics, and module mapping.
 - [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md): what is present, what is
   still external, and the pre-run gate.
+- [`experiment_policy.json`](experiment_policy.json) and
+  [`docs/EXPERIMENT_GOVERNANCE.md`](docs/EXPERIMENT_GOVERNANCE.md): the
+  machine-readable and human-readable rules for baseline settings, STAGE
+  tuning, run order, precision, and timing.
 - [`docs/WORKSPACE_INVENTORY.md`](docs/WORKSPACE_INVENTORY.md): local resource
   map and cleanup candidates.
 - [`docs/GITHUB_AND_BACKUP_WORKFLOW.md`](docs/GITHUB_AND_BACKUP_WORKFLOW.md):
   GitHub and three-copy result-backup workflow.
-- [`checksums/frozen-code.sha256`](checksums/frozen-code.sha256): frozen code
-  and recovery-asset hashes.
+- [`checksums/frozen-code.sha256`](checksums/frozen-code.sha256): active code
+  and configuration hashes.
 - [`scripts/verify_local_assets.ps1`](scripts/verify_local_assets.ps1): read-only
   local integrity check.
 - [`scripts/snapshot_local_results.ps1`](scripts/snapshot_local_results.ps1):
@@ -33,13 +39,13 @@ The repository should be rooted at this directory when it is pushed to
 GitHub. Raw datasets, Python environments, checkpoints, score arrays, secrets,
 and transient logs do not belong in Git.
 
-The recent-AAAI extension is not part of the active 15-method result table.
+The recent-AAAI extension is not yet part of the active 15-method result table.
 Its configuration must first be selected on official Tuning, frozen, and
 hashed before it may be evaluated.
 
 ## Scope
 
-- Seed: `2027`
+- Seed: `2026`
 - Dataset partition: the official TSB-AD Tuning/Eval split of Liu and
   Paparrizos (2024). Tuning is used only for hyperparameter selection and Eval
   only for final reporting.
@@ -48,7 +54,7 @@ hashed before it may be evaluated.
 - Every method consumes the filename-declared `tr_<N>` prefix without consulting
   labels during fitting. Labels are read only after anomaly scores have been
   produced.
-- The six metrics use the frozen DuoBa/PaAno evaluator with `pred=None`:
+- The six metrics use the frozen official evaluator with `pred=None`:
   `VUS-PR`, `VUS-ROC`, `R-based-F1`, `AUC-PR`, `AUC-ROC`, and `Standard-F1`.
 - Raw per-series metrics are stored at full precision. Paper tables round only
   their rendered values to three decimals.
@@ -62,15 +68,13 @@ Deep baselines (10): `PaAno`, `GBOC`, `MEMTO`, `PatchTST`,
 `DCdetector`, `AnomalyTransformer`, `TimesNet`, `TranAD`, `USAD`,
 `OmniAnomaly`.
 
-Target method: `DuoBa` (the read-only V1 source).
+Target method: `STAGE`.
 
 PaAno and GBOC are the closest patch-memory / granular-ball comparators.
 MEMTO adds a prototype-memory reconstruction comparator, while PatchTST adds a
 patch-reconstruction comparator. KMeansAD isolates fixed-prototype behavior.
 
-KNN was removed from the active comparison by author decision on 2026-07-21.
-The prior 16-method protocol remains available under
-`legacy/seed2027_v2_16method/` for audit only.
+KNN is excluded from the active comparison by author decision.
 
 The controller is resumable: a unit is skipped only when its JSON contains all
 six finite metrics and no error. Final tables must not be used to change any
@@ -79,17 +83,23 @@ hyperparameter in this run.
 TSB-AD-integrated baselines use `Optimal_Uni_algo_HP_dict` or
 `Optimal_Multi_algo_HP_dict`, which were selected on the official Tuning split.
 PaAno, GBOC, MEMTO, and DCdetector use released method configurations adapted
-only to the official per-series prefix interface. DuoBa uses the V1 defaults
-already frozen on Tuning. No Eval metric is an input to configuration choice.
+only to the official per-series prefix interface. Baselines receive no new
+hyperparameter search. If a matching released setting is unavailable, a
+documented stability default must be frozen before Eval. STAGE uses one
+subset-level configuration selected on official Tuning with an equal search
+budget for all ten subsets. No Eval metric is an input to configuration choice,
+including for Exathlon.
+
+The formal scheduler completes baselines before STAGE and places PaAno first on
+the GPU queue. Main-run timings are diagnostic only. Paper-ready Average
+Inference Time requires a separate, exclusive, identical-hardware rerun.
 
 ## Current local status
 
 - All 193 selected Eval files are present locally (122 U + 71 M), giving
   2,895 method-series units for 15 active methods.
-- All ten active code/config entries and both recovery assets listed in
+- All ten active code/config entries listed in
   `checksums/frozen-code.sha256` match.
-- The recovered Server B set contains 396 valid six-metric records and no bad
-  record.
 - Exact upstream commits for PaAno, GBOC, MEMTO, DCdetector, and TSB-AD are
   declared in `dependencies.lock.json` and can be restored by
   `scripts/bootstrap_sources.ps1`.
@@ -104,8 +114,6 @@ already frozen on Tuning. No Eval metric is an input to configuration choice.
 
 ## Safety notes
 
-- `multiserver/merge_server_b.py` is historical and must not be used for a new
-  run.
 - Shared-resource timings are invalid for the paper efficiency table.
 - Never commit SSH keys, passwords, `.env` files, raw data, checkpoints, or
   anomaly-score arrays.

@@ -29,7 +29,9 @@ TSB_DEEP = (
     "USAD",
     "OmniAnomaly",
 )
-EXTERNAL_DEEP = ("PaAno", "GBOC", "MEMTO", "DCdetector", "DuoBa")
+EXTERNAL_DEEP = ("PaAno", "GBOC", "MEMTO", "DCdetector", "STAGE")
+BASELINE_GPU_ORDER = ("PaAno", *TSB_DEEP, "GBOC", "MEMTO", "DCdetector")
+METHOD_ORDER = (*NON_DEEP, *BASELINE_GPU_ORDER, "STAGE")
 TARGETS = {
     "U": ("UCR", "Exathlon", "MSL", "SED", "TODS"),
     "M": ("CATSv2", "GHL", "LTDB", "SVDB", "TAO"),
@@ -56,10 +58,10 @@ def standard_path(result: Path, method: str, track: str, file_name: str) -> Path
 
 def normalized_external_record(method: str, source: dict[str, Any], track: str, file_name: str, seed: int) -> dict[str, Any]:
     metrics = source.get("metrics")
-    if metrics is None and method == "DuoBa":
+    if metrics is None and method == "STAGE":
         methods = source.get("methods", [])
         if len(methods) != 1:
-            raise ValueError("DuoBa output does not contain exactly one method")
+            raise ValueError("STAGE output does not contain exactly one method")
         metrics = {name: methods[0][name] for name in METRICS}
     return {
         "method": method,
@@ -86,7 +88,7 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
     common = [
         "--repo", str(args.repo), "--method", method, "--track", track,
         "--file", file_name, "--seed", str(args.seed), "--output", str(target),
-        "--frozen-duoba-source", str(args.duoba_source), "--paano-root", str(args.paano_root),
+        "--stage-source", str(args.stage_source), "--paano-root", str(args.paano_root),
     ]
     if method in NON_DEEP:
         return [python, str(args.experiment / "run_one_classical.py"), *common], env, None
@@ -117,7 +119,7 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
             python, str(args.memto_one), "--repo", str(args.repo),
             "--memto-root", str(args.memto_root), "--track", track,
             "--file", file_name, "--seed", str(args.seed), "--output", str(target),
-            "--frozen-duoba-source", str(args.duoba_source), "--paano-root", str(args.paano_root),
+            "--stage-source", str(args.stage_source), "--paano-root", str(args.paano_root),
             "--require-physical-gpu", str(gpu),
         ], env, None
     if method == "DCdetector":
@@ -125,14 +127,14 @@ def command_for(args: argparse.Namespace, method: str, track: str, file_name: st
             python, str(args.dcdetector_one), "--repo", str(args.repo),
             "--dcdetector-root", str(args.dcdetector_root), "--track", track,
             "--file", file_name, "--seed", str(args.seed), "--output", str(target),
-            "--frozen-duoba-source", str(args.duoba_source), "--paano-root", str(args.paano_root),
+            "--stage-source", str(args.stage_source), "--paano-root", str(args.paano_root),
             "--require-physical-gpu", str(gpu),
         ], env, None
-    if method == "DuoBa":
-        raw_root = scratch / "duoba"
+    if method == "STAGE":
+        raw_root = scratch / "stage"
         raw = raw_root / "series" / f"{Path(file_name).stem}.json"
         return [
-            python, str(args.duoba_source), "--data-root", str(args.repo / "data" / f"TSB-AD-{track}"),
+            python, str(args.stage_source), "--data-root", str(args.repo / "data" / f"TSB-AD-{track}"),
             "--files", file_name, "--output", str(raw_root), "--metrics-root", str(args.paano_root.parent),
             "--device", "cuda:0", "--require-physical-gpu", str(gpu), "--seed", str(args.seed),
         ], env, raw
@@ -148,7 +150,7 @@ def run_unit(args: argparse.Namespace, method: str, track: str, file_name: str, 
     target.parent.mkdir(parents=True, exist_ok=True)
     last_error = None
     for attempt in (1, 2):
-        with tempfile.TemporaryDirectory(prefix="duoba-baseline-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="stage-baseline-") as temporary:
             scratch = Path(temporary)
             command, env, raw_path = command_for(args, method, track, file_name, target, gpu, scratch)
             started = time.time()
@@ -195,7 +197,7 @@ def main() -> int:
     parser.add_argument("--experiment", required=True, type=Path)
     parser.add_argument("--result", required=True, type=Path)
     parser.add_argument("--python", required=True, type=Path)
-    parser.add_argument("--duoba-source", required=True, type=Path)
+    parser.add_argument("--stage-source", required=True, type=Path)
     parser.add_argument("--paano-root", required=True, type=Path)
     parser.add_argument("--paano-one", required=True, type=Path)
     parser.add_argument("--gboc-root", required=True, type=Path)
@@ -205,7 +207,7 @@ def main() -> int:
     parser.add_argument("--memto-one", required=True, type=Path)
     parser.add_argument("--dcdetector-root", required=True, type=Path)
     parser.add_argument("--dcdetector-one", required=True, type=Path)
-    parser.add_argument("--seed", type=int, default=2027)
+    parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--gpus", default="0,1")
     parser.add_argument("--cpu-workers", type=int, default=8)
     parser.add_argument("--mode", choices=("smoke", "formal"), default="formal")
@@ -213,7 +215,7 @@ def main() -> int:
     # Do not Path.resolve() the Python executable: resolving a venv symlink can
     # silently replace it with the system interpreter and lose site-packages.
     args.python = Path(os.path.abspath(args.python))
-    for name in ("repo", "experiment", "result", "duoba_source", "paano_root", "paano_one", "gboc_root", "gboc_one", "gboc_config", "memto_root", "memto_one", "dcdetector_root", "dcdetector_one"):
+    for name in ("repo", "experiment", "result", "stage_source", "paano_root", "paano_one", "gboc_root", "gboc_one", "gboc_config", "memto_root", "memto_one", "dcdetector_root", "dcdetector_one"):
         setattr(args, name, getattr(args, name).resolve())
     args.result.mkdir(parents=True, exist_ok=True)
     files = selected_files(args.repo)
@@ -222,10 +224,15 @@ def main() -> int:
             track: [min(names, key=lambda name: (args.repo / "data" / f"TSB-AD-{track}" / name).stat().st_size)]
             for track, names in files.items()
         }
-    methods = (*NON_DEEP, *TSB_DEEP, *EXTERNAL_DEEP)
-    jobs = [(method, track, file_name) for track in ("U", "M") for file_name in files[track] for method in methods]
+    methods = METHOD_ORDER
+    jobs = [
+        (method, track, file_name)
+        for method in methods
+        for track in ("U", "M")
+        for file_name in files[track]
+    ]
     manifest = {
-        "protocol": "duoba-10subset-seed2027-v3-no-knn",
+        "protocol": "stage-10subset-seed2026-v1",
         "status": "running",
         "mode": args.mode,
         "seed": args.seed,
@@ -235,8 +242,14 @@ def main() -> int:
         "methods": methods,
         "expected_units": len(jobs),
         "metrics": METRICS,
+        "execution_policy": {
+            "baselines_first": True,
+            "gpu_priority": list(BASELINE_GPU_ORDER),
+            "target_after_baselines": True,
+            "runtime_eligible_for_paper": False,
+        },
         "source_sha256": {
-            "duoba": sha256(args.duoba_source),
+            "stage": sha256(args.stage_source),
             "controller": sha256(Path(__file__)),
             "deep_runner": sha256(args.experiment / "run_one_deep.py"),
             "classical_runner": sha256(args.experiment / "run_one_classical.py"),
@@ -274,7 +287,6 @@ def main() -> int:
             print(f"[{completed + errors}/{len(jobs)}] {item}", flush=True)
 
     cpu_jobs = [job for job in jobs if job[0] in NON_DEEP]
-    gpu_jobs = [job for job in jobs if job[0] not in NON_DEEP]
     gpus = tuple(item.strip() for item in args.gpus.split(",") if item.strip())
     if len(gpus) != 2:
         raise ValueError("this locked run requires exactly two physical GPUs")
@@ -287,17 +299,34 @@ def main() -> int:
                 job = queue.pop(0)
             update(run_unit(args, *job, gpu))
 
-    queue_lock = threading.Lock()
-    with ThreadPoolExecutor(max_workers=args.cpu_workers + 2) as pool:
-        # Start the two long-lived GPU consumers before enqueueing the CPU work.
-        # ThreadPoolExecutor dispatches in submission order; placing these after
-        # every CPU unit would leave both GPUs idle until the CPU queue drained.
-        futures = [pool.submit(gpu_worker, gpu, gpu_jobs, queue_lock) for gpu in gpus]
-        futures.extend(pool.submit(run_unit, args, *job, None) for job in cpu_jobs)
-        for future in as_completed(futures):
+    with ThreadPoolExecutor(max_workers=args.cpu_workers) as cpu_pool, ThreadPoolExecutor(max_workers=2) as gpu_pool:
+        cpu_futures = [cpu_pool.submit(run_unit, args, *job, None) for job in cpu_jobs]
+
+        # Baseline GPU methods are strict phases. This makes PaAno finish before
+        # the next GPU baseline begins and prevents STAGE from overlapping any
+        # admitted baseline.
+        for method in BASELINE_GPU_ORDER:
+            queue = [job for job in jobs if job[0] == method]
+            queue_lock = threading.Lock()
+            phase = [gpu_pool.submit(gpu_worker, gpu, queue, queue_lock) for gpu in gpus]
+            for future in as_completed(phase):
+                future.result()
+
+        for future in as_completed(cpu_futures):
             result = future.result()
             if isinstance(result, dict):
                 update(result)
+
+        if errors == 0:
+            queue = [job for job in jobs if job[0] == "STAGE"]
+            queue_lock = threading.Lock()
+            phase = [gpu_pool.submit(gpu_worker, gpu, queue, queue_lock) for gpu in gpus]
+            for future in as_completed(phase):
+                future.result()
+        else:
+            manifest["target_skipped_due_to_baseline_error"] = True
+            manifest["updated_at"] = now()
+            atomic_json(manifest_path, manifest)
 
     manifest["status"] = "complete" if errors == 0 and completed == len(jobs) else "incomplete"
     manifest["completed_at"] = now()

@@ -5,7 +5,7 @@ param(
 
     [string]$BackupRoot,
 
-    [int]$Seed = 2027
+    [int]$Seed = 2026
 )
 
 Set-StrictMode -Version Latest
@@ -130,7 +130,7 @@ foreach ($item in $validated) {
 }
 
 $backupManifest = [ordered]@{
-    schema_version = 'duoba-metrics-backup-v1'
+    schema_version = 'stage-metrics-backup-v1'
     created_utc = (Get-Date).ToUniversalTime().ToString('o')
     source_root = $SourceRoot
     seed = $Seed

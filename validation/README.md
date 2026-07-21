@@ -6,7 +6,7 @@ metadata only: no raw dataset, score array, checkpoint, password, or SSH key.
 
 `local_00gwk_smoke.json` proves that all 15 active methods completed on one
 official U-series and one official M-series with six finite metrics under seed
-2027. It does **not** establish paper-ready accuracy or efficiency. Runtime is
+2026. It does **not** establish paper-ready accuracy or efficiency. Runtime is
 intentionally omitted because the laptop was not an exclusive benchmark host.
 
 Regenerate it after a successful smoke test:

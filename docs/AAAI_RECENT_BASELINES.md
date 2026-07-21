@@ -27,7 +27,7 @@ contains the training algorithm and architecture appendix.
 [When Model Meets New Normals](https://ojs.aaai.org/index.php/AAAI/article/view/29210)
 is a directly relevant AAAI-24 time-series anomaly-detection paper, but its
 central contribution is test-time adaptation on test observations. The frozen
-DuoBa comparison permits fitting only on the filename-declared `tr_<N>` prefix.
+STAGE comparison permits fitting only on the filename-declared `tr_<N>` prefix.
 Using Eval observations for parameter updates would therefore make its results
 incomparable with the active 15-method table. It remains a related-work item,
 not a baseline in this protocol.
@@ -88,7 +88,7 @@ The two implementations must pass all of the following before formal results
 are accepted:
 
 1. implementation provenance and paper equations are documented;
-2. deterministic seed `2027` is honored on CPU and CUDA;
+2. deterministic seed `2026` is honored on CPU and CUDA;
 3. one official U series and one official M series each produce six finite
    metrics locally under `00gwk`;
 4. the complete Tuning-only configuration is frozen and hashed;
@@ -101,6 +101,6 @@ Gates 1-3 and 6 have passed for the smoke profile. Gates 4, 5, and 7 remain
 mandatory before the 386-unit extension may run on Eval.
 
 Runtime ordering is deliberately not claimed here. Whether either method is
-slower than DuoBa and faster than GBOC must be measured later on exclusive,
+slower than STAGE and faster than GBOC must be measured later on exclusive,
 identical hardware with the efficiency protocol, not inferred from model
 architecture or shared-machine smoke tests.

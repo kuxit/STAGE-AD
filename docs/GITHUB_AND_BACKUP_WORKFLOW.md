@@ -2,7 +2,7 @@
 
 ## Repository boundary
 
-Use `DuoBa-Baseline-Seed2027` as the Git repository root. Keep the repository
+Use `STAGE-AD` as the Git repository root. Keep the repository
 private until upstream licenses and anonymization requirements are reviewed.
 Do not initialize the whole `AAAI` workspace as one repository: it contains raw
 data, unrelated experiments, paper artifacts, and audit clones.
@@ -20,12 +20,10 @@ order:
 
 1. Run the local verification script and save its output.
 2. Initialize Git in this directory with branch `main`.
-3. Commit documentation, frozen code, configs, checksum files, and the validated
-   396-record recovery.
-4. Preserve the baseline commit/tag for the superseded v2 protocol and tag the
-   audited no-KNN protocol as `protocol-seed2027-v3-no-knn`.
+3. Commit documentation, source code, configs, checksum files, and validation evidence.
+4. Tag the audited protocol as `stage-seed2026-v1`.
 5. Create a private GitHub repository and push `main` plus the tag.
-6. Create a run branch such as `run/server-b-seed2027-v3`. Formal runs deploy
+6. Create a run branch such as `run/server-b-seed2026-v1`. Formal runs deploy
    from the frozen tag or an audited descendant with no method/config changes.
 
 Do not place GitHub tokens on Server B. Clone with a read-only deploy key if
@@ -48,7 +46,7 @@ Recommended cadence:
 - Push a batched result commit from the local computer at those milestones.
 - At completion, commit all 2,895 active full-precision unit JSONs, the final manifest,
   full-precision and three-decimal CSV/Markdown summaries, and a SHA256
-  inventory. Add a signed/tagged release such as `seed2027-v3-complete`.
+  inventory. Add a signed/tagged release such as `stage-seed2026-complete`.
 
 Per-unit JSONs are small and suitable for Git once immutable. Do not commit a
 manifest after every unit; batch commits to avoid unnecessary history growth.

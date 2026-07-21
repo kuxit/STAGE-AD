@@ -1,0 +1,83 @@
+{
+  "schema_version": "stage-experiment-governance-v1",
+  "protocol": "stage-10subset-seed2026-v1",
+  "seed": 2026,
+  "official_split": "TSB-AD Tuning/Eval",
+  "baseline_policy": {
+    "additional_hyperparameter_search": false,
+    "parameter_source_priority": [
+      "paper_reported",
+      "author_released",
+      "official_tsb_ad_tuning",
+      "predeclared_stability_default"
+    ],
+    "stability_default_rule": "Allowed only when no matching reported or released setting exists; document the exact values and rationale, freeze their hash before Eval, and never use Eval metrics to choose them.",
+    "eval_feedback": false
+  },
+  "stage_tuning_policy": {
+    "data": "official TSB-AD Tuning only",
+    "configuration_granularity": "benchmark_subset",
+    "per_series_configuration": false,
+    "equal_budget_for_all_subsets": true,
+    "max_trials_per_subset": 24,
+    "sampler_seed": 2026,
+    "selection_objective": "macro mean of the six full-precision Tuning metrics across all series in the subset",
+    "tie_breakers": ["VUS-PR", "VUS-ROC", "R-based-F1"],
+    "eval_feedback": false,
+    "freeze_and_hash_before_eval": true,
+    "exathlon_exception": false,
+    "search_space": {
+      "alignment_profiles": [
+        {"patch_size": 32, "overlap_deltas": [8, 16], "overlap_trim": 2},
+        {"patch_size": 64, "overlap_deltas": [16, 32], "overlap_trim": 4},
+        {"patch_size": 96, "overlap_deltas": [24, 48], "overlap_trim": 8},
+        {"patch_size": 128, "overlap_deltas": [32, 64], "overlap_trim": 8}
+      ],
+      "learning_rate": [0.0001, 0.0003, 0.001],
+      "dropout": [0.0, 0.1, 0.2],
+      "steps": [750, 1000, 1500],
+      "gb_activation_fraction": [0.1, 0.2, 0.4],
+      "gb_sampling_power": [0.25, 0.5, 0.75],
+      "top_k": [1, 3, 5]
+    },
+    "fixed_parameters": {
+      "channels": 128,
+      "token_dim": 64,
+      "embedding_dim": 64,
+      "dilations": [1, 2, 4, 8, 4, 2],
+      "group_norm_groups": 8,
+      "batch_size": 256,
+      "weight_decay": 0.0001,
+      "grad_clip": 1.0,
+      "gb_min_split": 4,
+      "gb_max_rounds": 64
+    }
+  },
+  "execution_order": {
+    "phase_1": "all admitted baselines",
+    "gpu_first_method": "PaAno",
+    "phase_2": "verify baseline completeness and errors",
+    "phase_3": "STAGE",
+    "target_must_not_start_before_baselines_complete": true
+  },
+  "result_policy": {
+    "metrics": ["VUS-PR", "VUS-ROC", "R-based-F1", "AUC-PR", "AUC-ROC", "Standard-F1"],
+    "store_full_precision": true,
+    "paper_rounding_decimals": 3,
+    "persist_checkpoints": false,
+    "persist_score_arrays": false
+  },
+  "runtime_policy": {
+    "main_accuracy_run": "diagnostic_only",
+    "paper_runtime_from_shared_hardware": false,
+    "paper_metric": "Average Inference Time (Seconds)",
+    "paper_runtime_gate": "separate exclusive rerun on identical hardware, identical data, identical warm-up, and identical repetition count"
+  },
+  "method_counts": {
+    "active_baselines": 14,
+    "active_total_with_stage": 15,
+    "pending_recent_baselines": 2,
+    "intended_final_baselines_after_gate": 16,
+    "intended_final_total_with_stage": 17
+  }
+}

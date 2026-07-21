@@ -46,7 +46,7 @@ def main() -> int:
         type=Path,
         default=PROJECT / "results" / "smoke" / "aaai_recent_local_00gwk_validation",
     )
-    parser.add_argument("--seed", type=int, default=2027)
+    parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--dpad-epochs", type=int, default=3)
     parser.add_argument("--dne-epochs", type=int, default=3)
     parser.add_argument("--gpu", default="0")
@@ -58,7 +58,7 @@ def main() -> int:
     runner = project / "extensions" / "aaai_recent" / "run_one_recent.py"
     jobs = [(method, track, FILES[track]) for track in ("U", "M") for method in METHODS]
     manifest = {
-        "schema_version": "duoba-aaai-recent-smoke-v1",
+        "schema_version": "stage-aaai-recent-smoke-v1",
         "purpose": "implementation and six-metric portability only",
         "runtime_eligible_for_paper": False,
         "seed": args.seed,
@@ -88,7 +88,7 @@ def main() -> int:
             "--file", file_name,
             "--seed", str(args.seed),
             "--output", str(output),
-            "--frozen-duoba-source", str(project / "GROVE-AD-V3" / "grove_ad.py"),
+            "--stage-source", str(project / "STAGE" / "stage.py"),
             "--paano-root", str(project / "external" / "PaAno"),
             "--profile", "smoke",
             "--dpad-epochs", str(args.dpad_epochs),

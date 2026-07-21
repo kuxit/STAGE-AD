@@ -34,7 +34,7 @@ def main() -> int:
     parser.add_argument("--file", required=True)
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--frozen-duoba-source", required=True, type=Path)
+    parser.add_argument("--stage-source", required=True, type=Path)
     parser.add_argument("--paano-root", required=True, type=Path)
     parser.add_argument("--require-physical-gpu", required=True)
     args = parser.parse_args()
@@ -102,7 +102,7 @@ def main() -> int:
             scores,
             labels,
             values,
-            args.frozen_duoba_source,
+            args.stage_source,
             args.paano_root.parent,
         )
         record.update(

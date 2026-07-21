@@ -76,7 +76,7 @@ try {
                 $hashProblems.Add("Hash mismatch: $relative")
             }
         }
-        Add-Check 'Frozen checksums' ($hashProblems.Count -eq 0 -and $hashCount -eq 12) $(
+        Add-Check 'Active checksums' ($hashProblems.Count -eq 0 -and $hashCount -eq 10) $(
             if ($hashProblems.Count -eq 0) { "$hashCount files match" }
             else { $hashProblems -join '; ' }
         )
@@ -85,9 +85,25 @@ try {
     $protocolPath = Join-Path $ProjectRoot 'protocol.json'
     $protocol = Get-Content -LiteralPath $protocolPath -Raw | ConvertFrom-Json
     $methodCount = @($protocol.non_deep_baselines).Count + @($protocol.deep_baselines).Count + 1
-    $protocolOk = ([int]$protocol.seed -eq 2027) -and ($methodCount -eq 15) -and
+    $protocolOk = ([int]$protocol.seed -eq 2026) -and ($methodCount -eq 15) -and
+        ([string]$protocol.target_method -eq 'STAGE') -and
         (-not (@($protocol.non_deep_baselines) -contains 'KNN'))
-    Add-Check 'Frozen protocol' $protocolOk "seed=$($protocol.seed); methods=$methodCount"
+    Add-Check 'Active protocol' $protocolOk "seed=$($protocol.seed); methods=$methodCount; target=$($protocol.target_method)"
+
+    $policyPath = Join-Path $ProjectRoot 'experiment_policy.json'
+    $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
+    $policyOk = ([int]$policy.seed -eq 2026) -and
+        (-not [bool]$policy.baseline_policy.additional_hyperparameter_search) -and
+        (-not [bool]$policy.baseline_policy.eval_feedback) -and
+        ([bool]$policy.stage_tuning_policy.equal_budget_for_all_subsets) -and
+        (-not [bool]$policy.stage_tuning_policy.eval_feedback) -and
+        (-not [bool]$policy.stage_tuning_policy.exathlon_exception) -and
+        ([int]$policy.stage_tuning_policy.max_trials_per_subset -eq 24) -and
+        ([string]$policy.execution_order.gpu_first_method -eq 'PaAno') -and
+        ([bool]$policy.execution_order.target_must_not_start_before_baselines_complete) -and
+        ([bool]$policy.result_policy.store_full_precision) -and
+        (-not [bool]$policy.runtime_policy.paper_runtime_from_shared_hardware)
+    Add-Check 'Experiment governance' $policyOk "baseline_search=$($policy.baseline_policy.additional_hyperparameter_search); stage_trials=$($policy.stage_tuning_policy.max_trials_per_subset); first_gpu=$($policy.execution_order.gpu_first_method); seed=$($policy.seed)"
 
     $dataRoot = Join-Path $ProjectRoot 'data'
     if (-not (Test-Path -LiteralPath $dataRoot -PathType Container)) {
@@ -139,7 +155,7 @@ try {
     $dependencyProblems = New-Object System.Collections.Generic.List[string]
     foreach ($source in @($dependencyLock.sources)) {
         $sourceRoot = [IO.Path]::GetFullPath((Join-Path $ProjectRoot ([string]$source.destination)))
-        $markerPath = Join-Path $sourceRoot '.duoba-source.json'
+        $markerPath = Join-Path $sourceRoot '.stage-source.json'
         if (-not (Test-Path -LiteralPath $sourceRoot -PathType Container)) {
             $dependencyProblems.Add("Missing source: $($source.name)")
             continue
@@ -172,60 +188,6 @@ try {
         else { $dependencyProblems -join '; ' }
     )
 
-    $recoveryRoot = Join-Path $ProjectRoot 'multiserver\server_b_recovery_396_20260720T1441Z'
-    $unitRoot = Join-Path $recoveryRoot 'units'
-    $metricNames = @('VUS-PR', 'VUS-ROC', 'R-based-F1', 'AUC-PR', 'AUC-ROC', 'Standard-F1')
-    $recoveryProblems = New-Object System.Collections.Generic.List[string]
-    $validUnits = New-Object System.Collections.Generic.List[object]
-    $unitFiles = @(Get-ChildItem -LiteralPath $unitRoot -Recurse -File -Filter '*.json')
-    foreach ($unitFile in $unitFiles) {
-        try {
-            $unit = Get-Content -LiteralPath $unitFile.FullName -Raw | ConvertFrom-Json
-            $ok = ([int]$unit.seed -eq 2027) -and ($null -eq $unit.error)
-            foreach ($metricName in $metricNames) {
-                $metricProperty = $unit.metrics.PSObject.Properties[$metricName]
-                if ($null -eq $metricProperty -or -not (Test-FiniteNumber $metricProperty.Value)) {
-                    $ok = $false
-                }
-            }
-            if ($ok) {
-                $validUnits.Add($unit)
-            }
-            else {
-                $recoveryProblems.Add("Invalid unit: $($unitFile.FullName)")
-            }
-        }
-        catch {
-            $recoveryProblems.Add("Unreadable unit: $($unitFile.FullName)")
-        }
-    }
-
-    $duplicates = @($validUnits | Group-Object method, track, dataset, file | Where-Object Count -ne 1)
-    if ($duplicates.Count -gt 0) {
-        $recoveryProblems.Add("Duplicate unit identities: $($duplicates.Count)")
-    }
-    $methodCounts = @{}
-    foreach ($group in ($validUnits | Group-Object method)) {
-        $methodCounts[$group.Name] = $group.Count
-    }
-    foreach ($method in @($protocol.deep_baselines)) {
-        $expectedCount = $(if ($method -eq 'GBOC') { 9 } else { 43 })
-        $actualCount = $(if ($methodCounts.ContainsKey($method)) { [int]$methodCounts[$method] } else { 0 })
-        if ($actualCount -ne $expectedCount) {
-            $recoveryProblems.Add("$method count is $actualCount, expected $expectedCount")
-        }
-    }
-    $recoveryOk = ($unitFiles.Count -eq 396) -and ($validUnits.Count -eq 396) -and ($recoveryProblems.Count -eq 0)
-    Add-Check 'Recovered Server B metrics' $recoveryOk $(
-        if ($recoveryProblems.Count -eq 0) { '396 valid; 0 invalid; 0 duplicate identities' }
-        else { $recoveryProblems -join '; ' }
-    )
-
-    $planPath = Join-Path $ProjectRoot 'multiserver\server_b_split_plan.json'
-    $plan = Get-Content -LiteralPath $planPath -Raw | ConvertFrom-Json
-    $expectedPlanHash = '543c884bfc761f5fa767392b5bc29c9b7c3db6f56a07d2abd641cd3f14c90178'
-    $planOk = ([string]$plan.plan_sha256).ToLowerInvariant() -eq $expectedPlanHash
-    Add-Check 'Historical split plan identity' $planOk "embedded plan_sha256=$($plan.plan_sha256)"
 }
 catch {
     Add-Check 'Verifier execution' $false $_.Exception.Message
@@ -237,5 +199,5 @@ if ($failed) {
     exit 1
 }
 
-Write-Host 'PASS: local active assets, official Eval selection, and 396 recovered metrics are internally consistent.' -ForegroundColor Green
+Write-Host 'PASS: STAGE source, active baselines, pinned dependencies, and official Eval selection are internally consistent.' -ForegroundColor Green
 exit 0

@@ -1,7 +1,7 @@
 # Local compatibility adapters
 
 Files in this directory are used only by portability smoke tests. They are
-never authorized for the formal seed=2027 experiment.
+never authorized for the formal seed=2026 experiment.
 
 `paano_official_one_windows.py` is byte-for-byte equal to the frozen PaAno
 adapter except that it passes a POSIX-formatted path to the released PaAno

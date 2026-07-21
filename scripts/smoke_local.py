@@ -18,7 +18,7 @@ import controller  # noqa: E402
 from common import METRICS, atomic_json, complete_record  # noqa: E402
 
 
-ALL_METHODS = (*controller.NON_DEEP, *controller.TSB_DEEP, *controller.EXTERNAL_DEEP)
+ALL_METHODS = controller.METHOD_ORDER
 
 
 def utc_now() -> str:
@@ -63,7 +63,7 @@ def main() -> int:
     parser.add_argument("--file-u")
     parser.add_argument("--file-m")
     parser.add_argument("--gpu", default="0")
-    parser.add_argument("--seed", type=int, default=2027)
+    parser.add_argument("--seed", type=int, default=2026)
     args = parser.parse_args()
 
     project = args.project.resolve()
@@ -92,12 +92,12 @@ def main() -> int:
         experiment=project,
         result=result,
         python=Path(os.path.abspath(args.python)),
-        duoba_source=project / "GROVE-AD-V3" / "grove_ad.py",
+        stage_source=project / "STAGE" / "stage.py",
         paano_root=project / "external" / "PaAno",
         paano_one=(
             project / "compat" / "paano_official_one_windows.py"
             if os.name == "nt"
-            else project / "GROVE-AD-V3" / "paano_official_one.py"
+            else project / "compat" / "paano_official_one_linux.py"
         ),
         gboc_root=project / "external" / "GBOC_official_55a2a31",
         gboc_one=project / "spectral_tsad_v5" / "baselines" / "gboc" / "run_one.py",
@@ -111,7 +111,7 @@ def main() -> int:
 
     required_paths = [
         run_args.python,
-        run_args.duoba_source,
+        run_args.stage_source,
         run_args.paano_root / "model.py",
         run_args.gboc_root / "models" / "GBOC.py",
         run_args.memto_root / "model" / "Transformer.py",
@@ -125,7 +125,7 @@ def main() -> int:
     manifest_path = result / "smoke_manifest.json"
     jobs = [(method, track, files[track]) for track in tracks for method in methods]
     manifest = {
-        "schema_version": "duoba-local-smoke-v1",
+        "schema_version": "stage-local-smoke-v1",
         "purpose": "portability only; never use runtime in the paper efficiency table",
         "runtime_eligible_for_paper": False,
         "seed": args.seed,

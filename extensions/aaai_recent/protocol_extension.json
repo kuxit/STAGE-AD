@@ -1,9 +1,9 @@
 {
-  "schema_version": "duoba-aaai-recent-extension-v1",
+  "schema_version": "stage-aaai-recent-extension-v1",
   "status": "implementation_smoke_passed_tuning_freeze_pending",
   "base_protocol": "../../protocol.json",
-  "base_protocol_sha256": "f9891725a87f3ad6777276b46cc63cc1ebdbe591800f57edc5231bcfb6b7db44",
-  "seed": 2027,
+  "base_protocol_sha256": "eb4b99bfc834af063b23706015c898e01fc6b16f4ec387f941a738fdd129edc4",
+  "seed": 2026,
   "series_count": 193,
   "extension_method_count": 2,
   "extension_unit_count": 386,
@@ -50,7 +50,7 @@
   },
   "fit_scope": "filename-declared tr_<N> prefix, label blind",
   "evaluation_scope": "complete series",
-  "configuration_gate": "official Tuning split only; freeze and hash before Eval",
+  "configuration_gate": "no Eval feedback: use paper/author settings when available; otherwise freeze a documented stability default on official Tuning before Eval",
   "storage_policy": "full-precision six metrics only; no checkpoint or score array",
   "results_root_policy": "separate from the active no-KNN 15-method result root",
   "runtime_policy": "no paper runtime until exclusive identical-hardware rerun"

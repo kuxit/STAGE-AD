@@ -10,7 +10,7 @@ from common import ALIASES, METRICS, atomic_json, complete_record
 
 
 def markdown_tables(frame: pd.DataFrame, track: str) -> str:
-    lines = [f"# TSB-AD-{track}: DuoBa and locked baselines (seed 2027)", ""]
+    lines = [f"# TSB-AD-{track}: STAGE and locked baselines (seed 2026)", ""]
     for dataset in sorted(frame.loc[frame.track == track, "dataset"].unique()):
         group = frame[(frame.track == track) & (frame.dataset == dataset)]
         summary = group.groupby("method", as_index=False)[list(METRICS)].mean()

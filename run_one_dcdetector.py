@@ -114,7 +114,7 @@ def main() -> int:
     parser.add_argument("--file", required=True)
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--frozen-duoba-source", required=True, type=Path)
+    parser.add_argument("--stage-source", required=True, type=Path)
     parser.add_argument("--paano-root", required=True, type=Path)
     parser.add_argument("--require-physical-gpu", required=True)
     args = parser.parse_args()
@@ -164,7 +164,7 @@ def main() -> int:
         full_loader = DataLoader(TensorDataset(torch.from_numpy(full_windows)), batch_size=batch_size, shuffle=False)
         point_scores = scores(model, full_loader, full_starts, len(values), window, device)
         metrics, sliding_window = official_metrics(
-            point_scores, labels, values, args.frozen_duoba_source, args.paano_root.parent
+            point_scores, labels, values, args.stage_source, args.paano_root.parent
         )
         record.update(
             {

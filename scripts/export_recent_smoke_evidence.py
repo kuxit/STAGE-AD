@@ -40,7 +40,7 @@ def main() -> int:
         type=Path,
         default=PROJECT / "validation" / "aaai_recent_local_00gwk_smoke.json",
     )
-    parser.add_argument("--seed", type=int, default=2027)
+    parser.add_argument("--seed", type=int, default=2026)
     args = parser.parse_args()
 
     records: dict[tuple[str, str], dict] = {}
@@ -75,7 +75,7 @@ def main() -> int:
     import torch
 
     evidence = {
-        "schema_version": "duoba-aaai-recent-smoke-evidence-v1",
+        "schema_version": "stage-aaai-recent-smoke-evidence-v1",
         "status": "complete",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "purpose": "implementation and six-metric portability validation only",
@@ -102,6 +102,7 @@ def main() -> int:
         },
         "integrity": {
             "base_protocol_sha256": sha256(PROJECT / "protocol.json"),
+            "experiment_policy_sha256": sha256(PROJECT / "experiment_policy.json"),
             "extension_protocol_sha256": sha256(
                 PROJECT / "extensions" / "aaai_recent" / "protocol_extension.json"
             ),

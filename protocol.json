@@ -1,13 +1,11 @@
 {
-  "protocol_version": "duoba-10subset-seed2027-v3-no-knn",
-  "supersedes": "duoba-10subset-seed2027-v2",
+  "protocol_version": "stage-10subset-seed2026-v1",
   "change_control": {
     "decision_date": "2026-07-21",
     "removed_methods": ["KNN"],
-    "reason": "author decision: exclude KNN from the formal comparison",
-    "legacy_protocol": "legacy/seed2027_v2_16method/protocol.json"
+    "reason": "author decision: exclude KNN from the formal comparison"
   },
-  "seed": 2027,
+  "seed": 2026,
   "tracks": {
     "U": ["UCR", "Exathlon", "MSL", "SED", "TODS"],
     "M": ["CATSv2", "GHL", "LTDB", "SVDB", "TAO"]
@@ -25,7 +23,7 @@
     "USAD",
     "OmniAnomaly"
   ],
-  "target_method": "DuoBa",
+  "target_method": "STAGE",
   "metrics": {
     "VP": "VUS-PR",
     "VR": "VUS-ROC",
@@ -40,7 +38,21 @@
   "eval_role": "final performance reporting only",
   "evaluation_scope": "complete series",
   "metric_threshold_policy": "pred=None, version=opt, thre=250",
-  "selection_policy": "TSB-AD official Tuning-selected U/M hyperparameters or released method configurations; no Eval selection",
+  "selection_policy": "Baselines use paper-reported, author-released, or official TSB-AD Tuning-selected parameters without additional search. When no matching parameters exist, a documented stability default is frozen before Eval. STAGE is tuned only on official TSB-AD Tuning, with the same search budget for every subset; Eval metrics never affect selection.",
+  "baseline_parameter_policy": {
+    "priority": ["paper_reported", "author_released", "official_tsb_ad_tuning", "predeclared_stability_default"],
+    "additional_baseline_tuning": false,
+    "eval_feedback": false
+  },
+  "stage_tuning_policy": {
+    "split": "official TSB-AD Tuning only",
+    "granularity": "one frozen configuration per benchmark subset; never per Eval series",
+    "equal_search_budget_across_subsets": true,
+    "eval_feedback": false,
+    "freeze_before_eval": true
+  },
+  "execution_order": "baselines first, with PaAno first on the GPU queue; STAGE only after all admitted baselines",
   "storage_policy": "full-precision metrics only; no checkpoint or score array",
+  "runtime_policy": "main-run timings are diagnostic and paper-ineligible; Average Inference Time is reported only after a separate exclusive, identical-hardware rerun",
   "paper_rounding_decimals": 3
 }
