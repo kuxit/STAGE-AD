@@ -9,12 +9,15 @@ MEMTO_ENV="${STAGE_MEMTO_ENV:-$WORK_ROOT/envs/stage-memto-py310}"
 
 export CONDA_PKGS_DIRS="${CONDA_PKGS_DIRS:-$WORK_ROOT/conda_pkgs}"
 export PIP_CACHE_DIR="${PIP_CACHE_DIR:-$WORK_ROOT/pip_cache}"
-mkdir -p "$CONDA_PKGS_DIRS" "$PIP_CACHE_DIR" "$(dirname "$MAIN_ENV")"
+export TMPDIR="${TMPDIR:-$WORK_ROOT/tmp}"
+mkdir -p "$CONDA_PKGS_DIRS" "$PIP_CACHE_DIR" "$TMPDIR" "$(dirname "$MAIN_ENV")"
 
 if [[ ! -x "$MAIN_ENV/bin/python" ]]; then
   "$CONDA" create -y -p "$MAIN_ENV" python=3.10 pip
 fi
 "$MAIN_ENV/bin/python" -m pip install --upgrade pip setuptools wheel
+"$MAIN_ENV/bin/python" -m pip install \
+  filelock typing-extensions sympy networkx jinja2 fsspec
 "$MAIN_ENV/bin/python" -m pip install \
   torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
 "$MAIN_ENV/bin/python" -m pip install -r "$PROJECT/environment/requirements-formal.txt"
@@ -24,7 +27,7 @@ fi
 if [[ ! -x "$MEMTO_ENV/bin/python" ]]; then
   "$CONDA" create -y -p "$MEMTO_ENV" --clone "$MAIN_ENV"
 fi
-"$MEMTO_ENV/bin/python" -m pip install --force-reinstall \
+"$MEMTO_ENV/bin/python" -m pip install \
   torch==2.7.1 --index-url https://download.pytorch.org/whl/cu128
 "$MEMTO_ENV/bin/python" -m pip check
 
