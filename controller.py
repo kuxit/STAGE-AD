@@ -408,17 +408,15 @@ def main() -> int:
         else 0
     )
     with ThreadPoolExecutor(max_workers=args.cpu_workers) as cpu_pool, ThreadPoolExecutor(max_workers=2 + gboc_lanes) as gpu_pool:
-        # PaAno is always the first and exclusive GPU phase. Besides preserving
-        # the declared order, this gives its CPU-side memory-bank construction
-        # full host headroom before the heterogeneous throughput phase begins.
+        # CPU-only baselines start immediately and remain independent of the
+        # GPU queue. PaAno is still the first and exclusive GPU phase.
+        cpu_futures = [cpu_pool.submit(run_unit, args, *job, None) for job in cpu_jobs]
         paano_queue = [job for job in jobs if job[0] == "PaAno"]
         if paano_queue:
             queue_lock = threading.Lock()
             phase = [gpu_pool.submit(gpu_worker, gpu, paano_queue, queue_lock) for gpu in gpus]
             for future in as_completed(phase):
                 future.result()
-
-        cpu_futures = [cpu_pool.submit(run_unit, args, *job, None) for job in cpu_jobs]
 
         if args.scheduler == "throughput":
             # GBOC spends substantial time in host-side granular-ball/KMeans

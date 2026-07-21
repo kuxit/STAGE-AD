@@ -83,8 +83,11 @@ def main() -> int:
     paano_finished = max(item[3] for item in paano)
     if min(item[2] for item in other_gpu) < paano_finished:
         raise AssertionError("a GPU baseline overlapped the exclusive PaAno phase")
-    if min(item[2] for item in cpu) < paano_finished:
-        raise AssertionError("CPU jobs overlapped the exclusive PaAno phase")
+    cpu_paano_overlap = any(
+        max(c[2], p[2]) < min(c[3], p[3]) for c in cpu for p in paano
+    )
+    if not cpu_paano_overlap:
+        raise AssertionError("CPU-only baselines did not overlap the PaAno GPU phase")
 
     gboc = [item for item in intervals if item[0] == "GBOC"]
     regular = [
@@ -114,6 +117,7 @@ def main() -> int:
             {
                 "status": "PASS",
                 "exclusive_paano_units": len(paano),
+                "cpu_paano_overlap": cpu_paano_overlap,
                 "gboc_peak_concurrency": peak,
                 "gboc_regular_overlap": overlap,
                 "total_fake_units": len(intervals),
