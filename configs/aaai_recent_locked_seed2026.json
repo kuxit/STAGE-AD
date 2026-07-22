@@ -1,0 +1,180 @@
+{
+  "schema_version": "stage-aaai-recent-lock-v2",
+  "status": "frozen",
+  "base_protocol": "../protocol.json",
+  "base_protocol_version": "stage-10subset-seed2026-v1",
+  "base_protocol_sha256": "41dcda4a1e5e94a4c8d742ddc82ca4e6353c07250f1bb45951ac86c9aa9e75f0",
+  "experiment_policy": "../experiment_policy.json",
+  "experiment_policy_sha256": "8c05bb3060a9da26c44d7cbc861080e11730950149e1f75c8a81a6f85c6e0749",
+  "seed": 2026,
+  "selection_split": "official TSB-AD Tuning only",
+  "tuning_role": "fixed-configuration qualification only",
+  "candidate_count_per_method": 1,
+  "eval_feedback": false,
+  "extension_method_count": 2,
+  "series_count": 193,
+  "extension_unit_count": 386,
+  "files": {
+    "Tuning": {
+      "expected_series": 22,
+      "allowlist_fingerprint": "ff961fee490080f0d1110222b900e72009b34c8117d02ede2f04ef8581e56ee1",
+      "manifests": {
+        "U": {
+          "path": "data/File_List/TSB-AD-U-Tuning.csv",
+          "sha256": "7bf24d2ef834bb39ddd1c8c2b02c177339921dce694354e258ed2b77d8d5cd1c"
+        },
+        "M": {
+          "path": "data/File_List/TSB-AD-M-Tuning.csv",
+          "sha256": "b388541efcd8972cb2084f0aabe7c36bcf0e1ecd52adc6d0ef874afec335fa51"
+        }
+      }
+    },
+    "Eval": {
+      "expected_series": 193,
+      "allowlist_fingerprint": "cef61727219d5c31c0caec8cca1279098948f5e8b90d89c40f4bbbb641e97bb1",
+      "manifests": {
+        "U": {
+          "path": "data/File_List/TSB-AD-U-Eva.csv",
+          "sha256": "6f4e1d4ddbde195f9687f2c5a951b51faff54dda4b658d85f0c07e3e2879615a"
+        },
+        "M": {
+          "path": "data/File_List/TSB-AD-M-Eva.csv",
+          "sha256": "ef6353b5aad8519fb2e5ff366ae21cf626ecd56d1a05942ac3b5c02d9e4b32a4"
+        }
+      }
+    }
+  },
+  "source_files": {
+    "runner": "extensions/aaai_recent/run_one_recent.py",
+    "models": "extensions/aaai_recent/models.py",
+    "recent_autopilot": "scripts/recent_baseline_autopilot.py",
+    "stage_autopilot": "scripts/stage_autopilot.py",
+    "common": "common.py",
+    "window_selector": "external/PAI/third_party/TSB-AD/TSB_AD/utils/slidingWindows.py",
+    "metric_adapter": "STAGE/stage.py",
+    "metric_frontend": "external/PaAno/utils/metrics.py",
+    "metric_core": "external/PaAno/utils/basic_metrics.py"
+  },
+  "source_sha256": {
+    "runner": "c2484b64b06c64b082668f55098eb7c275d8b89b5727404eb5d3ed5118aafe2b",
+    "models": "fa3e8b5a5b8048eeaf9f5db9f9e4b8f605f7f3a7c259ac8fa54341b1acd28f56",
+    "recent_autopilot": "fa113a01ff706695fc6d6f8b9c8fe025b219a527cea2399bfd9459ac5a9450b6",
+    "stage_autopilot": "ba0a77d6b2fc2617cf258de85b57b76f1cb81d081f027cd3efeacbd1c26d9599",
+    "common": "f39da45089ac0478e658a014d6a5acbec9f0d31b113906b38122afaac51644d2",
+    "window_selector": "0ba65735c6572cd80e586409d4f653253d847e08fbae8e1da6e474e142e74af6",
+    "metric_adapter": "f57784bf84f2fc1bafbb080d7865d19cb89f3a3bd4aad3c9c6a8de2a6e297d63",
+    "metric_frontend": "bebcda215e8571c9dc4a854ab1cfd0b1f89d3babc064cb2849c2850b5e0b0179",
+    "metric_core": "13beed6cb5a8edb5aa61723b81ec692faf033e64f64baed3b8a197925347e480"
+  },
+  "methods": {
+    "DPAD_AAAI24": {
+      "parameter_source": "paper objective and 100 epochs; gamma/lambda from paper ablation; predeclared time-series adapter, Adam, k, architecture, and bounded all-pairs resource defaults; frozen before Tuning",
+      "implementation_provenance": "paper-derived adapted reimplementation; no author source URL pinned",
+      "formal_hyperparameters": {
+        "dpad_epochs": 100,
+        "max_train_windows": 1024,
+        "gamma": 0.01,
+        "lambda": 10.0,
+        "learning_rate": 0.001,
+        "k": 5,
+        "pairwise_reduction": "sum",
+        "optimizer_betas": [0.9, 0.999],
+        "optimizer_eps": 1e-08,
+        "optimizer_weight_decay": 0.0,
+        "optimizer_amsgrad": false
+      },
+      "config_fingerprint": "fb3c13b6ed3d81f1cd314bb6b4dc096468805351bbd3c7152c577d67c6d48fdd",
+      "formal_eval_eligible": true
+    },
+    "DNE_AAAI25": {
+      "parameter_source": "paper architecture/optimizer/noise/epoch settings plus predeclared batch size and bounded time-series resource default; frozen before Tuning",
+      "implementation_provenance": "paper-derived adapted reimplementation; no author source URL pinned",
+      "formal_hyperparameters": {
+        "dne_epochs": 500,
+        "max_train_windows": 4096,
+        "declared_max_optimizer_steps_per_unit": 16000,
+        "dne_architecture": "resmlp",
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0005,
+        "optimizer_betas": [0.9, 0.999],
+        "optimizer_eps": 1e-08,
+        "optimizer_amsgrad": true,
+        "sigma_max": 2.0,
+        "noise_level_parts": 3,
+        "noise_ratios": [0.5, 0.8, 1.0],
+        "learning_rate_decay_epoch": 100,
+        "learning_rate_decay_factor": 0.1
+      },
+      "config_fingerprint": "9c06244a1fb8595283f1223dd51c0dc560215a1f97c676271549db68058883c0",
+      "formal_eval_eligible": true
+    }
+  },
+  "plan": {
+    "schema_version": "stage-aaai-recent-plan-v2",
+    "seed": 2026,
+    "selection_split": "official TSB-AD Tuning only",
+    "tuning_role": "fixed-configuration qualification only",
+    "candidate_count_per_method": 1,
+    "eval_feedback": false,
+    "files": {
+      "Tuning": {
+        "expected_series": 22,
+        "allowlist_fingerprint": "ff961fee490080f0d1110222b900e72009b34c8117d02ede2f04ef8581e56ee1"
+      },
+      "Eval": {
+        "expected_series": 193,
+        "allowlist_fingerprint": "cef61727219d5c31c0caec8cca1279098948f5e8b90d89c40f4bbbb641e97bb1"
+      }
+    },
+    "source_sha256": {
+      "runner": "c2484b64b06c64b082668f55098eb7c275d8b89b5727404eb5d3ed5118aafe2b",
+      "models": "fa3e8b5a5b8048eeaf9f5db9f9e4b8f605f7f3a7c259ac8fa54341b1acd28f56",
+      "recent_autopilot": "fa113a01ff706695fc6d6f8b9c8fe025b219a527cea2399bfd9459ac5a9450b6",
+      "stage_autopilot": "ba0a77d6b2fc2617cf258de85b57b76f1cb81d081f027cd3efeacbd1c26d9599",
+      "common": "f39da45089ac0478e658a014d6a5acbec9f0d31b113906b38122afaac51644d2",
+      "window_selector": "0ba65735c6572cd80e586409d4f653253d847e08fbae8e1da6e474e142e74af6",
+      "metric_adapter": "f57784bf84f2fc1bafbb080d7865d19cb89f3a3bd4aad3c9c6a8de2a6e297d63",
+      "metric_frontend": "bebcda215e8571c9dc4a854ab1cfd0b1f89d3babc064cb2849c2850b5e0b0179",
+      "metric_core": "13beed6cb5a8edb5aa61723b81ec692faf033e64f64baed3b8a197925347e480"
+    },
+    "method_configs": {
+      "DPAD_AAAI24": {
+        "parameter_source": "paper objective and 100 epochs; gamma/lambda from paper ablation; predeclared time-series adapter, Adam, k, architecture, and bounded all-pairs resource defaults; frozen before Tuning",
+        "config_fingerprint": "fb3c13b6ed3d81f1cd314bb6b4dc096468805351bbd3c7152c577d67c6d48fdd"
+      },
+      "DNE_AAAI25": {
+        "parameter_source": "paper architecture/optimizer/noise/epoch settings plus predeclared batch size and bounded time-series resource default; frozen before Tuning",
+        "config_fingerprint": "9c06244a1fb8595283f1223dd51c0dc560215a1f97c676271549db68058883c0"
+      }
+    },
+    "acceptance": {
+      "tuning_units": 44,
+      "eval_units": 386,
+      "required_metrics": [
+        "VUS-PR",
+        "VUS-ROC",
+        "R-based-F1",
+        "AUC-PR",
+        "AUC-ROC",
+        "Standard-F1"
+      ],
+      "tuning_metrics_used_for_selection": false
+    }
+  },
+  "plan_fingerprint": "dbb816fda2f86388d0ed5996f07e9113147706d754e145e2cc74135fec9bbc9c",
+  "metrics": [
+    "VUS-PR",
+    "VUS-ROC",
+    "R-based-F1",
+    "AUC-PR",
+    "AUC-ROC",
+    "Standard-F1"
+  ],
+  "fit_scope": "filename-declared tr_<N> prefix, label blind",
+  "evaluation_scope": "complete series",
+  "storage_policy": "full-precision six metrics only; no checkpoint or score array",
+  "runtime_policy": "shared-run timing is diagnostic and paper-ineligible",
+  "locked_fingerprint": "078dec17f66d224fbed582a70d2ca45b666d4141a91b90c6b95fec09b1dd91ec",
+  "locked_at": "2026-07-22T12:50:41.177163+00:00"
+}

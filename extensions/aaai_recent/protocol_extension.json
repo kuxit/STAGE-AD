@@ -1,57 +1,54 @@
 {
-  "schema_version": "stage-aaai-recent-extension-v1",
-  "status": "implementation_smoke_passed_tuning_freeze_pending",
+  "schema_version": "stage-aaai-recent-extension-v2",
+  "status": "frozen_formal_extension",
   "base_protocol": "../../protocol.json",
-  "base_protocol_sha256": "eb4b99bfc834af063b23706015c898e01fc6b16f4ec387f941a738fdd129edc4",
+  "base_protocol_sha256": "41dcda4a1e5e94a4c8d742ddc82ca4e6353c07250f1bb45951ac86c9aa9e75f0",
+  "locked_config": "../../configs/aaai_recent_locked_seed2026.json",
+  "locked_config_sha256": "a0eae4e94934a62dbc7f42f3d8c3a34f57189d15face7e2fdbdc20312e4311c9",
+  "plan_fingerprint": "dbb816fda2f86388d0ed5996f07e9113147706d754e145e2cc74135fec9bbc9c",
+  "locked_fingerprint": "078dec17f66d224fbed582a70d2ca45b666d4141a91b90c6b95fec09b1dd91ec",
   "seed": 2026,
   "series_count": 193,
   "extension_method_count": 2,
   "extension_unit_count": 386,
-  "combined_method_count": 17,
-  "combined_unit_count": 3281,
+  "combined_baseline_method_count": 16,
+  "combined_baseline_unit_count": 3088,
+  "formal_order": [
+    "qualify both added baselines on the official TSB-AD Tuning split",
+    "evaluate both added baselines on all 193 Eval series",
+    "verify the complete 16-baseline, 3088-unit gate",
+    "resume and freeze the predeclared STAGE Tuning plan",
+    "evaluate STAGE with its independently frozen parameters"
+  ],
   "methods": {
     "DPAD_AAAI24": {
       "venue": "AAAI-24 main technical track",
       "paper_url": "https://ojs.aaai.org/index.php/AAAI/article/view/28682",
       "doi": "10.1609/aaai.v38i8.28682",
-      "implementation_provenance": "paper-derived provisional reimplementation; author source URL must be pinned if located before freeze",
+      "implementation_provenance": "paper-derived adapted reimplementation; no author source URL pinned",
       "implementation_files": ["models.py", "run_one_recent.py"],
       "uses_auxiliary_negative_samples": false,
-      "local_smoke": {
-        "profile": "smoke-only",
-        "epochs": 3,
-        "gamma": 0.01,
-        "lambda": 10.0,
-        "learning_rate": 0.001,
-        "k": 5,
-        "max_train_windows": 512,
-        "formal_eval_eligible": false
-      },
-      "formal_hyperparameters": null
+      "formal_config_fingerprint": "fb3c13b6ed3d81f1cd314bb6b4dc096468805351bbd3c7152c577d67c6d48fdd",
+      "formal_hyperparameters_source": "../../configs/aaai_recent_locked_seed2026.json"
     },
     "DNE_AAAI25": {
       "venue": "AAAI-25 main technical track",
       "paper_url": "https://ojs.aaai.org/index.php/AAAI/article/view/33257",
       "full_paper_url": "https://arxiv.org/abs/2412.11461",
       "doi": "10.1609/aaai.v39i11.33257",
-      "implementation_provenance": "paper-derived provisional reimplementation; no author source URL pinned",
+      "implementation_provenance": "paper-derived adapted reimplementation; no author source URL pinned",
       "implementation_files": ["models.py", "run_one_recent.py"],
       "uses_auxiliary_negative_samples": true,
       "negative_construction": "diverse Gaussian noise generated only from training-prefix windows",
-      "local_smoke": {
-        "profile": "paper settings with smoke-reduced epochs",
-        "architecture": "ResMLP",
-        "epochs": 3,
-        "paper_epochs": 500,
-        "formal_eval_eligible": false
-      },
-      "formal_hyperparameters": null
+      "formal_config_fingerprint": "9c06244a1fb8595283f1223dd51c0dc560215a1f97c676271549db68058883c0",
+      "formal_hyperparameters_source": "../../configs/aaai_recent_locked_seed2026.json"
     }
   },
   "fit_scope": "filename-declared tr_<N> prefix, label blind",
   "evaluation_scope": "complete series",
-  "configuration_gate": "no Eval feedback: use paper/author settings when available; otherwise freeze a documented stability default on official Tuning before Eval",
+  "configuration_gate": "the single fixed configuration per method is frozen before Tuning; Tuning is qualification only and Eval feedback is never used for selection or retuning",
   "storage_policy": "full-precision six metrics only; no checkpoint or score array",
-  "results_root_policy": "separate from the active no-KNN 15-method result root",
+  "results_root_policy": "separate recent_seed2026 root; merge only after strict completion of 44 Tuning and 386 Eval units",
+  "reporting_policy": "run and audit all 16 baselines; any later 15-baseline paper subset must use a predeclared relevance or provenance rule, never observed scores",
   "runtime_policy": "no paper runtime until exclusive identical-hardware rerun"
 }
