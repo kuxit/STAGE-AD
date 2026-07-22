@@ -54,6 +54,7 @@ PLAN_NAME = "recent_baseline_execution_plan.json"
 FAILSTOP_NAME = "recent_baseline_failstop.json"
 COMPLETE_NAME = "recent_baseline_autopilot_complete.json"
 LOCKFILE_NAME = ".recent_baseline_autopilot.lock"
+CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 FORBIDDEN_SUFFIXES = {".npy", ".npz", ".pt", ".pth", ".ckpt"}
 FORBIDDEN_RECORD_KEYS = {
     "checkpoint",
@@ -633,6 +634,9 @@ def run_one_unit(
     environment = os.environ.copy()
     environment["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     environment["CUDA_VISIBLE_DEVICES"] = gpu
+    # Required by torch.use_deterministic_algorithms(True) for CUDA >= 10.2.
+    # This is a runtime reproducibility setting, not a model hyperparameter.
+    environment["CUBLAS_WORKSPACE_CONFIG"] = CUBLAS_WORKSPACE_CONFIG
     environment.setdefault("OMP_NUM_THREADS", "2")
     environment.setdefault("MKL_NUM_THREADS", "2")
     environment.setdefault("OPENBLAS_NUM_THREADS", "2")

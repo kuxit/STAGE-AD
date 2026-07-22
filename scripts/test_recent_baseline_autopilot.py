@@ -106,6 +106,7 @@ class RecentBaselineAutopilotTests(unittest.TestCase):
         )
 
     def test_single_frozen_configs_and_resource_budgets(self) -> None:
+        self.assertEqual(autopilot.CUBLAS_WORKSPACE_CONFIG, ":4096:8")
         self.assertEqual(set(self.lock["methods"]), set(autopilot.METHODS))
 
         dpad = self.lock["methods"]["DPAD_AAAI24"]

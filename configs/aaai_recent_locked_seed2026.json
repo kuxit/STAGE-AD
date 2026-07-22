@@ -58,7 +58,7 @@
   "source_sha256": {
     "runner": "c2484b64b06c64b082668f55098eb7c275d8b89b5727404eb5d3ed5118aafe2b",
     "models": "fa3e8b5a5b8048eeaf9f5db9f9e4b8f605f7f3a7c259ac8fa54341b1acd28f56",
-    "recent_autopilot": "fa113a01ff706695fc6d6f8b9c8fe025b219a527cea2399bfd9459ac5a9450b6",
+    "recent_autopilot": "52be091044252fd9e7e358b3aa2490a795d49e9cedecf3cc067136afd1f5b6c4",
     "stage_autopilot": "ba0a77d6b2fc2617cf258de85b57b76f1cb81d081f027cd3efeacbd1c26d9599",
     "common": "f39da45089ac0478e658a014d6a5acbec9f0d31b113906b38122afaac51644d2",
     "window_selector": "0ba65735c6572cd80e586409d4f653253d847e08fbae8e1da6e474e142e74af6",
@@ -130,7 +130,7 @@
     "source_sha256": {
       "runner": "c2484b64b06c64b082668f55098eb7c275d8b89b5727404eb5d3ed5118aafe2b",
       "models": "fa3e8b5a5b8048eeaf9f5db9f9e4b8f605f7f3a7c259ac8fa54341b1acd28f56",
-      "recent_autopilot": "fa113a01ff706695fc6d6f8b9c8fe025b219a527cea2399bfd9459ac5a9450b6",
+      "recent_autopilot": "52be091044252fd9e7e358b3aa2490a795d49e9cedecf3cc067136afd1f5b6c4",
       "stage_autopilot": "ba0a77d6b2fc2617cf258de85b57b76f1cb81d081f027cd3efeacbd1c26d9599",
       "common": "f39da45089ac0478e658a014d6a5acbec9f0d31b113906b38122afaac51644d2",
       "window_selector": "0ba65735c6572cd80e586409d4f653253d847e08fbae8e1da6e474e142e74af6",
@@ -162,7 +162,7 @@
       "tuning_metrics_used_for_selection": false
     }
   },
-  "plan_fingerprint": "dbb816fda2f86388d0ed5996f07e9113147706d754e145e2cc74135fec9bbc9c",
+  "plan_fingerprint": "a2372dea534a6119b8dc7dfc7a63815ec17449adf67528fa3f9e4a6b9beabda3",
   "metrics": [
     "VUS-PR",
     "VUS-ROC",
@@ -175,6 +175,6 @@
   "evaluation_scope": "complete series",
   "storage_policy": "full-precision six metrics only; no checkpoint or score array",
   "runtime_policy": "shared-run timing is diagnostic and paper-ineligible",
-  "locked_fingerprint": "078dec17f66d224fbed582a70d2ca45b666d4141a91b90c6b95fec09b1dd91ec",
-  "locked_at": "2026-07-22T12:50:41.177163+00:00"
+  "locked_fingerprint": "a42a24950a8fccc286301f0f8f74cb5e36a6660e8848fe74d5aaa7e1f6a09d7b",
+  "locked_at": "2026-07-22T13:01:33.432997+00:00"
 }
