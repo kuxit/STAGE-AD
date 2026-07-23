@@ -1,0 +1,56 @@
+{
+  "schema_version": "stage-mechanism-tuning-v1",
+  "study_id": "stage-story-mechanism-tuning-seed2026-20260724",
+  "selection_split": "official TSB-AD Tuning only",
+  "eval_feedback": false,
+  "seeds": [2026],
+  "targets": {
+    "U": ["UCR", "Exathlon", "MSL", "SED", "TODS"],
+    "M": ["CATSv2", "GHL", "LTDB", "SVDB", "TAO"]
+  },
+  "files": {
+    "U": {
+      "UCR": [
+        "305_UCR_id_3_Medical_tr_3000_1st_5948.csv",
+        "312_UCR_id_10_Facility_tr_19948_1st_52000.csv",
+        "323_UCR_id_21_HumanActivity_tr_48812_1st_128430.csv",
+        "347_UCR_id_45_Sensor_tr_2851_1st_5365.csv",
+        "386_UCR_id_84_Environment_tr_2046_1st_5703.csv",
+        "429_UCR_id_127_Medical_tr_14825_1st_29000.csv"
+      ],
+      "Exathlon": [
+        "813_Exathlon_id_4_Facility_tr_10766_1st_12590.csv",
+        "825_Exathlon_id_16_Facility_tr_10766_1st_12590.csv"
+      ],
+      "MSL": [
+        "142_MSL_id_3_Sensor_tr_1525_1st_4575.csv",
+        "146_MSL_id_7_Sensor_tr_554_1st_1172.csv"
+      ],
+      "SED": ["235_SED_id_2_Medical_tr_2499_1st_3840.csv"],
+      "TODS": [
+        "291_TODS_id_5_Synthetic_tr_500_1st_11.csv",
+        "300_TODS_id_14_Synthetic_tr_1250_1st_2555.csv"
+      ]
+    },
+    "M": {
+      "CATSv2": ["140_CATSv2_id_3_Sensor_tr_28307_1st_28407.csv"],
+      "GHL": [
+        "040_GHL_id_9_Sensor_tr_50000_1st_92001.csv",
+        "049_GHL_id_18_Sensor_tr_50000_1st_109001.csv"
+      ],
+      "LTDB": ["082_LTDB_id_4_Medical_tr_4456_1st_4556.csv"],
+      "SVDB": [
+        "090_SVDB_id_7_Medical_tr_12157_1st_12257.csv",
+        "107_SVDB_id_24_Medical_tr_32805_1st_32905.csv",
+        "113_SVDB_id_30_Medical_tr_4552_1st_4652.csv"
+      ],
+      "TAO": [
+        "120_TAO_id_5_Environment_tr_500_1st_3.csv",
+        "126_TAO_id_11_Environment_tr_500_1st_7.csv"
+      ]
+    }
+  },
+  "representative_priority": ["U/UCR", "U/SED", "M/CATSv2", "M/GHL"],
+  "expected_formal_head": "74fd2b0b7c35672210bad023eb4305ca975fd481",
+  "expected_ten_dataset_lock_fingerprint": "aaea353206be38b569759cd442f8d79a755aa6f86de2259b211ea5b109c37ca9"
+}

@@ -69,6 +69,7 @@ class StageConfig:
     grad_clip: float = 1.0
     overlap_deltas: tuple[int, ...] = (24, 48)
     overlap_trim: int = 8
+    alignment_objective: str = "both"
     gb_min_split: int = 4
     gb_max_rounds: int = 64
     gb_sampling_power: float = 0.5
@@ -100,6 +101,13 @@ class StageConfig:
             raise ValueError("overlap deltas must lie strictly inside a patch")
         if any(self.patch_size - delta - 2 * self.overlap_trim < 1 for delta in self.overlap_deltas):
             raise ValueError("overlap_trim removes the complete aligned region")
+        if self.alignment_objective not in {
+            "both",
+            "timestamp_token_only",
+            "interval_only",
+            "context_only",
+        }:
+            raise ValueError("unsupported alignment_objective")
         if self.gb_min_split < 4:
             raise ValueError("gb_min_split must be at least four")
         if not 0.0 <= self.gb_sampling_power <= 1.0:
@@ -379,7 +387,17 @@ def temporal_overlap_loss(
             overlap_embedding_right,
         )
     )
-    total = token_loss + embedding_loss
+    if config.alignment_objective == "both":
+        total = token_loss + embedding_loss
+    elif config.alignment_objective == "timestamp_token_only":
+        total = token_loss
+    elif config.alignment_objective == "interval_only":
+        total = embedding_loss
+    else:
+        raise ValueError(
+            "temporal_overlap_loss does not implement context_only; "
+            "fit_encoder handles that matched-budget control directly"
+        )
     diagnostics = {
         "loss": float(total.detach().cpu()),
         "token_cc": float(token_loss.detach().cpu()),
@@ -620,6 +638,25 @@ def sample_from_partition(
     power: float,
     rng: np.random.Generator,
 ) -> np.ndarray:
+    sampled, _ = sample_from_partition_with_ids(
+        partition,
+        eligible_starts,
+        batch_size,
+        power,
+        rng,
+    )
+    return sampled
+
+
+def sample_from_partition_with_ids(
+    partition: GranularPartition,
+    eligible_starts: np.ndarray,
+    batch_size: int,
+    power: float,
+    rng: np.random.Generator,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Sample rows and expose region ids for mechanism diagnostics."""
+
     sizes = np.asarray([len(ball) for ball in partition.balls], dtype=np.float64)
     probability = np.power(sizes, float(power))
     probability /= probability.sum()
@@ -628,7 +665,7 @@ def sample_from_partition(
     for position, ball_id in enumerate(ball_ids):
         ball = partition.balls[int(ball_id)]
         local_rows[position] = int(ball[int(rng.integers(0, len(ball)))])
-    return eligible_starts[local_rows]
+    return eligible_starts[local_rows], np.asarray(ball_ids, dtype=np.int64)
 
 
 def resolve_training_steps(
@@ -682,6 +719,7 @@ def fit_encoder(
     gb_activation_step = min(max(1, gb_activation_step), max(1, effective_steps - 1))
     partition: GranularPartition | None = None
     partition_starts: np.ndarray | None = None
+    partition_sample_counts: np.ndarray | None = None
     history: list[dict[str, Any]] = []
     peak_grad_norm = 0.0
     started = time.perf_counter()
@@ -703,6 +741,7 @@ def fit_encoder(
             partition = build_granular_partition(
                 warm_embeddings, config, seed=int(config.seed) + 17
             )
+            partition_sample_counts = np.zeros(len(partition.balls), dtype=np.int64)
             model.train()
         if partition is None:
             starts = rng.choice(
@@ -713,12 +752,18 @@ def fit_encoder(
         else:
             if partition_starts is None:
                 raise AssertionError("partition starts are missing")
-            starts = sample_from_partition(
+            starts, sampled_ball_ids = sample_from_partition_with_ids(
                 partition,
                 partition_starts,
                 config.batch_size,
                 config.gb_sampling_power,
                 rng,
+            )
+            if partition_sample_counts is None:
+                raise AssertionError("partition sample counts are missing")
+            partition_sample_counts += np.bincount(
+                sampled_ball_ids,
+                minlength=len(partition.balls),
             )
         delta = int(config.overlap_deltas[step % len(config.overlap_deltas)])
         left = window_batch(values, starts, config.patch_size).to(
@@ -735,14 +780,32 @@ def fit_encoder(
         right_overlap = tokens_right[:, trim : config.patch_size - delta - trim]
         overlap_embedding_left = model.embed_tokens(left_overlap)
         overlap_embedding_right = model.embed_tokens(right_overlap)
-        loss, diagnostics = temporal_overlap_loss(
-            tokens_left,
-            tokens_right,
-            overlap_embedding_left,
-            overlap_embedding_right,
-            delta,
-            config,
-        )
+        if config.alignment_objective == "context_only":
+            context_left = model.embed_tokens(tokens_left)
+            context_right = model.embed_tokens(tokens_right)
+            loss, diagonal, redundancy = cross_correlation_identity_loss(
+                context_left,
+                context_right,
+            )
+            diagnostics = {
+                "loss": float(loss.detach().cpu()),
+                "token_cc": 0.0,
+                "token_cc_diagonal": 0.0,
+                "token_redundancy": 0.0,
+                "overlap_embedding_cc": float(loss.detach().cpu()),
+                "overlap_embedding_cc_diagonal": float(diagonal.detach().cpu()),
+                "embedding_redundancy": float(redundancy.detach().cpu()),
+                "aligned_tokens": 0,
+            }
+        else:
+            loss, diagnostics = temporal_overlap_loss(
+                tokens_left,
+                tokens_right,
+                overlap_embedding_left,
+                overlap_embedding_right,
+                delta,
+                config,
+            )
         if not torch.isfinite(loss):
             raise FloatingPointError(f"non-finite loss at step {step}")
         loss.backward()
@@ -781,6 +844,13 @@ def fit_encoder(
                 "final_k": partition.final_k,
                 "rounds": partition.rounds,
                 "rows": partition.source_rows,
+                "region_sizes": [int(len(ball)) for ball in partition.balls],
+                "region_sample_counts": (
+                    []
+                    if partition_sample_counts is None
+                    else [int(item) for item in partition_sample_counts]
+                ),
+                "sampling_power": float(config.gb_sampling_power),
             }
         ),
     }
