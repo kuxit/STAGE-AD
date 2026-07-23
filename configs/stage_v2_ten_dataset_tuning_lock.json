@@ -1,0 +1,492 @@
+{
+  "schema_version": "stage-v2-ten-dataset-tuning-lock-v1",
+  "kind": "derived posthoc ten-dataset STAGE Tuning lock",
+  "status": "locked_posthoc_development_only",
+  "selection_split": "official TSB-AD Tuning only",
+  "eval_feedback": false,
+  "confirmatory_claim_eligible": false,
+  "paper_main_table_eligible": false,
+  "runtime_eligible_for_paper": false,
+  "modifies_formal_stage2_lock": false,
+  "seeds": [
+    2026,
+    2027,
+    2028
+  ],
+  "targets": {
+    "U": [
+      "UCR",
+      "Exathlon",
+      "MSL",
+      "SED",
+      "TODS"
+    ],
+    "M": [
+      "CATSv2",
+      "GHL",
+      "LTDB",
+      "SVDB",
+      "TAO"
+    ]
+  },
+  "selection_rule": {
+    "training_then_head": true,
+    "joint_selection": false,
+    "score": "0.5 * mean(all six) + 0.5 * mean(VUS-PR, R-based-F1, AUC-PR, Standard-F1)",
+    "tie_breakers": [
+      "VUS-PR",
+      "R-based-F1",
+      "AUC-PR",
+      "Standard-F1"
+    ],
+    "rounding_before_ranking": false
+  },
+  "inputs": {
+    "stage2_plan_sha256": "507474a34b7b14b9dce6d8dc1f0ca2be8c07134f213a21ed04e116f63be2554a",
+    "stage2_plan_fingerprint": "e8958cfcb1609f527041e17c5a8f6fa7e726667e1a68a9c9559c7b883c95e233",
+    "stage2_summary_sha256": "5cc80988960da7a3a127fcdefc7680a6938e171494d376b1fa300dffe1441614",
+    "stage2_selection_sha256": "3d86b5b3917b79d46eacc0998167c3ede3bc4e2853487667b05c44cdb42304a1",
+    "stage2_selection_fingerprint": "33904e7483202e5a8aef37a5009abd194319f2f742ed74520d815b47b1dfb2aa",
+    "confirmation_summary_sha256": "e72caa88aca98ace34e06ca26e4039aafc41d50278987a7de163249ce398ac05",
+    "confirmation_summary_fingerprint": "6528758d7aef482dd0649044fa9d310251b1e187a8171c6c88ee73650d7f100a",
+    "training_selection_sha256": "e1bfac29a7faa1a5d53252e4d203de5656a2ce9585e7dda6a720747c90f5dc62",
+    "training_selection_fingerprint": "2d3bfe1d2ac9c2641efa27ab834973751b55a85591e8df0d3d4cad1d7e95efc4",
+    "head_summary_sha256": "0cb20f8f594d2d5caef8d89a653497b99a1c8375ef3d7f10b7a60e2b1d85acce",
+    "head_summary_fingerprint": "dfa2daf94aaf5c3083819f27cc929dbc5882909dc4a5a36125716fd51071a416",
+    "head_selection_sha256": "e0ed151de8614fb0f26c3e25bc35e15cb7a0d7e7975a2401d6de573a55674b57",
+    "head_selection_fingerprint": "52b92a75e5f3f3dd31a9cdcf89375d2d12bd1e85995b10b116cde00796550c3f"
+  },
+  "completion": {
+    "formal_stage2_physical_units_audited": 111,
+    "supplement_confirmation_new_units": 12,
+    "supplement_confirmation_reused_units": 15,
+    "supplement_head_new_units": 9,
+    "supplement_new_units_total": 21,
+    "supplement_head_rows": 180,
+    "error_units": 0
+  },
+  "dataset_locks": {
+    "M/GHL": {
+      "source": "frozen_stage2_tuning",
+      "training_candidate_id": "e02_low_lr_long_train",
+      "training_config_fingerprint": "c9f5de6b9ee734fb76605712a61c9abe03284e503cc5170143b784b7b2fba5ab",
+      "training_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H00",
+      "final_gb_min_split": 4,
+      "top_k": 1
+    },
+    "M/SVDB": {
+      "source": "frozen_stage2_tuning",
+      "training_candidate_id": "v1_t08_svdb_anchor",
+      "training_config_fingerprint": "c1cd8049d739760d4223e7f51aaee336c17f255b2893b0eee730ac21b73c60eb",
+      "training_parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H15",
+      "final_gb_min_split": 256,
+      "top_k": 1
+    },
+    "M/TAO": {
+      "source": "frozen_stage2_tuning",
+      "training_candidate_id": "v1_t12_ltdb_anchor",
+      "training_config_fingerprint": "ba885d9b5ec4bb42b90714b57df968e3bede13d3714228a878d996506fb461ab",
+      "training_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H10",
+      "final_gb_min_split": 64,
+      "top_k": 1
+    },
+    "U/Exathlon": {
+      "source": "frozen_stage2_tuning",
+      "training_candidate_id": "e03_ball_balanced_sampling",
+      "training_config_fingerprint": "ff31f31124b3482e140ff29500b3544a9612e578e7d33fe960c22f03f71d21ee",
+      "training_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.0,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H12",
+      "final_gb_min_split": 64,
+      "top_k": 5
+    },
+    "U/MSL": {
+      "source": "frozen_stage2_tuning",
+      "training_candidate_id": "v1_t00_msl_anchor",
+      "training_config_fingerprint": "e807c8e2639f0b6ae617f3c5f0d7ff42b0043b83e42e8d0a371ce4d8925e92f9",
+      "training_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H00",
+      "final_gb_min_split": 4,
+      "top_k": 1
+    },
+    "U/TODS": {
+      "source": "frozen_stage2_tuning",
+      "training_candidate_id": "v1_t05_tao_anchor",
+      "training_config_fingerprint": "abc7b796b4640bc0ec0a8b84bf61b9b3b02657a6267e34600bfd4f4393fdcd24",
+      "training_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H00",
+      "final_gb_min_split": 4,
+      "top_k": 1
+    },
+    "U/UCR": {
+      "source": "frozen_stage2_tuning",
+      "training_candidate_id": "v1_t17_ucr_anchor",
+      "training_config_fingerprint": "e2ed843349292ef3a7d545d7619a6109e6d2add5f934daf4c7f9aa6cb3821664",
+      "training_parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H00",
+      "final_gb_min_split": 4,
+      "top_k": 1
+    },
+    "M/CATSv2": {
+      "source": "dataset_specific_tuning_supplement",
+      "training_candidate_id": "v1_t06_cats_ghl_anchor",
+      "training_config_fingerprint": "630ff7ff0ecc9614253de02b994e4db2904495bcdba06aa89df2a919fa19f20c",
+      "training_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H00",
+      "final_gb_min_split": 4,
+      "top_k": 1
+    },
+    "M/LTDB": {
+      "source": "dataset_specific_tuning_supplement",
+      "training_candidate_id": "v1_t13_tods_anchor",
+      "training_config_fingerprint": "5d637c2826c075494e287c0779e24e2a21fd17e4fe8d88e1d058378851ebf7f7",
+      "training_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H05",
+      "final_gb_min_split": 16,
+      "top_k": 1
+    },
+    "U/SED": {
+      "source": "dataset_specific_tuning_supplement",
+      "training_candidate_id": "v1_t13_tods_anchor",
+      "training_config_fingerprint": "5d637c2826c075494e287c0779e24e2a21fd17e4fe8d88e1d058378851ebf7f7",
+      "training_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "head_id": "H09",
+      "final_gb_min_split": 16,
+      "top_k": 15
+    }
+  },
+  "lock_fingerprint": "aaea353206be38b569759cd442f8d79a755aa6f86de2259b211ea5b109c37ca9",
+  "created_at": "2026-07-23T18:17:14.390786+00:00"
+}
