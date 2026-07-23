@@ -104,6 +104,18 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def git_state(repo: Path) -> tuple[str, str]:
+    head = subprocess.check_output(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        text=True,
+    ).strip()
+    dirty = subprocess.check_output(
+        ["git", "-C", str(repo), "status", "--porcelain"],
+        text=True,
+    ).strip()
+    return head, dirty
+
+
 def finite_number(value: Any) -> bool:
     return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(float(value))
 
@@ -178,6 +190,9 @@ def create_plan(
 ) -> dict[str, Any]:
     protocol = load_json(protocol_path)
     verify_protocol(protocol)
+    formal_head, formal_dirty = git_state(data_repo)
+    if formal_head != protocol["expected_formal_head"] or formal_dirty:
+        raise RuntimeError("formal data repository HEAD/worktree drift")
     lock = load_json(lock_path)
     if lock.get("lock_fingerprint") != protocol["expected_ten_dataset_lock_fingerprint"]:
         raise RuntimeError("ten-dataset lock fingerprint mismatch")
@@ -261,6 +276,27 @@ def create_plan(
         return prior
     atomic_json(target, plan)
     return plan
+
+
+def verify_runtime_sources(
+    plan: Mapping[str, Any],
+    protocol_path: Path,
+    lock_path: Path,
+    data_repo: Path,
+    metrics_root: Path,
+) -> None:
+    formal_head, formal_dirty = git_state(data_repo)
+    if formal_head != plan["formal_head"] or formal_dirty:
+        raise RuntimeError("formal data repository HEAD/worktree drift")
+    actual = {
+        "stage.py": sha256_file(PROJECT_ROOT / "STAGE" / "stage.py"),
+        "runner.py": sha256_file(Path(__file__)),
+        "protocol.json": sha256_file(protocol_path),
+        "ten_dataset_lock.json": sha256_file(lock_path),
+        "metrics.py": sha256_file(metrics_root / "PaAno" / "utils" / "metrics.py"),
+    }
+    if actual != plan["source_sha256"]:
+        raise RuntimeError("mechanism runtime source hash drift")
 
 
 def unit_path(result_root: Path, task: Mapping[str, Any]) -> Path:
@@ -679,6 +715,13 @@ def main() -> int:
         if not plan_path.is_file():
             raise FileNotFoundError(plan_path)
         plan = load_json(plan_path)
+        verify_runtime_sources(
+            plan,
+            args.protocol,
+            args.ten_dataset_lock,
+            args.data_repo,
+            args.metrics_root,
+        )
         if args.command == "_worker":
             task = json.loads(args.task_json)
             run_worker(task, plan, args.data_repo, args.metrics_root, args.result_root)
