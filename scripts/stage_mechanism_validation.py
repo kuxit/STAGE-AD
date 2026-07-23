@@ -700,7 +700,9 @@ def parser() -> argparse.ArgumentParser:
             item.add_argument("--gpus", nargs="+", type=int, default=[0, 1])
             item.add_argument("--workers-per-gpu", type=int, default=6)
         if name == "_worker":
-            item.add_argument("--task-json", required=True)
+            task_source = item.add_mutually_exclusive_group(required=True)
+            task_source.add_argument("--task-json")
+            task_source.add_argument("--task-index", type=int)
     return value
 
 
@@ -723,7 +725,12 @@ def main() -> int:
             args.metrics_root,
         )
         if args.command == "_worker":
-            task = json.loads(args.task_json)
+            if args.task_json is not None:
+                task = json.loads(args.task_json)
+            else:
+                if args.task_index < 0 or args.task_index >= len(plan["tasks"]):
+                    raise ValueError("task-index is outside the frozen plan")
+                task = plan["tasks"][args.task_index]
             run_worker(task, plan, args.data_repo, args.metrics_root, args.result_root)
             return 0
         if args.command == "status":
