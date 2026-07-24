@@ -70,6 +70,7 @@ class StageConfig:
     overlap_deltas: tuple[int, ...] = (24, 48)
     overlap_trim: int = 8
     alignment_objective: str = "both"
+    multiscale_alignment_weight: float = 0.25
     gb_min_split: int = 4
     final_gb_min_split: int | None = None
     gb_max_rounds: int = 64
@@ -105,6 +106,8 @@ class StageConfig:
             raise ValueError("overlap deltas must lie strictly inside a patch")
         if any(self.patch_size - delta - 2 * self.overlap_trim < 1 for delta in self.overlap_deltas):
             raise ValueError("overlap_trim removes the complete aligned region")
+        if self.multiscale_alignment_weight < 0.0:
+            raise ValueError("multiscale_alignment_weight must be non-negative")
         if self.alignment_objective not in {
             "both",
             "timestamp_token_only",
@@ -619,6 +622,45 @@ def temporal_overlap_loss(
             overlap_embedding_right,
         )
     )
+    multiscale_loss = token_loss.new_zeros(())
+    multiscale_terms = 0
+    multiscale_gate_total = token_loss.new_zeros(())
+    fine_energy = 0.5 * (
+        aligned_left_raw.var(dim=1, unbiased=False).mean()
+        + aligned_right_raw.var(dim=1, unbiased=False).mean()
+    )
+    if config.multiscale_alignment_weight > 0.0:
+        aligned_length = int(aligned_left_raw.shape[1])
+        for scale in (2, 4, 8):
+            if aligned_length < scale:
+                continue
+            pooled_left = F.avg_pool1d(
+                aligned_left_raw.transpose(1, 2),
+                kernel_size=scale,
+                stride=scale,
+            ).transpose(1, 2)
+            pooled_right = F.avg_pool1d(
+                aligned_right_raw.transpose(1, 2),
+                kernel_size=scale,
+                stride=scale,
+            ).transpose(1, 2)
+            scale_loss, _, _ = cross_correlation_identity_loss(
+                pooled_left.reshape(-1, pooled_left.shape[-1]),
+                pooled_right.reshape(-1, pooled_right.shape[-1]),
+            )
+            pooled_energy = 0.5 * (
+                pooled_left.var(dim=1, unbiased=False).mean()
+                + pooled_right.var(dim=1, unbiased=False).mean()
+            )
+            scale_gate = (
+                pooled_energy.detach() / fine_energy.detach().clamp_min(1e-8)
+            ).clamp(0.0, 1.0)
+            multiscale_loss = multiscale_loss + scale_gate * scale_loss
+            multiscale_gate_total = multiscale_gate_total + scale_gate
+            multiscale_terms += 1
+        if multiscale_terms:
+            multiscale_loss = multiscale_loss / float(multiscale_terms)
+
     if config.alignment_objective == "both":
         total = token_loss + embedding_loss
     elif config.alignment_objective == "timestamp_token_only":
@@ -630,6 +672,7 @@ def temporal_overlap_loss(
             "temporal_overlap_loss does not implement context_only; "
             "fit_encoder handles that matched-budget control directly"
         )
+    total = total + float(config.multiscale_alignment_weight) * multiscale_loss
     diagnostics = {
         "loss": float(total.detach().cpu()),
         "token_cc": float(token_loss.detach().cpu()),
@@ -638,6 +681,12 @@ def temporal_overlap_loss(
         "overlap_embedding_cc": float(embedding_loss.detach().cpu()),
         "overlap_embedding_cc_diagonal": float(embedding_diagonal.detach().cpu()),
         "embedding_redundancy": float(embedding_redundancy.detach().cpu()),
+        "multiscale_cc": float(multiscale_loss.detach().cpu()),
+        "multiscale_gate": float(
+            (
+                multiscale_gate_total / float(max(1, multiscale_terms))
+            ).detach().cpu()
+        ),
         "aligned_tokens": int(left_stop - left_start),
     }
     return total, diagnostics
@@ -1454,6 +1503,10 @@ def evaluate_series(
             "patch_statistics_weight": float(config.patch_statistics_weight),
             "feature_calibration": "training_prefix_point_median_mad",
             "statistics_calibration": "training_window_median_mad",
+            "multiscale_alignment_weight": float(
+                config.multiscale_alignment_weight
+            ),
+            "scale_reliability_gate": True,
         },
         "final_gb": {
             "min_split": int(final_memory_config.gb_min_split),
@@ -1516,6 +1569,7 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         grad_clip=float(args.grad_clip),
         overlap_deltas=tuple(int(item) for item in args.overlap_deltas.split(",") if item),
         overlap_trim=int(args.overlap_trim),
+        multiscale_alignment_weight=float(args.multiscale_alignment_weight),
         gb_min_split=int(args.gb_min_split),
         final_gb_min_split=(
             None
@@ -1575,6 +1629,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--overlap-deltas", default="24,48")
     parser.add_argument("--overlap-trim", type=int, default=8)
+    parser.add_argument("--multiscale-alignment-weight", type=float, default=0.25)
     parser.add_argument("--gb-min-split", type=int, default=4)
     parser.add_argument("--final-gb-min-split", type=int)
     parser.add_argument("--gb-max-rounds", type=int, default=64)
