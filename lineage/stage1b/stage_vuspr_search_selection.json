@@ -1,0 +1,30 @@
+{
+  "schema_version": "stage-vuspr-search-selection-v1",
+  "phase": "stage1b",
+  "selection_split": "official TSB-AD Tuning only",
+  "eval_feedback": false,
+  "score": "macro mean VUS-PR only",
+  "tie_breakers": [
+    "canonical_id"
+  ],
+  "plan_fingerprint": "baa29a7eb659024d9351f4bb5b43598830f9006ca5e791f1271a6be8e8013415",
+  "training_winners": {
+    "U/UCR": "e10_patch128_batch64_long",
+    "U/Exathlon": "v1_t05_tao_anchor",
+    "U/MSL": "e09_long_patch_batch64",
+    "U/SED": "v1_t05_tao_anchor",
+    "U/TODS": "e07_short_patch_batch64",
+    "M/CATSv2": "e02_low_lr_long_train",
+    "M/GHL": "e02_low_lr_long_train",
+    "M/LTDB": "v1_t05_tao_anchor",
+    "M/SVDB": "e05_compact_encoder",
+    "M/TAO": "v1_t08_svdb_anchor"
+  },
+  "seeds": [
+    2026,
+    2027,
+    2028
+  ],
+  "selection_fingerprint": "4c7511442ac3d426b83418f99c9092648e28c60e6052f367b8ecd66e0cd01233",
+  "created_at": "2026-07-24T11:55:53.079672+00:00"
+}
