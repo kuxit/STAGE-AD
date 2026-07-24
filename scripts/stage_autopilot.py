@@ -363,6 +363,7 @@ def stage_parameter_args(config: Mapping[str, Any]) -> list[str]:
         "overlap_deltas": "--overlap-deltas",
         "overlap_trim": "--overlap-trim",
         "gb_min_split": "--gb-min-split",
+        "final_gb_min_split": "--final-gb-min-split",
         "gb_max_rounds": "--gb-max-rounds",
         "gb_sampling_power": "--gb-sampling-power",
         "top_k": "--top-k",

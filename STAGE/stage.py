@@ -30,7 +30,7 @@ import random
 import re
 import sys
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -71,6 +71,7 @@ class StageConfig:
     overlap_trim: int = 8
     alignment_objective: str = "both"
     gb_min_split: int = 4
+    final_gb_min_split: int | None = None
     gb_max_rounds: int = 64
     gb_sampling_power: float = 0.5
     top_k: int = 3
@@ -110,6 +111,8 @@ class StageConfig:
             raise ValueError("unsupported alignment_objective")
         if self.gb_min_split < 4:
             raise ValueError("gb_min_split must be at least four")
+        if self.final_gb_min_split is not None and self.final_gb_min_split < 4:
+            raise ValueError("final_gb_min_split must be at least four")
         if not 0.0 <= self.gb_sampling_power <= 1.0:
             raise ValueError("gb_sampling_power must be in [0, 1]")
         if self.score_batch_size < 1 or self.memory_score_block_size < 1:
@@ -1086,8 +1089,14 @@ def evaluate_series(
     full_unit = extract_embeddings(model, values, full_starts, device, config, normalize=True)
 
     memory_started = time.perf_counter()
+    final_memory_config = (
+        config
+        if config.final_gb_min_split is None
+        or int(config.final_gb_min_split) == int(config.gb_min_split)
+        else replace(config, gb_min_split=int(config.final_gb_min_split))
+    )
     gb_memory, final_partition = build_gb_exemplar_memory(
-        train_unit, config, seed=int(config.seed) + 29
+        train_unit, final_memory_config, seed=int(config.seed) + 29
     )
     gb_build_seconds = float(time.perf_counter() - memory_started)
     sliding_window = estimate_sliding_window(values)
@@ -1140,6 +1149,7 @@ def evaluate_series(
         "sliding_window": int(sliding_window),
         "training": training,
         "final_gb": {
+            "min_split": int(final_memory_config.gb_min_split),
             "initial_k": final_partition.initial_k,
             "final_k": final_partition.final_k,
             "rounds": final_partition.rounds,
@@ -1195,6 +1205,11 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         overlap_deltas=tuple(int(item) for item in args.overlap_deltas.split(",") if item),
         overlap_trim=int(args.overlap_trim),
         gb_min_split=int(args.gb_min_split),
+        final_gb_min_split=(
+            None
+            if args.final_gb_min_split is None
+            else int(args.final_gb_min_split)
+        ),
         gb_max_rounds=int(args.gb_max_rounds),
         gb_sampling_power=float(args.gb_sampling_power),
         top_k=int(args.top_k),
@@ -1246,6 +1261,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--overlap-deltas", default="24,48")
     parser.add_argument("--overlap-trim", type=int, default=8)
     parser.add_argument("--gb-min-split", type=int, default=4)
+    parser.add_argument("--final-gb-min-split", type=int)
     parser.add_argument("--gb-max-rounds", type=int, default=64)
     parser.add_argument("--gb-sampling-power", type=float, default=0.5)
     parser.add_argument("--top-k", type=int, default=3)
