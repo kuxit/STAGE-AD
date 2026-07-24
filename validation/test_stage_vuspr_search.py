@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 import copy
 import csv
+import importlib
 import os
 from pathlib import Path
 import shutil
@@ -19,6 +20,7 @@ from scripts import stage_vuspr_search as search
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = ROOT / "configs" / "stage_vuspr_stage1a.json"
+PLAN = ROOT / "configs" / "stage_vuspr_stage1a_plan.json"
 
 
 class StageVUSPRSearchTests(unittest.TestCase):
@@ -48,9 +50,12 @@ class StageVUSPRSearchTests(unittest.TestCase):
                 names: list[str] = []
                 for dataset, count in datasets.items():
                     for index in range(count):
-                        name = f"x_{dataset}_tr_1000_case{index}.csv"
+                        name = f"x_{dataset}_tr_350_case{index}.csv"
                         names.append(name)
-                        (data_dir / name).write_text("value,label\n0,0\n")
+                        rows = ["value,label"] + [
+                            f"{row % 17},0" for row in range(400)
+                        ]
+                        (data_dir / name).write_text("\n".join(rows) + "\n")
                 with (repo / "data" / "File_List" / f"TSB-AD-{track}-Tuning.csv").open(
                     "w", newline="", encoding="utf-8"
                 ) as handle:
@@ -63,6 +68,38 @@ class StageVUSPRSearchTests(unittest.TestCase):
             self.assertEqual(plan["expected_logical_units"], 528)
             self.assertEqual(plan["expected_units"], 528)
             self.assertEqual(plan["variants_per_unit"], 1)
+
+    def test_precomputed_plan_and_one_time_preflights_validate(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            result_root = Path(temporary)
+            shutil.copyfile(PLAN, result_root / search.PLAN_NAME)
+            plan = search.ensure_plan(
+                ROOT,
+                PROTOCOL,
+                ROOT / "external",
+                result_root,
+            )
+            data_preflight = search.ensure_data_preflight(
+                ROOT, result_root, plan
+            )
+            runtime_preflight = search.ensure_runtime_preflight(
+                result_root, plan, data_preflight
+            )
+            task = next(iter(search._iter_tasks(plan)))
+            loaded = search.load_frozen_plan_for_worker(
+                ROOT,
+                PROTOCOL,
+                ROOT / "external",
+                result_root,
+                track=task[0],
+                dataset=task[1],
+                file_name=task[2],
+                seed=task[3],
+                execution_signature=task[4],
+            )
+            self.assertEqual(loaded["plan_fingerprint"], plan["plan_fingerprint"])
+            self.assertEqual(data_preflight["status"], "complete")
+            self.assertEqual(runtime_preflight["status"], "complete")
 
     def test_protocol_rejects_candidate_scoring_axis(self) -> None:
         payload = search.load_json(PROTOCOL)
@@ -118,6 +155,40 @@ class StageVUSPRSearchTests(unittest.TestCase):
         self.assertEqual(behavior_two["effective_steps"], 2000)
         self.assertFalse(behavior_one["short_series_update_cap"])
         self.assertFalse(behavior_two["short_series_update_cap"])
+
+    def test_device_window_bank_matches_reference_batches(self) -> None:
+        rng = np.random.default_rng(17)
+        values = rng.normal(size=(41, 3)).astype(np.float32)
+        starts = np.asarray([0, 2, 7, 19, 32], dtype=np.int64)
+        reference = stage_impl.window_batch(values, starts, patch_size=9)
+        bank = stage_impl.DeviceWindowBank(
+            values, torch.device("cpu"), patch_size=9
+        )
+        actual = bank.batch(starts)
+        self.assertTrue(torch.equal(actual, reference))
+
+    def test_six_metric_projection_matches_official_get_metrics(self) -> None:
+        rng = np.random.default_rng(31)
+        scores = rng.normal(size=240).astype(np.float64)
+        labels = np.zeros(240, dtype=np.int64)
+        labels[35:51] = 1
+        labels[133:164] = 1
+        projected = stage_impl.official_metrics(
+            scores,
+            labels,
+            sliding_window=20,
+            metrics_root=ROOT / "external",
+        )
+        reference = importlib.import_module("PaAno.utils.metrics").get_metrics(
+            scores,
+            labels,
+            slidingWindow=20,
+            pred=None,
+            version="opt",
+            thre=250,
+        )
+        for metric in search.METRICS:
+            self.assertEqual(projected[metric], float(reference[metric]))
 
     def test_selection_uses_vus_pr_only_then_canonical_id(self) -> None:
         low_vus_high_other = {
@@ -176,7 +247,11 @@ class StageVUSPRSearchTests(unittest.TestCase):
                             "channels": 128,
                         }
                     },
-                }
+                },
+                "series_metadata": {
+                    f"U/UCR/{short_name}": {"data_bytes": 10},
+                    f"U/UCR/{long_name}": {"data_bytes": 100},
+                },
             }
             short_task = ("U", "UCR", short_name, 2026, short_signature)
             long_task = ("U", "UCR", long_name, 2026, long_signature)

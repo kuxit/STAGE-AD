@@ -23,10 +23,14 @@ official-Tuning macro VUS-PR only.
   [`validation/stage_vuspr_local_00gwk_validation.json`](validation/stage_vuspr_local_00gwk_validation.json)
 - Dual-GPU Stage1A launcher:
   [`scripts/launch_stage_vuspr_stage1a.sh`](scripts/launch_stage_vuspr_stage1a.sh)
+- One-hour dual-GPU runbook and background start:
+  [`docs/STAGE_ONE_HOUR_SERVER_RUNBOOK.md`](docs/STAGE_ONE_HOUR_SERVER_RUNBOOK.md),
+  [`scripts/start_stage_vuspr_stage1a.sh`](scripts/start_stage_vuspr_stage1a.sh)
 
-Do not use the older v1/v2 lock for a new Eval. Do not start a server run until
-the local tests, plan audit, deterministic GPU smoke, checksum manifest, and
-repository artifact scan all pass.
+Do not use the older v1/v2 lock for a new Eval. The complete Stage1A task plan,
+data hashes, label-blind sliding-window metadata, and task expansion are
+precomputed locally so the server can begin GPU work after one short
+preflight.
 
 Start here:
 

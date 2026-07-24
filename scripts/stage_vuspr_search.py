@@ -58,6 +58,8 @@ PLAN_SCHEMA = "stage-vuspr-search-plan-v1"
 UNIT_SCHEMA = "stage-vuspr-search-unit-v1"
 SUMMARY_SCHEMA = "stage-vuspr-search-summary-v1"
 PLAN_NAME = "stage_vuspr_search_plan.json"
+DATA_PREFLIGHT_NAME = "stage_vuspr_data_preflight.json"
+RUNTIME_PREFLIGHT_NAME = "stage_vuspr_runtime_preflight.json"
 STATUS_NAME = "stage_vuspr_search_status.json"
 SUMMARY_JSON_NAME = "stage_vuspr_search_summary.json"
 SUMMARY_CSV_NAME = "stage_vuspr_search_summary.csv"
@@ -573,6 +575,7 @@ def _plan_stable_payload(
     files: dict[str, dict[str, list[str]]] = {}
     manifest_sha256: dict[str, str] = {}
     data_sha256: dict[str, str] = {}
+    series_metadata: dict[str, dict[str, int]] = {}
     for track, requested_datasets in protocol["targets"].items():
         manifest = repo / "data" / "File_List" / f"TSB-AD-{track}-Tuning.csv"
         names = _read_official_tuning_manifest(manifest)
@@ -589,7 +592,16 @@ def _plan_stable_payload(
                 source = repo / "data" / f"TSB-AD-{track}" / file_name
                 if not source.is_file():
                     raise FileNotFoundError(source)
-                data_sha256[f"{track}/{dataset}/{file_name}"] = sha256_file(source)
+                data_key = f"{track}/{dataset}/{file_name}"
+                data_sha256[data_key] = sha256_file(source)
+                values, train_index, _ = stage_impl.load_series(source)
+                series_metadata[data_key] = {
+                    "points": int(len(values)),
+                    "channels": int(values.shape[1]),
+                    "train_index": int(train_index),
+                    "data_bytes": int(source.stat().st_size),
+                    "sliding_window": int(stage_impl.estimate_sliding_window(values)),
+                }
         files[track] = by_dataset
 
     script_path = Path(__file__).resolve()
@@ -674,6 +686,7 @@ def _plan_stable_payload(
         },
         "official_tuning_manifest_sha256": manifest_sha256,
         "data_sha256": data_sha256,
+        "series_metadata": series_metadata,
         "official_evaluator": {
             "root_name": evaluator_root.name,
             "source_sha256": evaluator_hashes,
@@ -721,38 +734,194 @@ def _plan_stable_payload(
     return stable
 
 
-def ensure_plan(
-    repo: Path, protocol_path: Path, metrics_root: Path, result_root: Path
-) -> dict[str, Any]:
-    stable = _plan_stable_payload(repo, protocol_path, metrics_root)
-    plan = {
-        **stable,
-        "plan_fingerprint": fingerprint(stable),
-        "created_at": utc_now(),
-    }
-    target = result_root / PLAN_NAME
-    if target.is_file():
-        prior = load_json(target)
-        if (
-            prior.get("schema_version") != PLAN_SCHEMA
-            or fingerprint(_stable_plan_from_frozen(prior))
-            != prior.get("plan_fingerprint")
-            or prior.get("plan_fingerprint") != plan["plan_fingerprint"]
-        ):
-            raise RuntimeError(
-                f"existing VUS-PR plan differs; use a fresh result root: {target}"
-            )
-        return prior
-    atomic_json(target, plan)
-    return plan
-
-
 def _stable_plan_from_frozen(plan: Mapping[str, Any]) -> dict[str, Any]:
     return {
         str(key): value
         for key, value in plan.items()
         if key not in {"plan_fingerprint", "created_at"}
     }
+
+
+def validate_frozen_plan_identity(
+    repo: Path,
+    protocol_path: Path,
+    metrics_root: Path,
+    plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Fast identity audit for a locally precomputed or resumed plan.
+
+    The expensive task expansion and per-file data hashes are computed once
+    before the server session.  This audit still checks the plan fingerprint,
+    protocol, executable sources, official manifests, and evaluator sources.
+    The parent then verifies all 22 CSV hashes once before any worker starts.
+    """
+
+    if plan.get("schema_version") != PLAN_SCHEMA:
+        raise RuntimeError("frozen VUS-PR plan has the wrong schema")
+    if fingerprint(_stable_plan_from_frozen(plan)) != plan.get("plan_fingerprint"):
+        raise RuntimeError("frozen VUS-PR plan fingerprint is invalid")
+
+    protocol, protocol_sha256, protocol_fingerprint = load_and_validate_protocol(
+        protocol_path
+    )
+    if (
+        plan.get("protocol_sha256") != protocol_sha256
+        or plan.get("protocol_fingerprint") != protocol_fingerprint
+        or plan.get("phase") != protocol.get("phase")
+    ):
+        raise RuntimeError("protocol differs from the frozen VUS-PR plan")
+
+    source_paths = {
+        "scripts/stage_vuspr_search.py": Path(__file__).resolve(),
+        "STAGE/stage.py": repo / "STAGE" / "stage.py",
+        "common.py": repo / "common.py",
+    }
+    if set(plan.get("source_sha256", {})) != set(source_paths):
+        raise RuntimeError("frozen VUS-PR plan source set is invalid")
+    for name, source_path in source_paths.items():
+        if (
+            not source_path.is_file()
+            or sha256_file(source_path) != plan["source_sha256"][name]
+        ):
+            raise RuntimeError(f"source hash drift in frozen plan: {name}")
+
+    manifest_hashes = plan.get("official_tuning_manifest_sha256")
+    if not isinstance(manifest_hashes, Mapping):
+        raise RuntimeError("frozen VUS-PR plan lacks manifest hashes")
+    for track, expected_hash in manifest_hashes.items():
+        manifest = repo / "data" / "File_List" / f"TSB-AD-{track}-Tuning.csv"
+        if not manifest.is_file() or sha256_file(manifest) != expected_hash:
+            raise RuntimeError(f"official {track} Tuning manifest hash drift")
+
+    evaluator_root, evaluator_hashes = _evaluator_source_hashes(metrics_root)
+    evaluator_plan = plan.get("official_evaluator")
+    if not isinstance(evaluator_plan, Mapping) or (
+        evaluator_plan.get("root_name") != evaluator_root.name
+        or evaluator_plan.get("source_sha256") != evaluator_hashes
+    ):
+        raise RuntimeError("official evaluator differs from the frozen VUS-PR plan")
+    return dict(plan)
+
+
+def _data_preflight_stable(payload: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        str(key): value
+        for key, value in payload.items()
+        if key not in {"preflight_fingerprint", "completed_at"}
+    }
+
+
+def ensure_data_preflight(
+    repo: Path,
+    result_root: Path,
+    plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Hash every frozen Tuning CSV once per result root, not once per unit."""
+
+    stable = {
+        "schema_version": "stage-vuspr-data-preflight-v1",
+        "status": "complete",
+        "plan_fingerprint": plan["plan_fingerprint"],
+        "data_sha256": plan["data_sha256"],
+    }
+    expected_fingerprint = fingerprint(stable)
+    target = result_root / DATA_PREFLIGHT_NAME
+    if target.is_file():
+        prior = load_json(target)
+        if (
+            fingerprint(_data_preflight_stable(prior)) != expected_fingerprint
+            or prior.get("preflight_fingerprint") != expected_fingerprint
+        ):
+            raise RuntimeError("existing Tuning data preflight is invalid")
+        return prior
+
+    def verify(item: tuple[str, str]) -> None:
+        data_key, expected_hash = item
+        track, _dataset, file_name = data_key.split("/", 2)
+        path = repo / "data" / f"TSB-AD-{track}" / file_name
+        if not path.is_file() or sha256_file(path) != expected_hash:
+            raise RuntimeError(f"Tuning data hash drift during preflight: {data_key}")
+
+    items = list(plan["data_sha256"].items())
+    with ThreadPoolExecutor(max_workers=min(8, len(items))) as pool:
+        futures = [pool.submit(verify, item) for item in items]
+        for future in as_completed(futures):
+            future.result()
+    payload = {
+        **stable,
+        "preflight_fingerprint": expected_fingerprint,
+        "completed_at": utc_now(),
+    }
+    atomic_json(target, payload)
+    return payload
+
+
+def _runtime_preflight_stable(payload: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        str(key): value
+        for key, value in payload.items()
+        if key not in {"preflight_fingerprint", "completed_at"}
+    }
+
+
+def ensure_runtime_preflight(
+    result_root: Path,
+    plan: Mapping[str, Any],
+    data_preflight: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Freeze the one-time parent audits into a small worker trust token."""
+
+    plan_path = result_root / PLAN_NAME
+    stable = {
+        "schema_version": "stage-vuspr-runtime-preflight-v1",
+        "status": "complete",
+        "plan_fingerprint": plan["plan_fingerprint"],
+        "plan_sha256": sha256_file(plan_path),
+        "protocol_sha256": plan["protocol_sha256"],
+        "source_sha256": plan["source_sha256"],
+        "official_tuning_manifest_sha256": plan[
+            "official_tuning_manifest_sha256"
+        ],
+        "official_evaluator": plan["official_evaluator"],
+        "data_preflight_fingerprint": data_preflight["preflight_fingerprint"],
+    }
+    expected_fingerprint = fingerprint(stable)
+    target = result_root / RUNTIME_PREFLIGHT_NAME
+    if target.is_file():
+        prior = load_json(target)
+        if (
+            prior.get("preflight_fingerprint") != expected_fingerprint
+            or fingerprint(_runtime_preflight_stable(prior))
+            != expected_fingerprint
+        ):
+            raise RuntimeError("existing runtime preflight is invalid")
+        return prior
+    payload = {
+        **stable,
+        "preflight_fingerprint": expected_fingerprint,
+        "completed_at": utc_now(),
+    }
+    atomic_json(target, payload)
+    return payload
+
+
+def ensure_plan(
+    repo: Path, protocol_path: Path, metrics_root: Path, result_root: Path
+) -> dict[str, Any]:
+    target = result_root / PLAN_NAME
+    if target.is_file():
+        return validate_frozen_plan_identity(
+            repo, protocol_path, metrics_root, load_json(target)
+        )
+
+    stable = _plan_stable_payload(repo, protocol_path, metrics_root)
+    plan = {
+        **stable,
+        "plan_fingerprint": fingerprint(stable),
+        "created_at": utc_now(),
+    }
+    atomic_json(target, plan)
+    return plan
 
 
 def load_frozen_plan_for_worker(
@@ -769,11 +938,10 @@ def load_frozen_plan_for_worker(
 ) -> dict[str, Any]:
     """Validate a frozen plan without rescanning every manifest/data file.
 
-    The parent performs the expensive all-data plan scan once.  A worker
-    verifies the frozen plan itself, the exact protocol and code/evaluator
-    sources, task membership, and only its own Tuning CSV.  This both avoids
-    an O(all-data) preamble for every unit and prevents workers from silently
-    regenerating a plan under a parent-held controller lock.
+    The parent verifies protocol/source/evaluator identity and all Tuning CSV
+    hashes once.  Each worker then checks the byte hash of that frozen plan and
+    the two preflight tokens before validating task membership.  This avoids
+    repeating the same source/data scans for hundreds of units.
     """
 
     plan_path = result_root / PLAN_NAME
@@ -789,53 +957,25 @@ def load_frozen_plan_for_worker(
         "runtime_eligible_for_paper": False,
     }:
         raise RuntimeError("frozen worker plan has the wrong execution environment")
-    stable = _stable_plan_from_frozen(plan)
-    if fingerprint(stable) != plan.get("plan_fingerprint"):
-        raise RuntimeError("frozen worker plan fingerprint is invalid")
-
-    protocol, protocol_sha256, protocol_fingerprint = load_and_validate_protocol(
-        protocol_path
-    )
+    runtime_preflight_path = result_root / RUNTIME_PREFLIGHT_NAME
+    if not runtime_preflight_path.is_file():
+        raise RuntimeError("worker requires the completed runtime preflight")
+    runtime_preflight = load_json(runtime_preflight_path)
     if (
-        protocol_sha256 != plan.get("protocol_sha256")
-        or protocol_fingerprint != plan.get("protocol_fingerprint")
-        or protocol.get("phase") != plan.get("phase")
+        runtime_preflight.get("preflight_fingerprint")
+        != fingerprint(_runtime_preflight_stable(runtime_preflight))
+        or runtime_preflight.get("plan_fingerprint")
+        != plan.get("plan_fingerprint")
+        or runtime_preflight.get("plan_sha256") != sha256_file(plan_path)
+        or runtime_preflight.get("protocol_sha256")
+        != plan.get("protocol_sha256")
+        or runtime_preflight.get("source_sha256") != plan.get("source_sha256")
+        or runtime_preflight.get("official_tuning_manifest_sha256")
+        != plan.get("official_tuning_manifest_sha256")
+        or runtime_preflight.get("official_evaluator")
+        != plan.get("official_evaluator")
     ):
-        raise RuntimeError("protocol differs from the frozen worker plan")
-
-    source_paths = {
-        "scripts/stage_vuspr_search.py": Path(__file__).resolve(),
-        "STAGE/stage.py": repo / "STAGE" / "stage.py",
-        "common.py": repo / "common.py",
-    }
-    if set(plan.get("source_sha256", {})) != set(source_paths):
-        raise RuntimeError("frozen plan source set is invalid")
-    for name, source_path in source_paths.items():
-        if not source_path.is_file() or sha256_file(source_path) != plan["source_sha256"][name]:
-            raise RuntimeError(f"source hash drift in worker: {name}")
-
-    manifest_hashes = plan.get("official_tuning_manifest_sha256")
-    if not isinstance(manifest_hashes, Mapping):
-        raise RuntimeError("frozen plan lacks official Tuning manifest hashes")
-    for manifest_track, expected_hash in manifest_hashes.items():
-        manifest = (
-            repo
-            / "data"
-            / "File_List"
-            / f"TSB-AD-{manifest_track}-Tuning.csv"
-        )
-        if not manifest.is_file() or sha256_file(manifest) != expected_hash:
-            raise RuntimeError(
-                f"official {manifest_track} Tuning manifest hash drift in worker"
-            )
-
-    evaluator_root, evaluator_hashes = _evaluator_source_hashes(metrics_root)
-    evaluator_plan = plan.get("official_evaluator")
-    if not isinstance(evaluator_plan, Mapping) or (
-        evaluator_plan.get("root_name") != evaluator_root.name
-        or evaluator_plan.get("source_sha256") != evaluator_hashes
-    ):
-        raise RuntimeError("official evaluator differs from the frozen worker plan")
+        raise RuntimeError("worker runtime preflight is invalid")
 
     if track not in plan.get("files", {}) or dataset not in plan["files"][track]:
         raise ValueError(f"task target is outside the frozen plan: {track}/{dataset}")
@@ -851,8 +991,25 @@ def load_frozen_plan_for_worker(
     )
     if not isinstance(expected_data_hash, str) or not data_path.is_file():
         raise RuntimeError("worker task lacks a frozen data source")
-    if sha256_file(data_path) != expected_data_hash:
-        raise RuntimeError(f"Tuning data hash drift: {data_path}")
+    data_preflight_path = result_root / DATA_PREFLIGHT_NAME
+    if not data_preflight_path.is_file():
+        raise RuntimeError("worker requires the completed Tuning data preflight")
+    data_preflight = load_json(data_preflight_path)
+    expected_preflight = {
+        "schema_version": "stage-vuspr-data-preflight-v1",
+        "status": "complete",
+        "plan_fingerprint": plan["plan_fingerprint"],
+        "data_sha256": plan["data_sha256"],
+    }
+    if (
+        data_preflight.get("preflight_fingerprint")
+        != fingerprint(expected_preflight)
+        or fingerprint(_data_preflight_stable(data_preflight))
+        != fingerprint(expected_preflight)
+        or runtime_preflight.get("data_preflight_fingerprint")
+        != data_preflight.get("preflight_fingerprint")
+    ):
+        raise RuntimeError("worker Tuning data preflight is invalid")
     return plan
 
 
@@ -1260,9 +1417,6 @@ def execute_unit(
 
     data_path = repo / "data" / f"TSB-AD-{track}" / file_name
     expected_data_hash = plan["data_sha256"][f"{track}/{dataset}/{file_name}"]
-    if sha256_file(data_path) != expected_data_hash:
-        raise RuntimeError(f"Tuning data hash drift: {data_path}")
-
     config_kwargs = dict(candidate["resolved_parameters"])
     config_kwargs.update(seed=int(seed), top_k=max(int(item) for item in plan["top_ks"]))
     training_config = stage_impl.StageConfig(**config_kwargs)
@@ -1270,14 +1424,29 @@ def execute_unit(
     device = torch.device("cuda:0")
 
     values, train_index, label_column = stage_impl.load_series(data_path)
+    series_metadata = plan["series_metadata"][f"{track}/{dataset}/{file_name}"]
+    if (
+        int(len(values)) != int(series_metadata["points"])
+        or int(values.shape[1]) != int(series_metadata["channels"])
+        or int(train_index) != int(series_metadata["train_index"])
+    ):
+        raise RuntimeError(f"Tuning series metadata drift: {data_path}")
     if train_index < training_config.patch_size + max(training_config.overlap_deltas):
         raise ValueError(f"training prefix is too short in {file_name}")
     stage_impl.seed_everything(seed)
     model = stage_impl.StageEncoder(values.shape[1], training_config).to(device)
     parameter_count = int(sum(parameter.numel() for parameter in model.parameters()))
     torch.cuda.reset_peak_memory_stats(device)
+    train_values = values[:train_index]
+    train_window_bank = stage_impl.DeviceWindowBank(
+        train_values, device, training_config.patch_size
+    )
     training = stage_impl.fit_encoder(
-        values[:train_index], model, device, training_config
+        train_values,
+        model,
+        device,
+        training_config,
+        window_bank=train_window_bank,
     )
     raw_starts = np.arange(
         train_index - training_config.patch_size + 1, dtype=np.int64
@@ -1287,11 +1456,12 @@ def execute_unit(
     )
     train_raw = stage_impl.extract_embeddings(
         model,
-        values[:train_index],
+        train_values,
         raw_starts,
         device,
         training_config,
         normalize=False,
+        window_bank=train_window_bank,
     )
     train_unit = train_raw / np.maximum(
         np.linalg.norm(train_raw, axis=1, keepdims=True), 1e-12
@@ -1304,7 +1474,8 @@ def execute_unit(
         training_config,
         normalize=True,
     )
-    sliding_window = stage_impl.estimate_sliding_window(values)
+    del train_window_bank
+    sliding_window = int(series_metadata["sliding_window"])
 
     pending_variants: list[dict[str, Any]] = []
     memory_diagnostics: list[dict[str, Any]] = []
@@ -1397,6 +1568,15 @@ def execute_unit(
             }
         )
 
+    # The remaining work is label loading plus CPU-only official metrics.  Drop
+    # model/embedding allocations before it starts so other workers can use the
+    # device while this process evaluates VUS-PR and the reporting metrics.
+    train_patches = int(len(train_unit))
+    full_patches = int(len(full_unit))
+    peak_cuda_bytes = int(torch.cuda.max_memory_allocated(device))
+    del model, train_raw, train_unit, full_unit
+    torch.cuda.empty_cache()
+
     # Labels are loaded only after training, memory construction, and every
     # anomaly-score vector have completed.  They are used solely by the
     # official Tuning evaluator and never feed back into this worker.
@@ -1438,10 +1618,10 @@ def execute_unit(
             "points": int(len(values)),
             "channels": int(values.shape[1]),
             "train_index": int(train_index),
-            "train_patches": int(len(train_unit)),
-            "full_patches": int(len(full_unit)),
+            "train_patches": train_patches,
+            "full_patches": full_patches,
             "parameter_count": parameter_count,
-            "peak_cuda_bytes": int(torch.cuda.max_memory_allocated(device)),
+            "peak_cuda_bytes": peak_cuda_bytes,
             "sliding_window": int(sliding_window),
             "training": training,
             "final_memories": memory_diagnostics,
@@ -1454,7 +1634,6 @@ def execute_unit(
         "completed_at": utc_now(),
     }
     atomic_json(target, payload)
-    del model, train_raw, train_unit, full_unit
     torch.cuda.empty_cache()
     return target
 
@@ -1567,7 +1746,7 @@ def _task_priority(
         * int(behavior["patch_size"])
         * int(behavior["channels"])
     )
-    data_bytes = (repo / "data" / f"TSB-AD-{track}" / file_name).stat().st_size
+    data_bytes = int(plan["series_metadata"][data_key]["data_bytes"])
     scoring_work = data_bytes * int(behavior["patch_size"]) * int(
         behavior["channels"]
     )
@@ -1592,6 +1771,8 @@ def run_parent(
     workers_per_gpu: int,
 ) -> dict[str, Any]:
     plan = ensure_plan(repo, protocol_path, metrics_root, result_root)
+    data_preflight = ensure_data_preflight(repo, result_root, plan)
+    ensure_runtime_preflight(result_root, plan, data_preflight)
     _assert_no_unplanned_unit_artifacts(result_root, plan)
     tasks: list[tuple[str, str, str, int, str]] = []
     for task in _iter_tasks(plan):

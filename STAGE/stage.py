@@ -215,6 +215,43 @@ def window_batch(values: np.ndarray, starts: np.ndarray, patch_size: int) -> tor
     return torch.from_numpy(np.transpose(patches, (0, 2, 1)).copy())
 
 
+class DeviceWindowBank:
+    """Keep one feature prefix on a device and gather windows without host copies.
+
+    Training revisits the same normal prefix for hundreds or thousands of
+    optimizer updates.  Rebuilding every batch with NumPy advanced indexing
+    makes the CPU copy and host-to-device transfer the throughput bottleneck.
+    ``unfold`` is a view, so this bank stores only the original feature tensor;
+    each requested batch is gathered directly on the target device.
+    """
+
+    def __init__(
+        self,
+        values: np.ndarray,
+        device: torch.device,
+        patch_size: int,
+    ) -> None:
+        array = np.ascontiguousarray(np.asarray(values, dtype=np.float32))
+        if array.ndim != 2 or len(array) < int(patch_size):
+            raise ValueError("device window bank received an invalid time series")
+        self.points = int(len(array))
+        self.channels = int(array.shape[1])
+        self.patch_size = int(patch_size)
+        self.device = torch.device(device)
+        self.values = torch.from_numpy(array).to(self.device)
+        self.windows = self.values.unfold(0, self.patch_size, 1)
+
+    def batch(self, starts: np.ndarray) -> torch.Tensor:
+        indices = np.asarray(starts, dtype=np.int64).reshape(-1)
+        if not len(indices):
+            raise ValueError("cannot construct an empty patch batch")
+        maximum = self.points - self.patch_size
+        if int(indices.min()) < 0 or int(indices.max()) > maximum:
+            raise IndexError("patch indices escape the device window bank")
+        positions = torch.as_tensor(indices, device=self.device, dtype=torch.long)
+        return self.windows.index_select(0, positions).contiguous()
+
+
 class PatchRevIN(nn.Module):
     """Per-patch, per-channel normalization without learnable affine terms."""
 
@@ -419,15 +456,26 @@ def extract_embeddings(
     config: StageConfig,
     *,
     normalize: bool = True,
+    window_bank: DeviceWindowBank | None = None,
 ) -> np.ndarray:
     model.eval()
     rows: list[np.ndarray] = []
     starts = np.asarray(starts, dtype=np.int64)
+    if window_bank is not None and (
+        window_bank.points != len(values)
+        or window_bank.patch_size != int(config.patch_size)
+        or window_bank.device != torch.device(device)
+    ):
+        raise ValueError("embedding window bank does not match values/config/device")
     with torch.inference_mode():
         for offset in range(0, len(starts), int(config.embedding_batch_size)):
             current = starts[offset : offset + int(config.embedding_batch_size)]
-            batch = window_batch(values, current, config.patch_size).to(
-                device=device, dtype=torch.float32, non_blocking=True
+            batch = (
+                window_batch(values, current, config.patch_size).to(
+                    device=device, dtype=torch.float32, non_blocking=True
+                )
+                if window_bank is None
+                else window_bank.batch(current)
             )
             _, embedding = model(batch)
             if normalize:
@@ -693,6 +741,8 @@ def fit_encoder(
     model: StageEncoder,
     device: torch.device,
     config: StageConfig,
+    *,
+    window_bank: DeviceWindowBank | None = None,
 ) -> dict[str, Any]:
     seed_everything(config.seed)
     model.train()
@@ -715,6 +765,14 @@ def fit_encoder(
         optimizer, T_max=max(1, effective_steps)
     )
     eligible_starts = np.arange(eligible_count, dtype=np.int64)
+    if window_bank is None:
+        window_bank = DeviceWindowBank(values, device, config.patch_size)
+    elif (
+        window_bank.points != len(values)
+        or window_bank.patch_size != int(config.patch_size)
+        or window_bank.device != torch.device(device)
+    ):
+        raise ValueError("training window bank does not match values/config/device")
     rng = np.random.default_rng(int(config.seed))
     gb_activation_step = int(round(effective_steps * config.gb_activation_fraction))
     gb_activation_step = min(max(1, gb_activation_step), max(1, effective_steps - 1))
@@ -738,6 +796,7 @@ def fit_encoder(
                 device,
                 config,
                 normalize=True,
+                window_bank=window_bank,
             )
             partition = build_granular_partition(
                 warm_embeddings, config, seed=int(config.seed) + 17
@@ -767,12 +826,8 @@ def fit_encoder(
                 minlength=len(partition.balls),
             )
         delta = int(config.overlap_deltas[step % len(config.overlap_deltas)])
-        left = window_batch(values, starts, config.patch_size).to(
-            device=device, dtype=torch.float32, non_blocking=True
-        )
-        right = window_batch(values, starts + delta, config.patch_size).to(
-            device=device, dtype=torch.float32, non_blocking=True
-        )
+        left = window_bank.batch(starts)
+        right = window_bank.batch(starts + delta)
         optimizer.zero_grad(set_to_none=True)
         tokens_left = model.encode_tokens(left)
         tokens_right = model.encode_tokens(right)
@@ -959,16 +1014,33 @@ def official_metrics(
     for candidate in (root, root / "PaAno"):
         if str(candidate) not in sys.path:
             sys.path.insert(0, str(candidate))
-    module = importlib.import_module("PaAno.utils.metrics")
-    result = module.get_metrics(
-        np.asarray(scores, dtype=np.float64),
-        np.asarray(labels, dtype=np.int64),
-        slidingWindow=int(sliding_window),
-        pred=None,
-        version="opt",
-        thre=250,
+    # ``PaAno.utils.metrics.get_metrics`` also computes PA-F1, Event-F1 and
+    # Affiliation-F, none of which belongs to the frozen six-metric protocol.
+    # Call the exact same official primitives and arguments for the six needed
+    # values, avoiding those three unused CPU-heavy calculations.
+    basic = importlib.import_module("PaAno.utils.basic_metrics")
+    score = np.asarray(scores, dtype=np.float64)
+    target = np.asarray(labels, dtype=np.int64)
+    grader = basic.basic_metricor()
+    auc_roc = grader.metric_ROC(target, score)
+    auc_pr = grader.metric_PR(target, score)
+    _, _, _, _, _, _, vus_roc, vus_pr = basic.generate_curve(
+        target,
+        score,
+        int(sliding_window),
+        "opt",
+        250,
     )
-    return {name: float(result[name]) for name in SIX_METRICS}
+    point_f1 = grader.metric_PointF1(target, score, preds=None)
+    range_f1 = grader.metric_RF1(target, score, preds=None)
+    return {
+        "VUS-PR": float(vus_pr),
+        "VUS-ROC": float(vus_roc),
+        "R-based-F1": float(range_f1),
+        "AUC-PR": float(auc_pr),
+        "AUC-ROC": float(auc_roc),
+        "Standard-F1": float(point_f1),
+    }
 
 
 def evaluate_series(
@@ -989,12 +1061,27 @@ def evaluate_series(
     parameter_count = int(sum(parameter.numel() for parameter in model.parameters()))
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
-    training = fit_encoder(values[:train_index], model, device, config)
+    train_values = values[:train_index]
+    train_window_bank = DeviceWindowBank(train_values, device, config.patch_size)
+    training = fit_encoder(
+        train_values,
+        model,
+        device,
+        config,
+        window_bank=train_window_bank,
+    )
     raw_starts = np.arange(train_index - config.patch_size + 1, dtype=np.int64)
     full_starts = np.arange(len(values) - config.patch_size + 1, dtype=np.int64)
     train_raw = extract_embeddings(
-        model, values[:train_index], raw_starts, device, config, normalize=False
+        model,
+        train_values,
+        raw_starts,
+        device,
+        config,
+        normalize=False,
+        window_bank=train_window_bank,
     )
+    del train_window_bank
     train_unit = train_raw / np.maximum(np.linalg.norm(train_raw, axis=1, keepdims=True), 1e-12)
     full_unit = extract_embeddings(model, values, full_starts, device, config, normalize=True)
 

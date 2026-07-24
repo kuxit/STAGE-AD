@@ -6,6 +6,7 @@ FORMAL="${STAGE_FORMAL_REPO:-/root/autodl-tmp/STAGE-AD}"
 PYTHON="${STAGE_PYTHON:-/root/autodl-tmp/envs/stage-py310/bin/python}"
 RESULT_ROOT="${STAGE_VUSPR_RESULT_ROOT:-/root/autodl-tmp/results/STAGE_vuspr_tuning/stage1a_seed2026}"
 PROTOCOL="$APP/configs/stage_vuspr_stage1a.json"
+PRECOMPUTED_PLAN="$APP/configs/stage_vuspr_stage1a_plan.json"
 METRICS_ROOT="$FORMAL/external"
 DATA_SOURCE="$FORMAL/data"
 
@@ -14,6 +15,7 @@ git -C "$APP" rev-parse --is-inside-work-tree >/dev/null
 test -d "$DATA_SOURCE"
 test -d "$METRICS_ROOT"
 test -f "$PROTOCOL"
+test -f "$PRECOMPUTED_PLAN"
 
 if [[ -n "$(git -C "$APP" status --porcelain)" ]]; then
   echo "refusing to run from a dirty STAGE VUS-PR worktree" >&2
@@ -47,6 +49,9 @@ if [[ "$available_kb" -lt 15728640 ]]; then
 fi
 
 mkdir -p "$RESULT_ROOT"
+if [[ ! -e "$RESULT_ROOT/stage_vuspr_search_plan.json" ]]; then
+  cp "$PRECOMPUTED_PLAN" "$RESULT_ROOT/stage_vuspr_search_plan.json"
+fi
 
 "$PYTHON" "$APP/scripts/stage_vuspr_search.py" \
   --repo "$APP" \
@@ -54,6 +59,33 @@ mkdir -p "$RESULT_ROOT"
   --result-root "$RESULT_ROOT" \
   --metrics-root "$METRICS_ROOT" \
   plan
+
+if [[ -n "${STAGE_WORKERS_PER_GPU:-}" ]]; then
+  workers_per_gpu="$STAGE_WORKERS_PER_GPU"
+else
+  minimum_memory_mib="$(
+    nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits \
+      | awk 'NR == 1 {minimum=$1} $1 < minimum {minimum=$1} END {print int(minimum)}'
+  )"
+  if [[ "$minimum_memory_mib" -ge 40000 ]]; then
+    workers_per_gpu=8
+  elif [[ "$minimum_memory_mib" -ge 22000 ]]; then
+    workers_per_gpu=6
+  elif [[ "$minimum_memory_mib" -ge 14000 ]]; then
+    workers_per_gpu=4
+  else
+    workers_per_gpu=3
+  fi
+fi
+if ! [[ "$workers_per_gpu" =~ ^[1-9][0-9]*$ ]]; then
+  echo "STAGE_WORKERS_PER_GPU must be a positive integer" >&2
+  exit 1
+fi
+
+export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
+export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"
+export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
+echo "launching STAGE with ${workers_per_gpu} workers/GPU on ${gpu_count} GPUs"
 
 exec "$PYTHON" "$APP/scripts/stage_vuspr_search.py" \
   --repo "$APP" \
@@ -63,4 +95,4 @@ exec "$PYTHON" "$APP/scripts/stage_vuspr_search.py" \
   run \
   --python "$PYTHON" \
   --gpus 0,1 \
-  --workers-per-gpu 3
+  --workers-per-gpu "$workers_per_gpu"

@@ -6,7 +6,7 @@
   "selection_split": "official TSB-AD Tuning only",
   "eval_feedback_used_by_runner": false,
   "confirmatory_claim_eligible": false,
-  "expected_source_sha256": "20a500b1b5a059334f7b3f13621f540b68c9f50a9e1e199ebff30381f20f5adc",
+  "expected_source_sha256": "43a8a8d5526d8a76f3632a34b5bb048e386723f58f41f84e5ef572eafb1c2ebe",
   "seeds": [2026],
   "targets": {
     "U": ["UCR", "Exathlon", "MSL", "SED", "TODS"],

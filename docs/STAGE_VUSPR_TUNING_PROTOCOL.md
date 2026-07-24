@@ -86,10 +86,15 @@ bash scripts/launch_stage_vuspr_stage1a.sh
 
 The launcher verifies a clean worktree, the frozen checksum manifest, the
 formal data/evaluator locations, two visible GPUs, and at least 15 GiB of free
-space. It freezes the plan before execution and then runs three isolated
-workers per GPU. The scheduler dispatches longest-estimated units first and
-interleaves GPU 0/1 lanes. Existing strictly valid unit JSONs are resumed;
-invalid existing units are never overwritten.
+space. The 528-unit task plan, data fingerprints, series metadata, and
+label-blind sliding-window values are precomputed locally. The server performs
+one data/runtime preflight, then starts 3--8 isolated workers per GPU according
+to device memory. Training windows are gathered directly from a device-resident
+prefix, and GPU allocations are released before CPU metric evaluation. The
+six-metric projection is exactly equal to the official PaAno `get_metrics`
+outputs while skipping three unused metrics. The scheduler dispatches
+longest-estimated units first and interleaves GPU 0/1 lanes. Existing strictly
+valid unit JSONs are resumed; invalid existing units are never overwritten.
 
 ## Interpretation
 
