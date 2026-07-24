@@ -8,7 +8,7 @@ This file intentionally contains the complete model-side pipeline:
 * a dilated residual token encoder;
 * exact-overlap cross-correlation learning with redundancy reduction;
 * a one-shot granular sampler and a final granular exemplar memory;
-* a small-data update-budget safeguard;
+* a fixed, protocol-declared optimizer-update budget for every series;
 * top-k squared unit-Euclidean patch scoring and overlap-to-point aggregation;
 * a portable command-line experiment runner.
 
@@ -673,18 +673,19 @@ def resolve_training_steps(
     batch_size: int,
     requested_steps: int,
 ) -> tuple[int, bool]:
-    """Cap undersized-series updates at ``ceil(N / batch)``."""
+    """Return the declared update budget for every valid training series.
+
+    Sampling is already performed with replacement when a series has fewer
+    eligible patches than ``batch_size``.  Reducing the optimizer-update count
+    for those series silently changes the training protocol and can leave the
+    geometry-guided phase with only one update.  The caller therefore always
+    receives ``requested_steps``; the boolean is retained for result-schema
+    compatibility and is always false.
+    """
 
     if eligible_count < 1 or batch_size < 1 or requested_steps < 1:
         raise ValueError("training-step inputs must be positive")
-    small_data_update_cap = eligible_count < 2 * batch_size
-    if not small_data_update_cap:
-        return requested_steps, False
-    effective_steps = min(
-        requested_steps,
-        max(1, math.ceil(eligible_count / float(batch_size))),
-    )
-    return effective_steps, True
+    return requested_steps, False
 
 
 def fit_encoder(

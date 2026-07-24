@@ -5,6 +5,29 @@ STAGE, a framework for debiased time-series anomaly detection. It contains the
 model, frozen experiment controller, per-method adapters, protocol, local
 validation evidence, and server deployment entry point.
 
+## Active development protocol (2026-07-24)
+
+The active branch is `stage-vuspr-tuning`. It runs STAGE only; every baseline
+result is read-only. The new protocol fixes the short-series update-budget bug
+and selects training/head parameters separately for all ten datasets using
+official-Tuning macro VUS-PR only.
+
+- Protocol: [`configs/stage_vuspr_stage1a.json`](configs/stage_vuspr_stage1a.json)
+- Runner: [`scripts/stage_vuspr_search.py`](scripts/stage_vuspr_search.py)
+- Strict watcher: [`scripts/stage_vuspr_watch.py`](scripts/stage_vuspr_watch.py)
+- Scientific and execution contract:
+  [`docs/STAGE_VUSPR_TUNING_PROTOCOL.md`](docs/STAGE_VUSPR_TUNING_PROTOCOL.md)
+- Strict local audit:
+  [`validation/audit_stage_vuspr_plan.py`](validation/audit_stage_vuspr_plan.py)
+- Local unit/plan/GPU evidence:
+  [`validation/stage_vuspr_local_00gwk_validation.json`](validation/stage_vuspr_local_00gwk_validation.json)
+- Dual-GPU Stage1A launcher:
+  [`scripts/launch_stage_vuspr_stage1a.sh`](scripts/launch_stage_vuspr_stage1a.sh)
+
+Do not use the older v1/v2 lock for a new Eval. Do not start a server run until
+the local tests, plan audit, deterministic GPU smoke, checksum manifest, and
+repository artifact scan all pass.
+
 Start here:
 
 - [`protocol.json`](protocol.json): active no-KNN scientific protocol.

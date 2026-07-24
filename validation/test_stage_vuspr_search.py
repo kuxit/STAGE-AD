@@ -14,18 +14,18 @@ import numpy as np
 import torch
 
 from STAGE import stage as stage_impl
-from scripts import stage_v2_search as search
+from scripts import stage_vuspr_search as search
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PROTOCOL = ROOT / "configs" / "stage_v2_stage1_posthoc.json"
+PROTOCOL = ROOT / "configs" / "stage_vuspr_stage1a.json"
 
 
-class StageV2SearchTests(unittest.TestCase):
+class StageVUSPRSearchTests(unittest.TestCase):
     def test_repository_protocol_and_full_stage1a_plan_validate(self) -> None:
         protocol, _, _ = search.load_and_validate_protocol(PROTOCOL)
         self.assertEqual(protocol["phase"], "stage1a")
-        self.assertEqual(len(protocol["training_candidates"]), 16)
+        self.assertEqual(len(protocol["training_candidates"]), 24)
         self.assertEqual(protocol["final_gb_min_splits"], [4])
         self.assertEqual(protocol["top_ks"], [3])
 
@@ -60,8 +60,8 @@ class StageV2SearchTests(unittest.TestCase):
 
             plan = search._plan_stable_payload(repo, PROTOCOL, metrics)
             self.assertEqual(plan["series_count"], 22)
-            self.assertEqual(plan["expected_logical_units"], 352)
-            self.assertLessEqual(plan["expected_units"], 352)
+            self.assertEqual(plan["expected_logical_units"], 528)
+            self.assertEqual(plan["expected_units"], 528)
             self.assertEqual(plan["variants_per_unit"], 1)
 
     def test_protocol_rejects_candidate_scoring_axis(self) -> None:
@@ -70,15 +70,13 @@ class StageV2SearchTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must not set axes"):
             search.validate_protocol_payload(payload)
 
-    def test_stage1b_candidate_scope_unions_subset_and_track_shortlists(self) -> None:
+    def test_stage1b_candidate_scope_is_dataset_specific(self) -> None:
         payload = search.load_json(PROTOCOL)
         identifiers = [item["id"] for item in payload["training_candidates"]]
         payload["phase"] = "stage1b"
         payload["seeds"] = [2027, 2028]
         payload["prior_summary"] = {"path": "stage1a.json", "sha256": "0" * 64}
         payload["training_shortlists"] = {
-            "U/__track__": identifiers[:3],
-            "M/__track__": identifiers[3:6],
             **{
                 f"{track}/{dataset}": identifiers[6:9]
                 for track, datasets in payload["targets"].items()
@@ -91,7 +89,7 @@ class StageV2SearchTests(unittest.TestCase):
         protocol = search.validate_protocol_payload(payload)
         self.assertEqual(
             search._candidate_ids_for_subset(protocol, "U", "UCR"),
-            [*identifiers[6:9], *identifiers[:3]],
+            identifiers[6:9],
         )
         self.assertEqual(
             search._candidate_ids_for_subset(protocol, "U", "SED"), identifiers[:3]
@@ -100,7 +98,7 @@ class StageV2SearchTests(unittest.TestCase):
             search._candidate_ids_for_subset(protocol, "M", "CATSv2"), identifiers[3:6]
         )
 
-    def test_short_series_execution_signature_deduplicates_effective_training(self) -> None:
+    def test_short_series_keeps_declared_training_budget(self) -> None:
         protocol, _, _ = search.load_and_validate_protocol(PROTOCOL)
         first = copy.deepcopy(protocol["training_candidates"][0])
         second = copy.deepcopy(first)
@@ -114,9 +112,92 @@ class StageV2SearchTests(unittest.TestCase):
         two, behavior_two = search.training_execution_signature(
             second, "x_UCR_tr_150_case.csv"
         )
-        self.assertEqual(one, two)
-        self.assertEqual(behavior_one, behavior_two)
-        self.assertTrue(behavior_one["short_series_update_cap"])
+        self.assertNotEqual(one, two)
+        self.assertNotEqual(behavior_one, behavior_two)
+        self.assertEqual(behavior_one["effective_steps"], 1000)
+        self.assertEqual(behavior_two["effective_steps"], 2000)
+        self.assertFalse(behavior_one["short_series_update_cap"])
+        self.assertFalse(behavior_two["short_series_update_cap"])
+
+    def test_selection_uses_vus_pr_only_then_canonical_id(self) -> None:
+        low_vus_high_other = {
+            metric: (0.40 if metric == "VUS-PR" else 1.0)
+            for metric in search.METRICS
+        }
+        high_vus_low_other = {
+            metric: (0.41 if metric == "VUS-PR" else 0.0)
+            for metric in search.METRICS
+        }
+        _, low_score = search._selection_statistics(low_vus_high_other)
+        _, high_score = search._selection_statistics(high_vus_low_other)
+        self.assertEqual(low_score, 0.40)
+        self.assertEqual(high_score, 0.41)
+        rows = [
+            {
+                "training_candidate_id": "z_candidate",
+                "selection_score": 0.41,
+            },
+            {
+                "training_candidate_id": "a_candidate",
+                "selection_score": 0.41,
+            },
+        ]
+        ranked = sorted(
+            rows, key=lambda row: search._ranking_key(row, candidate=True)
+        )
+        self.assertEqual(ranked[0]["training_candidate_id"], "a_candidate")
+
+    def test_scheduler_prioritizes_long_work_and_defaults_to_three_workers(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            data_dir = repo / "data" / "TSB-AD-U"
+            data_dir.mkdir(parents=True)
+            short_name = "x_UCR_tr_500_short.csv"
+            long_name = "x_UCR_tr_500_long.csv"
+            (data_dir / short_name).write_bytes(b"x" * 10)
+            (data_dir / long_name).write_bytes(b"x" * 100)
+            short_signature = "a" * 64
+            long_signature = "b" * 64
+            plan = {
+                "execution_behaviors": {
+                    f"U/UCR/{short_name}": {
+                        short_signature: {
+                            "effective_steps": 750,
+                            "batch_size": 64,
+                            "patch_size": 48,
+                            "channels": 64,
+                        }
+                    },
+                    f"U/UCR/{long_name}": {
+                        long_signature: {
+                            "effective_steps": 2000,
+                            "batch_size": 128,
+                            "patch_size": 96,
+                            "channels": 128,
+                        }
+                    },
+                }
+            }
+            short_task = ("U", "UCR", short_name, 2026, short_signature)
+            long_task = ("U", "UCR", long_name, 2026, long_signature)
+            ordered = sorted(
+                [short_task, long_task],
+                key=lambda item: search._task_priority(plan, repo, item),
+            )
+            self.assertEqual(ordered[0], long_task)
+
+        args = search.parse_args(
+            [
+                "--protocol",
+                "protocol.json",
+                "--result-root",
+                "results",
+                "--metrics-root",
+                "external",
+                "run",
+            ]
+        )
+        self.assertEqual(args.workers_per_gpu, 3)
 
     def test_multi_k_cpu_matches_reference_including_clamping(self) -> None:
         rng = np.random.default_rng(7)
@@ -162,13 +243,17 @@ class StageV2SearchTests(unittest.TestCase):
                 "--physical-gpu",
                 "0",
             ]
-            with (
-                mock.patch.object(search, "controller_singleton") as controller,
-                mock.patch.object(search, "load_frozen_plan_for_worker", return_value={}),
-                mock.patch.object(search, "execute_unit", return_value=unit),
-            ):
-                self.assertEqual(search.main(argv), 0)
-                controller.assert_not_called()
+            with mock.patch.object(
+                search, "controller_singleton"
+            ) as controller:
+                with mock.patch.object(
+                    search, "load_frozen_plan_for_worker", return_value={}
+                ):
+                    with mock.patch.object(
+                        search, "execute_unit", return_value=unit
+                    ):
+                        self.assertEqual(search.main(argv), 0)
+                        controller.assert_not_called()
 
     def test_worker_determinism_environment_is_fail_stop(self) -> None:
         prior = torch.are_deterministic_algorithms_enabled()
@@ -193,7 +278,7 @@ class StageV2SearchTests(unittest.TestCase):
         finally:
             torch.use_deterministic_algorithms(prior)
 
-    def test_stage1a_summary_freezes_distinct_top3_and_track_fallbacks(self) -> None:
+    def test_stage1a_summary_freezes_dataset_specific_top3(self) -> None:
         candidates = [
             {"id": f"c{index}", "config_fingerprint": str(index) * 64}
             for index in range(4)
@@ -264,18 +349,20 @@ class StageV2SearchTests(unittest.TestCase):
                         ]
                     },
                 )
-            with (
-                mock.patch.object(search, "ensure_plan", return_value=plan),
-                mock.patch.object(search, "valid_unit", return_value=True),
+            with mock.patch.object(
+                search, "ensure_plan", return_value=plan
             ):
-                summary = search.summarize_results(
-                    ROOT, PROTOCOL, result_root, ROOT
-                )
+                with mock.patch.object(search, "valid_unit", return_value=True):
+                    summary = search.summarize_results(
+                        ROOT, PROTOCOL, result_root, ROOT
+                    )
             shortlists = summary["selection"]["training_shortlists"]
             self.assertEqual(shortlists["U/UCR"], ["c0", "c1", "c2"])
-            self.assertEqual(shortlists["U/SED"], shortlists["U/__track__"])
-            self.assertEqual(shortlists["M/CATSv2"], shortlists["M/__track__"])
-            self.assertEqual(shortlists["M/LTDB"], shortlists["M/__track__"])
+            self.assertEqual(shortlists["U/SED"], ["c0", "c1", "c2"])
+            self.assertEqual(shortlists["M/CATSv2"], ["c0", "c1", "c2"])
+            self.assertEqual(shortlists["M/LTDB"], ["c0", "c1", "c2"])
+            self.assertNotIn("U/__track__", shortlists)
+            self.assertNotIn("M/__track__", shortlists)
             self.assertTrue((result_root / search.SELECTION_JSON_NAME).is_file())
 
 

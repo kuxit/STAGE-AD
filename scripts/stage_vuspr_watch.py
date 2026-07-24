@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Read-only, strict progress audit for a frozen STAGE v2 search.
+"""Read-only strict progress audit for a frozen STAGE VUS-PR search.
 
 The scanner deliberately does not call ``ensure_plan`` and never writes into
 the result tree.  Existing physical unit JSONs are validated by importing and
-calling :func:`scripts.stage_v2_search.valid_unit`; no reduced unit schema is
+calling :func:`scripts.stage_vuspr_search.valid_unit`; no reduced unit schema is
 maintained here.  Missing planned units are normal for a partial scan.
 
 Only frozen TSB-AD Tuning metadata and byte-level hashes are inspected.  The
@@ -27,10 +27,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts import stage_v2_search as search  # noqa: E402
+from scripts import stage_vuspr_search as search  # noqa: E402
 
 
-WATCH_SCHEMA = "stage-v2-search-watch-v1"
+WATCH_SCHEMA = "stage-vuspr-search-watch-v1"
 FORBIDDEN_SUFFIXES = {".npy", ".npz", ".pt", ".pth", ".ckpt", ".joblib", ".pkl"}
 FORBIDDEN_DIRECTORY_NAMES = {
     "checkpoint",
@@ -119,7 +119,7 @@ def validate_frozen_plan(
         checks["protocol"] = {"match": False}
 
     source_paths = {
-        "scripts/stage_v2_search.py": Path(search.__file__).resolve(),
+        "scripts/stage_vuspr_search.py": Path(search.__file__).resolve(),
         "STAGE/stage.py": repo / "STAGE" / "stage.py",
         "common.py": repo / "common.py",
     }
@@ -449,7 +449,7 @@ def process_status(pid_file: Path | None, proc_root: Path = Path("/proc")) -> di
                 )
             except OSError:
                 continue
-            if b"stage_v2_search.py" in command and b"_worker" in command:
+            if b"stage_vuspr_search.py" in command and b"_worker" in command:
                 workers.append(candidate)
         status["worker_count"] = len(workers)
         status["worker_pids"] = workers

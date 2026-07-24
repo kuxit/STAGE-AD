@@ -42,10 +42,14 @@ results/staging/
 # Raw data and archives belong outside this repository
 data/
 datasets/
+# Server launchers may use an ignored symlink with this exact name.
+data
 
 # Exact upstream commits are declared in dependencies.lock.json and fetched
 # locally. Third-party source trees are not redistributed in this repository.
 external/
+# The evaluator may likewise be linked from the frozen formal repository.
+external
 
 # OS/editor noise
 .DS_Store

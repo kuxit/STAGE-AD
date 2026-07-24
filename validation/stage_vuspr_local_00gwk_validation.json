@@ -1,0 +1,64 @@
+{
+  "schema_version": "stage-vuspr-local-validation-v1",
+  "status": "pass",
+  "purpose": "local protocol and execution smoke only",
+  "formal_result": false,
+  "runtime_eligible_for_paper": false,
+  "environment": {
+    "name": "00gwk",
+    "python": "3.8.20",
+    "torch": "2.4.1+cu118",
+    "numpy": "1.24.4",
+    "scipy": "1.10.1",
+    "pandas": "2.0.3",
+    "scikit_learn": "1.3.2",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU"
+  },
+  "unit_tests": {
+    "framework": "unittest",
+    "passed": 13,
+    "failed": 0,
+    "modules": [
+      "validation.test_stage_vuspr_search",
+      "validation.test_stage_vuspr_watch"
+    ]
+  },
+  "plan_audit": {
+    "selection_split": "official TSB-AD Tuning only",
+    "selection_score": "macro mean VUS-PR only",
+    "tie_breakers": [
+      "canonical_id"
+    ],
+    "eval_feedback": false,
+    "training_candidates": 24,
+    "series": 22,
+    "physical_units": 528,
+    "logical_units": 528,
+    "short_series_caps": 0,
+    "minimum_updates": 750,
+    "maximum_updates": 2000,
+    "protocol_sha256": "28d14f2c346209f1d6f2b5a44ffe5bb8235d2f027afc0c647b7c3254cd77b83a",
+    "protocol_fingerprint": "2e7e70bf879d4558e5b1f79a63c7c460f219aeede047161030caa4cf2201b256",
+    "plan_fingerprint": "b1bc1a7633c6957a3c34b3336c2ccfb45d48c9fe880898c8387f66a05ec1bfd8"
+  },
+  "gpu_smoke": {
+    "split": "Tuning",
+    "file": "291_TODS_id_5_Synthetic_tr_500_1st_11.csv",
+    "seed": 2026,
+    "requested_steps": 6,
+    "executed_steps": 6,
+    "short_series_update_cap": false,
+    "final_memory_rows": 168,
+    "six_metrics": {
+      "VUS-PR": 0.8254296947496911,
+      "VUS-ROC": 0.9121332591556519,
+      "R-based-F1": 0.11193112688346675,
+      "AUC-PR": 0.07334840678666522,
+      "AUC-ROC": 0.5825266659066893,
+      "Standard-F1": 0.12858033344381437
+    },
+    "repeat_metrics_exact": true,
+    "repeat_final_memory_rows_exact": true
+  },
+  "source_sha256": "20a500b1b5a059334f7b3f13621f540b68c9f50a9e1e199ebff30381f20f5adc"
+}

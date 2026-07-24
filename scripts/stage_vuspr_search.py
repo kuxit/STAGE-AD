@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Leakage-safe, explicit-plan STAGE v2 search on official TSB-AD Tuning.
+"""Leakage-safe STAGE search selected by official-Tuning VUS-PR only.
 
 Each unit trains one encoder for a unique
 ``(track, dataset, file, seed, training_candidate)`` key.  The worker extracts
@@ -53,29 +53,21 @@ from common import METRICS, atomic_json, dataset_name  # noqa: E402
 from STAGE import stage as stage_impl  # noqa: E402
 
 
-PROTOCOL_SCHEMA = "stage-v2-posthoc-search-v1"
-PLAN_SCHEMA = "stage-v2-search-plan-v1"
-UNIT_SCHEMA = "stage-v2-search-unit-v1"
-SUMMARY_SCHEMA = "stage-v2-search-summary-v1"
-PLAN_NAME = "stage_v2_search_plan.json"
-STATUS_NAME = "stage_v2_search_status.json"
-SUMMARY_JSON_NAME = "stage_v2_search_summary.json"
-SUMMARY_CSV_NAME = "stage_v2_search_summary.csv"
-SELECTION_JSON_NAME = "stage_v2_search_selection.json"
-CONTROLLER_LOCK_NAME = ".stage_v2_search.lock"
+PROTOCOL_SCHEMA = "stage-vuspr-search-v1"
+PLAN_SCHEMA = "stage-vuspr-search-plan-v1"
+UNIT_SCHEMA = "stage-vuspr-search-unit-v1"
+SUMMARY_SCHEMA = "stage-vuspr-search-summary-v1"
+PLAN_NAME = "stage_vuspr_search_plan.json"
+STATUS_NAME = "stage_vuspr_search_status.json"
+SUMMARY_JSON_NAME = "stage_vuspr_search_summary.json"
+SUMMARY_CSV_NAME = "stage_vuspr_search_summary.csv"
+SELECTION_JSON_NAME = "stage_vuspr_search_selection.json"
+CONTROLLER_LOCK_NAME = ".stage_vuspr_search.lock"
 SELECTION_SPLIT = "official TSB-AD Tuning only"
-UNIT_KIND = "STAGE official-Tuning v2 search unit"
+UNIT_KIND = "STAGE official-Tuning VUS-PR search unit"
 
-DEFAULT_SELECTION_WEIGHTS: dict[str, float] = {
-    "VUS-PR": 2.0,
-    "VUS-ROC": 1.0,
-    "R-based-F1": 2.0,
-    "AUC-PR": 2.0,
-    "AUC-ROC": 1.0,
-    "Standard-F1": 2.0,
-}
-PR_F1_METRICS = ("VUS-PR", "R-based-F1", "AUC-PR", "Standard-F1")
-SINGLE_SERIES_FALLBACKS = {"U/SED", "M/CATSv2", "M/LTDB"}
+SELECTION_METRIC = "VUS-PR"
+SELECTION_TIE_BREAKERS = ("canonical_id",)
 EXPECTED_TARGETS = {
     "U": ["UCR", "Exathlon", "MSL", "SED", "TODS"],
     "M": ["CATSv2", "GHL", "LTDB", "SVDB", "TAO"],
@@ -83,9 +75,7 @@ EXPECTED_TARGETS = {
 EXPECTED_FINAL_SPLITS = [4, 16, 64, 256]
 EXPECTED_TOP_KS = [1, 3, 5, 9, 15]
 CUBLAS_WORKSPACE_CONFIG = ":4096:8"
-EXPECTED_SELECTION_SCORE = (
-    "0.5 * mean(all six) + 0.5 * mean(VUS-PR, R-based-F1, AUC-PR, Standard-F1)"
-)
+EXPECTED_SELECTION_SCORE = "macro mean VUS-PR only"
 
 INTEGER_CONFIG_FIELDS = {
     "patch_size",
@@ -282,22 +272,24 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         "stage1_head",
         "stage1_rule",
         "stage2_rule",
-        "single_series_fallback",
+        "dataset_specific_rule",
     }
     if not isinstance(raw_selection, Mapping) or set(raw_selection) != expected_selection_fields:
         raise ValueError(
             f"selection must contain exactly {sorted(expected_selection_fields)}"
         )
     if raw_selection.get("score") != EXPECTED_SELECTION_SCORE:
-        raise ValueError("selection.score differs from the frozen PR/F1-weighted rule")
-    if raw_selection.get("tie_breakers") != list(PR_F1_METRICS):
-        raise ValueError(f"selection.tie_breakers must be {list(PR_F1_METRICS)}")
+        raise ValueError("selection.score must be macro mean Tuning VUS-PR only")
+    if raw_selection.get("tie_breakers") != list(SELECTION_TIE_BREAKERS):
+        raise ValueError(
+            f"selection.tie_breakers must be {list(SELECTION_TIE_BREAKERS)}"
+        )
     if raw_selection.get("stage1_head") != {
         "final_gb_min_split": 4,
         "top_k": 3,
     }:
         raise ValueError("selection.stage1_head must remain final_min=4, top_k=3")
-    for name in ("stage1_rule", "stage2_rule", "single_series_fallback"):
+    for name in ("stage1_rule", "stage2_rule", "dataset_specific_rule"):
         if not isinstance(raw_selection.get(name), str) or not raw_selection[name].strip():
             raise ValueError(f"selection.{name} must be a non-empty governance statement")
 
@@ -390,8 +382,8 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             }
         )
 
-    if len(candidates) != 16:
-        raise ValueError("the frozen v2 protocol requires exactly 16 training candidates")
+    if not 8 <= len(candidates) <= 64:
+        raise ValueError("the VUS-PR protocol requires 8--64 frozen candidates")
     candidate_ids_set = {item["id"] for item in candidates}
     subset_keys = {
         f"{track}/{dataset}"
@@ -404,12 +396,10 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     raw_shortlists = payload.get("training_shortlists")
     training_shortlists: dict[str, list[str]] | None = None
     if phase == "stage1b":
-        required_shortlist_keys = subset_keys | {
-            f"{track}/__track__" for track in targets
-        }
+        required_shortlist_keys = subset_keys
         if not isinstance(raw_shortlists, Mapping) or set(raw_shortlists) != required_shortlist_keys:
             raise ValueError(
-                "stage1b training_shortlists must contain every subset and both track fallbacks"
+                "stage1b training_shortlists must contain every dataset subset"
             )
         training_shortlists = {}
         for key, value in raw_shortlists.items():
@@ -534,11 +524,8 @@ def _candidate_ids_for_subset(
         return all_ids
     if phase == "stage1b":
         shortlists = protocol["training_shortlists"]
-        source = [*shortlists[subset], *shortlists[f"{track}/__track__"]]
-        return list(dict.fromkeys(str(item) for item in source))
-    winner = str(protocol["training_winners"][subset])
-    track_winner = str(protocol["track_training_winners"][track])
-    return list(dict.fromkeys((winner, track_winner)))
+        return [str(item) for item in shortlists[subset]]
+    return [str(protocol["training_winners"][subset])]
 
 
 def training_execution_signature(
@@ -546,11 +533,9 @@ def training_execution_signature(
 ) -> tuple[str, dict[str, Any]]:
     """Fingerprint the behavior that actually reaches ``fit_encoder``.
 
-    Short series cap the requested update count.  Distinct requested ``steps``
-    or activation fractions can therefore execute exactly the same updates.
-    The signature replaces those requested values with their effective values,
-    allowing the plan to train one representative and fan its result out to all
-    equivalent candidates without hiding the equivalence.
+    Every series executes the protocol-declared update budget.  Requested steps
+    and activation fractions therefore remain part of the effective behavior
+    and cannot be silently deduplicated on short series.
     """
 
     config = stage_impl.StageConfig(
@@ -585,11 +570,6 @@ def _plan_stable_payload(
     prior_summary: dict[str, Any] | None = None
     if protocol["phase"] in {"stage1b", "stage2"}:
         prior_summary = _load_prior_summary(protocol, protocol_path)
-        if protocol["phase"] == "stage2":
-            protocol = dict(protocol)
-            protocol["track_training_winners"] = dict(
-                prior_summary["selection"]["track_training_winners"]
-            )
     files: dict[str, dict[str, list[str]]] = {}
     manifest_sha256: dict[str, str] = {}
     data_sha256: dict[str, str] = {}
@@ -630,8 +610,8 @@ def _plan_stable_payload(
         len(names) for datasets in files.values() for names in datasets.values()
     )
     if protocol["phase"] == "stage1a":
-        if len(protocol["training_candidates"]) != 16 or series_count != 22:
-            raise RuntimeError("stage1a governance requires exactly 16 candidates x 22 series")
+        if series_count != 22:
+            raise RuntimeError("stage1a governance requires the 22 frozen Tuning series")
 
     candidate_lookup = {
         str(item["id"]): item for item in protocol["training_candidates"]
@@ -688,7 +668,7 @@ def _plan_stable_payload(
         "protocol_sha256": protocol_sha256,
         "protocol_fingerprint": protocol_fingerprint,
         "source_sha256": {
-            "scripts/stage_v2_search.py": sha256_file(script_path),
+            "scripts/stage_vuspr_search.py": sha256_file(script_path),
             "STAGE/stage.py": actual_stage_hash,
             "common.py": sha256_file(common_path),
         },
@@ -721,7 +701,6 @@ def _plan_stable_payload(
         "shortlist_size": protocol["shortlist_size"],
         "training_shortlists": protocol["training_shortlists"],
         "training_winners": protocol["training_winners"],
-        "track_training_winners": protocol.get("track_training_winners"),
         "prior_summary": protocol["prior_summary"],
         "series_count": series_count,
         "expected_logical_units": expected_logical_units,
@@ -760,7 +739,9 @@ def ensure_plan(
             != prior.get("plan_fingerprint")
             or prior.get("plan_fingerprint") != plan["plan_fingerprint"]
         ):
-            raise RuntimeError(f"existing v2 plan differs; use a fresh result root: {target}")
+            raise RuntimeError(
+                f"existing VUS-PR plan differs; use a fresh result root: {target}"
+            )
         return prior
     atomic_json(target, plan)
     return plan
@@ -823,7 +804,7 @@ def load_frozen_plan_for_worker(
         raise RuntimeError("protocol differs from the frozen worker plan")
 
     source_paths = {
-        "scripts/stage_v2_search.py": Path(__file__).resolve(),
+        "scripts/stage_vuspr_search.py": Path(__file__).resolve(),
         "STAGE/stage.py": repo / "STAGE" / "stage.py",
         "common.py": repo / "common.py",
     }
@@ -1540,7 +1521,9 @@ def _run_lanes(
         return
     if workers_per_gpu < 1:
         raise ValueError("workers_per_gpu must be positive")
-    lanes = [gpu for gpu in gpus for _ in range(workers_per_gpu)]
+    # Interleave physical GPUs so the first dispatched tasks cannot all land on
+    # one device when worker startup times differ.
+    lanes = [gpu for _ in range(workers_per_gpu) for gpu in gpus]
     iterator = iter(tasks)
     iterator_lock = threading.Lock()
     stop = threading.Event()
@@ -1566,6 +1549,37 @@ def _run_lanes(
             future.result()
     if failures:
         raise RuntimeError(str(failures[0])) from failures[0]
+
+
+def _task_priority(
+    plan: Mapping[str, Any],
+    repo: Path,
+    task: tuple[str, str, str, int, str],
+) -> tuple[Any, ...]:
+    """Longest-estimated task first, with a canonical deterministic tie."""
+
+    track, dataset, file_name, seed, execution_signature = task
+    data_key = f"{track}/{dataset}/{file_name}"
+    behavior = plan["execution_behaviors"][data_key][execution_signature]
+    training_work = (
+        int(behavior["effective_steps"])
+        * int(behavior["batch_size"])
+        * int(behavior["patch_size"])
+        * int(behavior["channels"])
+    )
+    data_bytes = (repo / "data" / f"TSB-AD-{track}" / file_name).stat().st_size
+    scoring_work = data_bytes * int(behavior["patch_size"]) * int(
+        behavior["channels"]
+    )
+    estimated = training_work + scoring_work
+    return (
+        -int(estimated),
+        track,
+        dataset,
+        file_name,
+        int(seed),
+        execution_signature,
+    )
 
 
 def run_parent(
@@ -1602,6 +1616,7 @@ def run_parent(
                 continue
             raise RuntimeError(f"refusing to overwrite invalid existing unit: {target}")
         tasks.append(task)
+    tasks.sort(key=lambda item: _task_priority(plan, repo, item))
 
     total = int(plan["expected_units"])
     counter = {"value": total - len(tasks)}
@@ -1651,13 +1666,13 @@ def run_parent(
         )
         if completed.returncode:
             raise RuntimeError(
-                f"v2 unit failed on GPU {gpu} for {track}/{dataset}/{file_name} "
+                f"VUS-PR unit failed on GPU {gpu} for {track}/{dataset}/{file_name} "
                 f"seed={seed} execution={execution_signature}:\n{completed.stdout[-8000:]}"
             )
         with counter_lock:
             counter["value"] += 1
             print(
-                f"[v2 search {counter['value']}/{total}] GPU={gpu} "
+                f"[STAGE VUS-PR {counter['value']}/{total}] GPU={gpu} "
                 f"{track}/{dataset} seed={seed} execution={execution_signature[:12]} "
                 f"{file_name}",
                 flush=True,
@@ -1687,7 +1702,7 @@ def run_parent(
     if validated_units != total:
         raise RuntimeError("post-run unit audit count differs from the frozen plan")
     status = {
-        "schema_version": "stage-v2-search-status-v1",
+        "schema_version": "stage-vuspr-search-status-v1",
         "status": "complete",
         "expected_units": total,
         "expected_logical_units": int(plan["expected_logical_units"]),
@@ -1702,10 +1717,7 @@ def run_parent(
 
 def _selection_statistics(metric_means: Mapping[str, float]) -> tuple[float, float]:
     all6 = sum(float(metric_means[metric]) for metric in METRICS) / len(METRICS)
-    pr_f1 = sum(float(metric_means[metric]) for metric in PR_F1_METRICS) / len(
-        PR_F1_METRICS
-    )
-    return all6, 0.5 * all6 + 0.5 * pr_f1
+    return all6, float(metric_means[SELECTION_METRIC])
 
 
 def _aggregate_metric_rows(
@@ -1782,7 +1794,6 @@ def _ranking_key(row: Mapping[str, Any], *, candidate: bool) -> tuple[Any, ...]:
     )
     return (
         -float(row["selection_score"]),
-        *(-float(row[metric]) for metric in PR_F1_METRICS),
         identity,
     )
 
@@ -1906,12 +1917,6 @@ def _load_prior_summary(
         raise RuntimeError(
             "Stage2 training_winners differ from the frozen Stage1B selection"
         )
-    if plan["phase"] == "stage2":
-        track_winners = prior_selection.get("track_training_winners")
-        if not isinstance(track_winners, Mapping) or set(track_winners) != set(
-            plan["targets"]
-        ):
-            raise RuntimeError("prior Stage1B selection lacks track training winners")
     return summary
 
 
@@ -2146,7 +2151,7 @@ def summarize_results(
             row
             for row in selection_series_rows
             if row["training_candidate_id"]
-            == plan["track_training_winners"][row["track"]]
+            == plan["training_winners"][f"{row['track']}/{row['dataset']}"]
         ]
         track_seed_rows = _aggregate_metric_rows(track_selection_series, track_seed_fields)
         track_rows = _combine_seed_rows(track_seed_rows, track_fields)
@@ -2162,36 +2167,20 @@ def summarize_results(
         track_rows = _rank_groups(track_rows, ("track",), candidate=False)
 
     selection_payload: dict[str, Any] = {
-        "schema_version": "stage-v2-search-selection-v1",
+        "schema_version": "stage-vuspr-search-selection-v1",
         "phase": phase,
         "selection_split": SELECTION_SPLIT,
         "eval_feedback": False,
         "score": EXPECTED_SELECTION_SCORE,
-        "tie_breakers": list(PR_F1_METRICS),
+        "tie_breakers": list(SELECTION_TIE_BREAKERS),
         "plan_fingerprint": plan["plan_fingerprint"],
     }
     shortlist_size = int(plan["shortlist_size"])
     if phase == "stage1a":
-        track_shortlists: dict[str, list[str]] = {}
-        for track in plan["targets"]:
-            ranked = [row for row in track_rows if row["track"] == track]
-            track_shortlists[track] = _take_unique_training_candidates(
-                ranked,
-                lambda candidate_id, t=track: _track_execution_signature(
-                    plan, t, candidate_id
-                ),
-                shortlist_size,
-            )
-        training_shortlists: dict[str, list[str]] = {
-            f"{track}/__track__": values
-            for track, values in track_shortlists.items()
-        }
+        training_shortlists: dict[str, list[str]] = {}
         for track, datasets in plan["targets"].items():
             for dataset in datasets:
                 subset = f"{track}/{dataset}"
-                if subset in SINGLE_SERIES_FALLBACKS:
-                    training_shortlists[subset] = list(track_shortlists[track])
-                    continue
                 ranked = [
                     row
                     for row in rows
@@ -2210,25 +2199,9 @@ def summarize_results(
         expected_seeds = 3
         shortlist_map = plan["training_shortlists"]
         training_winners: dict[str, str] = {}
-        track_winners: dict[str, str] = {}
-        for track in plan["targets"]:
-            allowed = set(shortlist_map[f"{track}/__track__"])
-            ranked = [
-                row
-                for row in track_rows
-                if row["track"] == track
-                and row["training_candidate_id"] in allowed
-            ]
-            if not ranked or any(int(row["seeds"]) != expected_seeds for row in ranked):
-                raise RuntimeError(f"{track} track shortlist lacks three complete seeds")
-            ranked.sort(key=lambda row: _ranking_key(row, candidate=True))
-            track_winners[track] = str(ranked[0]["training_candidate_id"])
         for track, datasets in plan["targets"].items():
             for dataset in datasets:
                 subset = f"{track}/{dataset}"
-                if subset in SINGLE_SERIES_FALLBACKS:
-                    training_winners[subset] = track_winners[track]
-                    continue
                 allowed = set(shortlist_map[subset])
                 ranked = [
                     row
@@ -2247,7 +2220,6 @@ def summarize_results(
                 )
         selection_payload.update(
             training_winners=training_winners,
-            track_training_winners=track_winners,
             seeds=[2026, 2027, 2028],
         )
     else:
@@ -2256,22 +2228,9 @@ def summarize_results(
         ):
             raise RuntimeError("Stage2 head selection requires all three seeds")
         selected_heads: dict[str, dict[str, Any]] = {}
-        track_heads: dict[str, dict[str, Any]] = {}
-        for track in plan["targets"]:
-            ranked = [row for row in track_rows if row["track"] == track]
-            ranked.sort(key=lambda row: _ranking_key(row, candidate=False))
-            winner = ranked[0]
-            track_heads[track] = {
-                "head_id": winner["head_id"],
-                "final_gb_min_split": int(winner["final_gb_min_split"]),
-                "top_k": int(winner["top_k"]),
-            }
         for track, datasets in plan["targets"].items():
             for dataset in datasets:
                 subset = f"{track}/{dataset}"
-                if subset in SINGLE_SERIES_FALLBACKS:
-                    selected_heads[subset] = dict(track_heads[track])
-                    continue
                 ranked = [
                     row
                     for row in rows
@@ -2290,7 +2249,6 @@ def summarize_results(
         selection_payload.update(
             training_winners=plan["training_winners"],
             selected_heads=selected_heads,
-            track_selected_heads=track_heads,
             seeds=[2026, 2027, 2028],
         )
         if bool(plan.get("metadata", {}).get("verify_stage2_fixed_head", False)):
@@ -2317,7 +2275,7 @@ def summarize_results(
         "plan_fingerprint": plan["plan_fingerprint"],
         "protocol_fingerprint": plan["protocol_fingerprint"],
         "selection_score": EXPECTED_SELECTION_SCORE,
-        "tie_breakers": list(PR_F1_METRICS),
+        "tie_breakers": list(SELECTION_TIE_BREAKERS),
         "completed_units": seen_units,
         "expected_units": plan["expected_units"],
         "completed_logical_units": seen_logical_units,
@@ -2411,7 +2369,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     run = subparsers.add_parser("run", help="run or resume all planned Tuning units")
     run.add_argument("--python", type=Path, default=Path(sys.executable))
     run.add_argument("--gpus", default="0,1")
-    run.add_argument("--workers-per-gpu", type=int, default=1)
+    run.add_argument("--workers-per-gpu", type=int, default=3)
     subparsers.add_parser("summarize", help="strictly aggregate all completed units")
     worker = subparsers.add_parser("_worker", help=argparse.SUPPRESS)
     worker.add_argument("--track", required=True, choices=("U", "M"))

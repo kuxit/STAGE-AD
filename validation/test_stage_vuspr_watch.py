@@ -6,8 +6,8 @@ import tempfile
 import unittest
 from unittest import mock
 
-from scripts import stage_v2_search as search
-from scripts import stage_v2_watch as watch
+from scripts import stage_vuspr_search as search
+from scripts import stage_vuspr_watch as watch
 
 
 def minimal_plan() -> dict:
@@ -29,7 +29,7 @@ def minimal_plan() -> dict:
     }
 
 
-class StageV2WatchTests(unittest.TestCase):
+class StageVUSPRWatchTests(unittest.TestCase):
     def test_partial_scan_uses_exact_runner_validator_and_missing_is_not_invalid(self) -> None:
         plan = minimal_plan()
         with tempfile.TemporaryDirectory() as temporary:
