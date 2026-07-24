@@ -25,6 +25,27 @@ def write_json(path: Path, payload: dict) -> None:
 
 
 class StageVUSPREvalTests(unittest.TestCase):
+    def test_prepare_subset_cli_accepts_exact_dataset_keys(self) -> None:
+        args = evaluation.parse_args(
+            [
+                "--repo",
+                str(ROOT),
+                "--metrics-root",
+                str(ROOT / "external"),
+                "--stage2-protocol",
+                "stage2.json",
+                "--stage2-result",
+                "stage2-result",
+                "--result-root",
+                "eval-result",
+                "prepare-subset",
+                "--subset",
+                "M/CATSv2",
+            ]
+        )
+        self.assertEqual(args.command, "prepare-subset")
+        self.assertEqual(args.subset, ["M/CATSv2"])
+
     def test_final_memory_split_is_independent_and_cli_mapped(self) -> None:
         default = StageConfig()
         self.assertIsNone(default.final_gb_min_split)

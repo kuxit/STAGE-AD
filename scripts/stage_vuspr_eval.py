@@ -295,8 +295,14 @@ def build_partial_lock(
     stage2_protocol_path: Path,
     stage2_result: Path,
     destination: Path,
+    requested_subsets: set[str] | None = None,
 ) -> dict[str, Any]:
-    """Freeze every independently complete Stage2 dataset without CATS fallback."""
+    """Freeze independently complete Stage2 datasets without track fallback.
+
+    When ``requested_subsets`` is provided, the lock is restricted to exactly
+    those datasets. This supports non-overlapping Eval shards after a larger
+    partial Eval has already completed.
+    """
 
     protocol = load_json(stage2_protocol_path)
     stage2_plan_path = stage2_result / "stage_vuspr_search_plan.json"
@@ -321,6 +327,15 @@ def build_partial_lock(
     training_winners = stage2_plan.get("training_winners")
     if not isinstance(training_winners, Mapping):
         raise RuntimeError("Stage2 plan has no frozen training winners")
+    expected_subsets = {
+        f"{track}/{dataset}"
+        for track, datasets in EXPECTED_TARGETS.items()
+        for dataset in datasets
+    }
+    if requested_subsets is not None and (
+        not requested_subsets or not requested_subsets.issubset(expected_subsets)
+    ):
+        raise RuntimeError("requested Eval subset set is empty or unknown")
 
     unit_members: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
     units_root = stage2_result / "units"
@@ -362,6 +377,8 @@ def build_partial_lock(
     for track, datasets in stage2_plan["files"].items():
         for dataset, files in datasets.items():
             subset = f"{track}/{dataset}"
+            if requested_subsets is not None and subset not in requested_subsets:
+                continue
             expected_keys = {
                 (file_name, int(seed))
                 for file_name in files
@@ -416,8 +433,14 @@ def build_partial_lock(
                 "tuning_mean_vus_pr": -float(_negative_score),
             }
 
-    if not selections or len(selections) == 10:
-        raise RuntimeError("prepare-partial requires between one and nine complete datasets")
+    if requested_subsets is None:
+        if not selections or len(selections) == 10:
+            raise RuntimeError(
+                "prepare-partial requires between one and nine complete datasets"
+            )
+    elif set(selections) != requested_subsets:
+        missing = sorted(requested_subsets - set(selections))
+        raise RuntimeError(f"requested Stage2 datasets are incomplete: {missing}")
     stable = {
         "schema_version": LOCK_SCHEMA,
         "method": "STAGE",
@@ -426,8 +449,11 @@ def build_partial_lock(
         "eval_feedback": False,
         "dataset_specific": True,
         "track_fallback": False,
-        "partial": True,
+        "partial": len(selections) < 10,
         "complete_dataset_count": len(selections),
+        "requested_subsets": (
+            sorted(requested_subsets) if requested_subsets is not None else None
+        ),
         "incomplete_subsets": incomplete_subsets,
         "stage2_protocol_sha256": sha256_file(stage2_protocol_path),
         "stage2_plan_sha256": sha256_file(stage2_plan_path),
@@ -1002,6 +1028,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("prepare")
     sub.add_parser("prepare-partial")
+    subset_parser = sub.add_parser("prepare-subset")
+    subset_parser.add_argument(
+        "--subset",
+        action="append",
+        required=True,
+        help="exact track/dataset key; repeat to create a non-overlapping Eval shard",
+    )
     run_parser = sub.add_parser("run")
     run_parser.add_argument("--python", required=True, type=Path)
     run_parser.add_argument("--gpus", default="0,1")
@@ -1019,14 +1052,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     result_root.mkdir(parents=True, exist_ok=True)
     lock_path = result_root / LOCK_NAME
     plan_path = result_root / PLAN_NAME
-    if args.command in {"prepare", "prepare-partial"}:
-        builder = build_lock if args.command == "prepare" else build_partial_lock
-        lock = builder(
-            repo,
-            args.stage2_protocol.resolve(),
-            args.stage2_result.resolve(),
-            lock_path,
-        )
+    if args.command in {"prepare", "prepare-partial", "prepare-subset"}:
+        if args.command == "prepare":
+            lock = build_lock(
+                repo,
+                args.stage2_protocol.resolve(),
+                args.stage2_result.resolve(),
+                lock_path,
+            )
+        else:
+            lock = build_partial_lock(
+                repo,
+                args.stage2_protocol.resolve(),
+                args.stage2_result.resolve(),
+                lock_path,
+                requested_subsets=(
+                    set(args.subset) if args.command == "prepare-subset" else None
+                ),
+            )
         plan = build_plan(repo, metrics_root, lock_path, plan_path)
         print(
             json.dumps(
