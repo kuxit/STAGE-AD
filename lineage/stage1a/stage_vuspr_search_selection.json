@@ -1,0 +1,65 @@
+{
+  "schema_version": "stage-vuspr-search-selection-v1",
+  "phase": "stage1a",
+  "selection_split": "official TSB-AD Tuning only",
+  "eval_feedback": false,
+  "score": "macro mean VUS-PR only",
+  "tie_breakers": [
+    "canonical_id"
+  ],
+  "plan_fingerprint": "82710806f9bc2c98c2406649963222a82e7c3394902d7437a544947d0827c6d8",
+  "training_shortlists": {
+    "U/UCR": [
+      "e10_patch128_batch64_long",
+      "v1_t17_ucr_anchor",
+      "e09_long_patch_batch64"
+    ],
+    "U/Exathlon": [
+      "v1_t05_tao_anchor",
+      "e08_short_patch_long_train",
+      "v1_t22_exathlon_anchor"
+    ],
+    "U/MSL": [
+      "e09_long_patch_batch64",
+      "v1_t05_tao_anchor",
+      "e06_wide_encoder"
+    ],
+    "U/SED": [
+      "v1_t05_tao_anchor",
+      "v1_t13_tods_anchor",
+      "v1_t10_sed_anchor"
+    ],
+    "U/TODS": [
+      "e08_short_patch_long_train",
+      "v1_t10_sed_anchor",
+      "e07_short_patch_batch64"
+    ],
+    "M/CATSv2": [
+      "e02_low_lr_long_train",
+      "e03_geometry_balanced_sampling",
+      "e04_base_high_decay"
+    ],
+    "M/GHL": [
+      "e02_low_lr_long_train",
+      "e06_wide_encoder",
+      "v1_t06_cats_ghl_anchor"
+    ],
+    "M/LTDB": [
+      "e05_compact_encoder",
+      "v1_t05_tao_anchor",
+      "v1_t13_tods_anchor"
+    ],
+    "M/SVDB": [
+      "v1_t08_svdb_anchor",
+      "e10_patch128_batch64_long",
+      "e05_compact_encoder"
+    ],
+    "M/TAO": [
+      "v1_t08_svdb_anchor",
+      "v1_t13_tods_anchor",
+      "v1_t22_exathlon_anchor"
+    ]
+  },
+  "selection_fingerprint": "cd9405844d0ecfb37a0a768da40882b35d540e9c1e0c07fd125063915c94f282",
+  "created_at": "2026-07-24T11:26:56.993722+00:00"
+}

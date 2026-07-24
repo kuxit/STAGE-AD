@@ -1,0 +1,4754 @@
+{
+  "schema_version": "stage-vuspr-search-plan-v1",
+  "study_id": "stage-vuspr-stage1b-tuning-only-20260724",
+  "status": "posthoc_development_only",
+  "confirmatory_claim_eligible": false,
+  "phase": "stage1b",
+  "selection_split": "official TSB-AD Tuning only",
+  "eval_feedback": false,
+  "story_contract": {
+    "canonical_guidance_sha256": "bfca67c805c48d169aa5206f429fd9c71f60e0767fbc2f214ec8d02843b1f3a9",
+    "fixed_problem": "coupled_context_and_patch_abundance_bias_within_normality",
+    "alignment_role": "reduce_context_induced_variation_of_shared_temporal_content",
+    "intermediate_geometry_role": "temper_abundance_driven_encoder_exposure",
+    "final_geometry_role": "retain_supported_observed_exemplars_at_adaptive_granularity",
+    "implementation_flexible": true,
+    "main_selection_excludes_controls": true
+  },
+  "protocol_schema": "stage-vuspr-search-v1",
+  "protocol_sha256": "7e13a2f6c075425da817ac3ee014663632bbe1bd066493c89ce2304c116a4b58",
+  "protocol_fingerprint": "a0a9af523f130ac8e7a581679d05f254bc762555e92f19f79df086e4bc7d3d9d",
+  "source_sha256": {
+    "scripts/stage_vuspr_search.py": "96b1591a57f37e971ddce8259b69b6cb7c2db1ed09f2435f7e9aefe29625a91d",
+    "STAGE/stage.py": "43a8a8d5526d8a76f3632a34b5bb048e386723f58f41f84e5ef572eafb1c2ebe",
+    "common.py": "f39da45089ac0478e658a014d6a5acbec9f0d31b113906b38122afaac51644d2"
+  },
+  "official_tuning_manifest_sha256": {
+    "U": "7bf24d2ef834bb39ddd1c8c2b02c177339921dce694354e258ed2b77d8d5cd1c",
+    "M": "b388541efcd8972cb2084f0aabe7c36bcf0e1ecd52adc6d0ef874afec335fa51"
+  },
+  "data_sha256": {
+    "U/UCR/305_UCR_id_3_Medical_tr_3000_1st_5948.csv": "f7935d2fb6872307549939ed1ab12cd906bfe190c23353dfaf72f9c21cc20b52",
+    "U/UCR/312_UCR_id_10_Facility_tr_19948_1st_52000.csv": "ef252ddb8654c50014dee1e782e87f94bedb2c03b43acaab0a762febbe2305ed",
+    "U/UCR/323_UCR_id_21_HumanActivity_tr_48812_1st_128430.csv": "70a5e894306d7f0052f27ec89f5f33080c653f96b75f340cecc98fda32234823",
+    "U/UCR/347_UCR_id_45_Sensor_tr_2851_1st_5365.csv": "51e30e63184a81feaaf7e7c89133d0fe5eb825056157d47573a0f6bab2479763",
+    "U/UCR/386_UCR_id_84_Environment_tr_2046_1st_5703.csv": "1674803d63149d296c14a80235e3fc75a8904b8971d24db91ea7e3e38dcc05e1",
+    "U/UCR/429_UCR_id_127_Medical_tr_14825_1st_29000.csv": "72ed1c0d38ce1a6d23a65e3a7eb17e70c791ac0853d21a3aedc6a75cf9f36b70",
+    "U/Exathlon/813_Exathlon_id_4_Facility_tr_10766_1st_12590.csv": "052f48d2f44d15feac8855701b1c938ed1dde3346d14a7e5e6202640b2909b6f",
+    "U/Exathlon/825_Exathlon_id_16_Facility_tr_10766_1st_12590.csv": "3f8aa95bdcdc44af112fbab5822d4e9576616d6ce6494769f9687eb21adae458",
+    "U/MSL/142_MSL_id_3_Sensor_tr_1525_1st_4575.csv": "85e4495914a26491cd241ccf962c28906a8e09dd72c0afa5a7c3f0746239eb2a",
+    "U/MSL/146_MSL_id_7_Sensor_tr_554_1st_1172.csv": "8ca4e1b810bf25fcfbef5fdc168112465f5a2e72c5f7a1fa56b70cad3c4d580b",
+    "U/SED/235_SED_id_2_Medical_tr_2499_1st_3840.csv": "9c084359b93c4a1a273f1a5ac1ff4a21399cb2c510372bbcf287da199a1ded1b",
+    "U/TODS/291_TODS_id_5_Synthetic_tr_500_1st_11.csv": "0b8e2f94bbd69c6723c1c7b6d3c44f0820f94cc941d676f412398fef34e003b6",
+    "U/TODS/300_TODS_id_14_Synthetic_tr_1250_1st_2555.csv": "08f5960a6fafcd183189696d89f521fa885fe47666da96941366e7b9ea409176",
+    "M/CATSv2/140_CATSv2_id_3_Sensor_tr_28307_1st_28407.csv": "c4e9706efd923a595d93ade46d20cad0ac586bc704eec5ec98009afda585db7b",
+    "M/GHL/040_GHL_id_9_Sensor_tr_50000_1st_92001.csv": "c2a0f29c6af262fb16251d4663d5e56ef3dc8085f8a278ca2965e37901230699",
+    "M/GHL/049_GHL_id_18_Sensor_tr_50000_1st_109001.csv": "3097f30211eef2c905ca8b74066c56b0b365a32c5897fe4096b828e1bdf87f7e",
+    "M/LTDB/082_LTDB_id_4_Medical_tr_4456_1st_4556.csv": "698edd323bc804f797cf5d8e4222d70844f10202081d4379543f162315f43183",
+    "M/SVDB/090_SVDB_id_7_Medical_tr_12157_1st_12257.csv": "443e3e64f65cb7c4002c4e149dc12997889d7f2e74cfdb275b023a3a2b4ab846",
+    "M/SVDB/107_SVDB_id_24_Medical_tr_32805_1st_32905.csv": "79af5662ff1534500c68e74263822019bd2f0ed25d82f46e46f8779888730219",
+    "M/SVDB/113_SVDB_id_30_Medical_tr_4552_1st_4652.csv": "c79e1884bc009b1b0d11ca8b27c5c4d33a535f949de2ee4851ae81e5e422eda7",
+    "M/TAO/120_TAO_id_5_Environment_tr_500_1st_3.csv": "5926d15432d2b67d7348b6107c06daa7707b78f3994e0d9fb11b70afc74a6763",
+    "M/TAO/126_TAO_id_11_Environment_tr_500_1st_7.csv": "bb5df8d457b6b06ae6d9386651252294e22f9a5c3ffe58264c47a9b3b1b7679e"
+  },
+  "series_metadata": {
+    "U/UCR/305_UCR_id_3_Medical_tr_3000_1st_5948.csv": {
+      "points": 12000,
+      "channels": 1,
+      "train_index": 3000,
+      "data_bytes": 165073,
+      "sliding_window": 218
+    },
+    "U/UCR/312_UCR_id_10_Facility_tr_19948_1st_52000.csv": {
+      "points": 79795,
+      "channels": 1,
+      "train_index": 19948,
+      "data_bytes": 991067,
+      "sliding_window": 208
+    },
+    "U/UCR/323_UCR_id_21_HumanActivity_tr_48812_1st_128430.csv": {
+      "points": 195250,
+      "channels": 1,
+      "train_index": 48812,
+      "data_bytes": 1793711,
+      "sliding_window": 125
+    },
+    "U/UCR/347_UCR_id_45_Sensor_tr_2851_1st_5365.csv": {
+      "points": 11406,
+      "channels": 1,
+      "train_index": 2851,
+      "data_bytes": 149615,
+      "sliding_window": 98
+    },
+    "U/UCR/386_UCR_id_84_Environment_tr_2046_1st_5703.csv": {
+      "points": 8184,
+      "channels": 1,
+      "train_index": 2046,
+      "data_bytes": 97325,
+      "sliding_window": 24
+    },
+    "U/UCR/429_UCR_id_127_Medical_tr_14825_1st_29000.csv": {
+      "points": 59302,
+      "channels": 1,
+      "train_index": 14825,
+      "data_bytes": 448974,
+      "sliding_window": 232
+    },
+    "U/Exathlon/813_Exathlon_id_4_Facility_tr_10766_1st_12590.csv": {
+      "points": 43066,
+      "channels": 1,
+      "train_index": 10766,
+      "data_bytes": 313894,
+      "sliding_window": 10
+    },
+    "U/Exathlon/825_Exathlon_id_16_Facility_tr_10766_1st_12590.csv": {
+      "points": 43066,
+      "channels": 1,
+      "train_index": 10766,
+      "data_bytes": 260437,
+      "sliding_window": 10
+    },
+    "U/MSL/142_MSL_id_3_Sensor_tr_1525_1st_4575.csv": {
+      "points": 6100,
+      "channels": 1,
+      "train_index": 1525,
+      "data_bytes": 127683,
+      "sliding_window": 125
+    },
+    "U/MSL/146_MSL_id_7_Sensor_tr_554_1st_1172.csv": {
+      "points": 2217,
+      "channels": 1,
+      "train_index": 554,
+      "data_bytes": 14593,
+      "sliding_window": 70
+    },
+    "U/SED/235_SED_id_2_Medical_tr_2499_1st_3840.csv": {
+      "points": 9999,
+      "channels": 1,
+      "train_index": 2499,
+      "data_bytes": 109460,
+      "sliding_window": 125
+    },
+    "U/TODS/291_TODS_id_5_Synthetic_tr_500_1st_11.csv": {
+      "points": 5000,
+      "channels": 1,
+      "train_index": 500,
+      "data_bytes": 106383,
+      "sliding_window": 100
+    },
+    "U/TODS/300_TODS_id_14_Synthetic_tr_1250_1st_2555.csv": {
+      "points": 5000,
+      "channels": 1,
+      "train_index": 1250,
+      "data_bytes": 106343,
+      "sliding_window": 100
+    },
+    "M/CATSv2/140_CATSv2_id_3_Sensor_tr_28307_1st_28407.csv": {
+      "points": 400000,
+      "channels": 17,
+      "train_index": 28307,
+      "data_bytes": 105415516,
+      "sliding_window": 100
+    },
+    "M/GHL/040_GHL_id_9_Sensor_tr_50000_1st_92001.csv": {
+      "points": 200001,
+      "channels": 19,
+      "train_index": 50000,
+      "data_bytes": 39691143,
+      "sliding_window": 100
+    },
+    "M/GHL/049_GHL_id_18_Sensor_tr_50000_1st_109001.csv": {
+      "points": 200001,
+      "channels": 19,
+      "train_index": 50000,
+      "data_bytes": 39709764,
+      "sliding_window": 100
+    },
+    "M/LTDB/082_LTDB_id_4_Medical_tr_4456_1st_4556.csv": {
+      "points": 100000,
+      "channels": 2,
+      "train_index": 4456,
+      "data_bytes": 1261256,
+      "sliding_window": 100
+    },
+    "M/SVDB/090_SVDB_id_7_Medical_tr_12157_1st_12257.csv": {
+      "points": 50000,
+      "channels": 2,
+      "train_index": 12157,
+      "data_bytes": 628354,
+      "sliding_window": 100
+    },
+    "M/SVDB/107_SVDB_id_24_Medical_tr_32805_1st_32905.csv": {
+      "points": 230400,
+      "channels": 2,
+      "train_index": 32805,
+      "data_bytes": 3200090,
+      "sliding_window": 100
+    },
+    "M/SVDB/113_SVDB_id_30_Medical_tr_4552_1st_4652.csv": {
+      "points": 230400,
+      "channels": 2,
+      "train_index": 4552,
+      "data_bytes": 2945634,
+      "sliding_window": 100
+    },
+    "M/TAO/120_TAO_id_5_Environment_tr_500_1st_3.csv": {
+      "points": 10000,
+      "channels": 3,
+      "train_index": 500,
+      "data_bytes": 211593,
+      "sliding_window": 100
+    },
+    "M/TAO/126_TAO_id_11_Environment_tr_500_1st_7.csv": {
+      "points": 10000,
+      "channels": 3,
+      "train_index": 500,
+      "data_bytes": 211767,
+      "sliding_window": 100
+    }
+  },
+  "official_evaluator": {
+    "root_name": "PaAno",
+    "source_sha256": {
+      "utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utils/basic_metrics.py": "13beed6cb5a8edb5aa61723b81ec692faf033e64f64baed3b8a197925347e480",
+      "utils/data_preprocess.py": "0068bce0f8c11af512f4e67ac9165fac6fdbf99b7330a99d5d43302db53e02e1",
+      "utils/evaluation.py": "2729f105d1c292a19773025d6d60a5eec5ec7939e5ed2ed933e6ed1bdfb62956",
+      "utils/metrics.py": "bebcda215e8571c9dc4a854ab1cfd0b1f89d3babc064cb2849c2850b5e0b0179",
+      "utils/utils.py": "5d2b3ee824137781140bbc8362fe5353dce37812f4fb127c64e84929091353bc",
+      "affiliation/__init__ .py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "affiliation/_affiliation_zone.py": "3b289bf11cebe614afabe353c873de90ba9debf8831aef8f73532870dce01ba2",
+      "affiliation/_integral_interval.py": "8177e69eccb0ae4ea76b2f54f6799ae61758b5a103603fae3d1a3a8d331e7cda",
+      "affiliation/_single_ground_truth_event.py": "a04b5daa0fb0ef68893807c7ab5d4353b43f0d5231ae06ef0006b2e6cf939165",
+      "affiliation/generics.py": "16743b204d24feb8ba9deaabceb7b0cf900520136e8a3b77e499448fcaafbfc9",
+      "affiliation/metrics.py": "f1a397b3c552f8d7cba66913d483d882bc663f148098bdf6327dbb6b42409277"
+    }
+  },
+  "targets": {
+    "U": [
+      "UCR",
+      "Exathlon",
+      "MSL",
+      "SED",
+      "TODS"
+    ],
+    "M": [
+      "CATSv2",
+      "GHL",
+      "LTDB",
+      "SVDB",
+      "TAO"
+    ]
+  },
+  "files": {
+    "U": {
+      "UCR": [
+        "305_UCR_id_3_Medical_tr_3000_1st_5948.csv",
+        "312_UCR_id_10_Facility_tr_19948_1st_52000.csv",
+        "323_UCR_id_21_HumanActivity_tr_48812_1st_128430.csv",
+        "347_UCR_id_45_Sensor_tr_2851_1st_5365.csv",
+        "386_UCR_id_84_Environment_tr_2046_1st_5703.csv",
+        "429_UCR_id_127_Medical_tr_14825_1st_29000.csv"
+      ],
+      "Exathlon": [
+        "813_Exathlon_id_4_Facility_tr_10766_1st_12590.csv",
+        "825_Exathlon_id_16_Facility_tr_10766_1st_12590.csv"
+      ],
+      "MSL": [
+        "142_MSL_id_3_Sensor_tr_1525_1st_4575.csv",
+        "146_MSL_id_7_Sensor_tr_554_1st_1172.csv"
+      ],
+      "SED": [
+        "235_SED_id_2_Medical_tr_2499_1st_3840.csv"
+      ],
+      "TODS": [
+        "291_TODS_id_5_Synthetic_tr_500_1st_11.csv",
+        "300_TODS_id_14_Synthetic_tr_1250_1st_2555.csv"
+      ]
+    },
+    "M": {
+      "CATSv2": [
+        "140_CATSv2_id_3_Sensor_tr_28307_1st_28407.csv"
+      ],
+      "GHL": [
+        "040_GHL_id_9_Sensor_tr_50000_1st_92001.csv",
+        "049_GHL_id_18_Sensor_tr_50000_1st_109001.csv"
+      ],
+      "LTDB": [
+        "082_LTDB_id_4_Medical_tr_4456_1st_4556.csv"
+      ],
+      "SVDB": [
+        "090_SVDB_id_7_Medical_tr_12157_1st_12257.csv",
+        "107_SVDB_id_24_Medical_tr_32805_1st_32905.csv",
+        "113_SVDB_id_30_Medical_tr_4552_1st_4652.csv"
+      ],
+      "TAO": [
+        "120_TAO_id_5_Environment_tr_500_1st_3.csv",
+        "126_TAO_id_11_Environment_tr_500_1st_7.csv"
+      ]
+    }
+  },
+  "seeds": [
+    2027,
+    2028
+  ],
+  "training_candidates": [
+    {
+      "id": "v1_t00_msl_anchor",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "590589cee0965874ee6f1448d7a5666cbbce096634b7bf195397560a8f51d1ec",
+      "path_id": "candidate_000_v1_t00_msl_anchor"
+    },
+    {
+      "id": "v1_t06_cats_ghl_anchor",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "cabcb3b63a1afa23c5969137eb1ae0a40cd16a98ee8b1b3da0fe82dce638a0ef",
+      "path_id": "candidate_001_v1_t06_cats_ghl_anchor"
+    },
+    {
+      "id": "v1_t22_exathlon_anchor",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "dd74986ad865e2e77d788c06f9449e3efadc6cbe2d79fa017555c266880cb6cb",
+      "path_id": "candidate_002_v1_t22_exathlon_anchor"
+    },
+    {
+      "id": "v1_t17_ucr_anchor",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "198bd5a6b6ae2995aa30f2f608ddd60daa7ab5304fdf616f86a2c31c95a637d0",
+      "path_id": "candidate_003_v1_t17_ucr_anchor"
+    },
+    {
+      "id": "v1_t10_sed_anchor",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "99951e8254ccfa473a2d0088bad21a0f46a745082ce57e8725bbb72648c5acc3",
+      "path_id": "candidate_004_v1_t10_sed_anchor"
+    },
+    {
+      "id": "v1_t13_tods_anchor",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "060f5eba6e4d6afb5f0d2db2a428043f7cec83c77e033b9ac62e01585e231eae",
+      "path_id": "candidate_005_v1_t13_tods_anchor"
+    },
+    {
+      "id": "v1_t12_ltdb_anchor",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "c0ad6884ae97d03a4ea67abf7eba6bd3ca16915b4fc7d9cd5ded83470754d45d",
+      "path_id": "candidate_006_v1_t12_ltdb_anchor"
+    },
+    {
+      "id": "v1_t08_svdb_anchor",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "069a1a9ea75c963b5f72b17bdd6aee164ed6502184272a2efbfc8fe9cd1d48d5",
+      "path_id": "candidate_007_v1_t08_svdb_anchor"
+    },
+    {
+      "id": "v1_t05_tao_anchor",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "dd723d60e88d278b7f740b6890f29494cd017d1440a0a76f88e9d78249bcf923",
+      "path_id": "candidate_008_v1_t05_tao_anchor"
+    },
+    {
+      "id": "e00_small_batch_short_series",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "8fdace32e006c28291ba154cf344d7096e180a317e400e8722b1f04117ed2a52",
+      "path_id": "candidate_009_e00_small_batch_short_series"
+    },
+    {
+      "id": "e01_batch128_no_decay",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0,
+        "grad_clip": 0.5,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0,
+        "grad_clip": 0.5,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "1775e871631eea44d8ab1ab38ec9ac8487f3da9d25ca42b3e99ce20fd0ec8be8",
+      "path_id": "candidate_010_e01_batch128_no_decay"
+    },
+    {
+      "id": "e02_low_lr_long_train",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "e1ae88a2972d8d652928da59317aab0521ac3bea5959a79436eb1567826160a3",
+      "path_id": "candidate_011_e02_low_lr_long_train"
+    },
+    {
+      "id": "e03_geometry_balanced_sampling",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.0,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.0,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "69276275e08fcc1e787ad394445676c1e8c0b6ab2ced4452f49ceefe24d7d76f",
+      "path_id": "candidate_012_e03_geometry_balanced_sampling"
+    },
+    {
+      "id": "e04_base_high_decay",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "b3b30743f3bb34bf8c5677aafbaf4251fc66db6ed31c2b91432c0d1864da3034",
+      "path_id": "candidate_013_e04_base_high_decay"
+    },
+    {
+      "id": "e05_compact_encoder",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "b801bf02d7ece465df5702b771f9df75d4a87ce1e7d3ea94144e1fdd51a05277",
+      "path_id": "candidate_014_e05_compact_encoder"
+    },
+    {
+      "id": "e06_wide_encoder",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 256,
+        "token_dim": 128,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 256,
+        "token_dim": 128,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "89874e47ce6860794a3b6c6deaed0defd9dab4431b6f0e3f8adc97f53c0a4476",
+      "path_id": "candidate_015_e06_wide_encoder"
+    },
+    {
+      "id": "e07_short_patch_batch64",
+      "parameters": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "5707ece3e5994e3919a4b8bcab192687ce59e719ce169da73ba679a5e2602613",
+      "path_id": "candidate_016_e07_short_patch_batch64"
+    },
+    {
+      "id": "e08_short_patch_long_train",
+      "parameters": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "231d54d9fc71298339820a0eb9c247e162fa42e725d09ed17fa653d04c3e5016",
+      "path_id": "candidate_017_e08_short_patch_long_train"
+    },
+    {
+      "id": "e09_long_patch_batch64",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "96fffd1185751b0c9bd69f131edca8b00a26fb48e3c1c0f842f72ac7ad51d9a9",
+      "path_id": "candidate_018_e09_long_patch_batch64"
+    },
+    {
+      "id": "e10_patch128_batch64_long",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "07b8848f7f89589f58c4021ec4814b3d05c384ffb4c2f94ed66bf1367f637df4",
+      "path_id": "candidate_019_e10_patch128_batch64_long"
+    },
+    {
+      "id": "e11_batch128_lr3e4_early",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.1,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "b84a9e57fcc9b97f8ecb9d811de837fa47a2174385bb97a73899048805f7e3b9",
+      "path_id": "candidate_020_e11_batch128_lr3e4_early"
+    },
+    {
+      "id": "e12_batch128_late_geometry",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.5,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.5,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "45feea64066d911798c1da40b62d67689ed78e54a8d198abfb3982145eafc32b",
+      "path_id": "candidate_021_e12_batch128_late_geometry"
+    },
+    {
+      "id": "e13_batch128_geometry_balanced",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.0,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.0,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "1b42b8c41f50256b065f9dc90227a0237c6ca05cb34b2b98571a63fe4384305f",
+      "path_id": "candidate_022_e13_batch128_geometry_balanced"
+    },
+    {
+      "id": "e14_batch128_mild_tempering",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "max_gb_rows": 50000
+      },
+      "resolved_parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000
+      },
+      "config_fingerprint": "69df8da9271a5687f7e4e5c39f643c3b06e6560d83ed0614da19fd393b614d97",
+      "path_id": "candidate_023_e14_batch128_mild_tempering"
+    }
+  ],
+  "candidates_by_subset": {
+    "U/UCR": [
+      "e10_patch128_batch64_long",
+      "v1_t17_ucr_anchor",
+      "e09_long_patch_batch64"
+    ],
+    "U/Exathlon": [
+      "v1_t05_tao_anchor",
+      "e08_short_patch_long_train",
+      "v1_t22_exathlon_anchor"
+    ],
+    "U/MSL": [
+      "e09_long_patch_batch64",
+      "v1_t05_tao_anchor",
+      "e06_wide_encoder"
+    ],
+    "U/SED": [
+      "v1_t05_tao_anchor",
+      "v1_t13_tods_anchor",
+      "v1_t10_sed_anchor"
+    ],
+    "U/TODS": [
+      "e08_short_patch_long_train",
+      "v1_t10_sed_anchor",
+      "e07_short_patch_batch64"
+    ],
+    "M/CATSv2": [
+      "e02_low_lr_long_train",
+      "e03_geometry_balanced_sampling",
+      "e04_base_high_decay"
+    ],
+    "M/GHL": [
+      "e02_low_lr_long_train",
+      "e06_wide_encoder",
+      "v1_t06_cats_ghl_anchor"
+    ],
+    "M/LTDB": [
+      "e05_compact_encoder",
+      "v1_t05_tao_anchor",
+      "v1_t13_tods_anchor"
+    ],
+    "M/SVDB": [
+      "v1_t08_svdb_anchor",
+      "e10_patch128_batch64_long",
+      "e05_compact_encoder"
+    ],
+    "M/TAO": [
+      "v1_t08_svdb_anchor",
+      "v1_t13_tods_anchor",
+      "v1_t22_exathlon_anchor"
+    ]
+  },
+  "execution_signatures": {
+    "U/UCR/305_UCR_id_3_Medical_tr_3000_1st_5948.csv": {
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "v1_t17_ucr_anchor": "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe",
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb"
+    },
+    "U/UCR/312_UCR_id_10_Facility_tr_19948_1st_52000.csv": {
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "v1_t17_ucr_anchor": "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe",
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb"
+    },
+    "U/UCR/323_UCR_id_21_HumanActivity_tr_48812_1st_128430.csv": {
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "v1_t17_ucr_anchor": "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe",
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb"
+    },
+    "U/UCR/347_UCR_id_45_Sensor_tr_2851_1st_5365.csv": {
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "v1_t17_ucr_anchor": "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe",
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb"
+    },
+    "U/UCR/386_UCR_id_84_Environment_tr_2046_1st_5703.csv": {
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "v1_t17_ucr_anchor": "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe",
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb"
+    },
+    "U/UCR/429_UCR_id_127_Medical_tr_14825_1st_29000.csv": {
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "v1_t17_ucr_anchor": "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe",
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb"
+    },
+    "U/Exathlon/813_Exathlon_id_4_Facility_tr_10766_1st_12590.csv": {
+      "v1_t05_tao_anchor": "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd",
+      "e08_short_patch_long_train": "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe",
+      "v1_t22_exathlon_anchor": "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df"
+    },
+    "U/Exathlon/825_Exathlon_id_16_Facility_tr_10766_1st_12590.csv": {
+      "v1_t05_tao_anchor": "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd",
+      "e08_short_patch_long_train": "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe",
+      "v1_t22_exathlon_anchor": "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df"
+    },
+    "U/MSL/142_MSL_id_3_Sensor_tr_1525_1st_4575.csv": {
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb",
+      "v1_t05_tao_anchor": "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd",
+      "e06_wide_encoder": "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5"
+    },
+    "U/MSL/146_MSL_id_7_Sensor_tr_554_1st_1172.csv": {
+      "e09_long_patch_batch64": "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb",
+      "v1_t05_tao_anchor": "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd",
+      "e06_wide_encoder": "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5"
+    },
+    "U/SED/235_SED_id_2_Medical_tr_2499_1st_3840.csv": {
+      "v1_t05_tao_anchor": "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd",
+      "v1_t13_tods_anchor": "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0",
+      "v1_t10_sed_anchor": "03e432bff961ed362c94fb57e60f15f0bd15396ca8a4575971ff7331e7775746"
+    },
+    "U/TODS/291_TODS_id_5_Synthetic_tr_500_1st_11.csv": {
+      "e08_short_patch_long_train": "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe",
+      "v1_t10_sed_anchor": "03e432bff961ed362c94fb57e60f15f0bd15396ca8a4575971ff7331e7775746",
+      "e07_short_patch_batch64": "bcb88bc1cb81a5a0e957db64c5617d6c78961a2062e7d9ed80942ef76ffcc171"
+    },
+    "U/TODS/300_TODS_id_14_Synthetic_tr_1250_1st_2555.csv": {
+      "e08_short_patch_long_train": "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe",
+      "v1_t10_sed_anchor": "03e432bff961ed362c94fb57e60f15f0bd15396ca8a4575971ff7331e7775746",
+      "e07_short_patch_batch64": "bcb88bc1cb81a5a0e957db64c5617d6c78961a2062e7d9ed80942ef76ffcc171"
+    },
+    "M/CATSv2/140_CATSv2_id_3_Sensor_tr_28307_1st_28407.csv": {
+      "e02_low_lr_long_train": "2d3129d4ba21fbca08134e43298a19c70673aa4b7093fb806020cddf6c76476b",
+      "e03_geometry_balanced_sampling": "d12c7925d44211a397ac0d95aeddbe0e66efe77744d88e07b1ba30258b86de0f",
+      "e04_base_high_decay": "9c552649dc15c4e7826d9349695527e070b92da62e3bebeae470418c892f0ff7"
+    },
+    "M/GHL/040_GHL_id_9_Sensor_tr_50000_1st_92001.csv": {
+      "e02_low_lr_long_train": "2d3129d4ba21fbca08134e43298a19c70673aa4b7093fb806020cddf6c76476b",
+      "e06_wide_encoder": "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5",
+      "v1_t06_cats_ghl_anchor": "31eaac24c5c6abaf64916776b37daa91b6fdfed9faa0480c219a426b3dc1e1de"
+    },
+    "M/GHL/049_GHL_id_18_Sensor_tr_50000_1st_109001.csv": {
+      "e02_low_lr_long_train": "2d3129d4ba21fbca08134e43298a19c70673aa4b7093fb806020cddf6c76476b",
+      "e06_wide_encoder": "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5",
+      "v1_t06_cats_ghl_anchor": "31eaac24c5c6abaf64916776b37daa91b6fdfed9faa0480c219a426b3dc1e1de"
+    },
+    "M/LTDB/082_LTDB_id_4_Medical_tr_4456_1st_4556.csv": {
+      "e05_compact_encoder": "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03",
+      "v1_t05_tao_anchor": "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd",
+      "v1_t13_tods_anchor": "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0"
+    },
+    "M/SVDB/090_SVDB_id_7_Medical_tr_12157_1st_12257.csv": {
+      "v1_t08_svdb_anchor": "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d",
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "e05_compact_encoder": "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03"
+    },
+    "M/SVDB/107_SVDB_id_24_Medical_tr_32805_1st_32905.csv": {
+      "v1_t08_svdb_anchor": "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d",
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "e05_compact_encoder": "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03"
+    },
+    "M/SVDB/113_SVDB_id_30_Medical_tr_4552_1st_4652.csv": {
+      "v1_t08_svdb_anchor": "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d",
+      "e10_patch128_batch64_long": "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db",
+      "e05_compact_encoder": "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03"
+    },
+    "M/TAO/120_TAO_id_5_Environment_tr_500_1st_3.csv": {
+      "v1_t08_svdb_anchor": "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d",
+      "v1_t13_tods_anchor": "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0",
+      "v1_t22_exathlon_anchor": "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df"
+    },
+    "M/TAO/126_TAO_id_11_Environment_tr_500_1st_7.csv": {
+      "v1_t08_svdb_anchor": "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d",
+      "v1_t13_tods_anchor": "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0",
+      "v1_t22_exathlon_anchor": "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df"
+    }
+  },
+  "execution_behaviors": {
+    "U/UCR/305_UCR_id_3_Medical_tr_3000_1st_5948.csv": {
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/UCR/312_UCR_id_10_Facility_tr_19948_1st_52000.csv": {
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/UCR/323_UCR_id_21_HumanActivity_tr_48812_1st_128430.csv": {
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/UCR/347_UCR_id_45_Sensor_tr_2851_1st_5365.csv": {
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/UCR/386_UCR_id_84_Environment_tr_2046_1st_5703.csv": {
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/UCR/429_UCR_id_127_Medical_tr_14825_1st_29000.csv": {
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "2e581cd3528825259f654ecc524cb01ab1e17b13b192e65b1acb61d1db96fdfe": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.75,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/Exathlon/813_Exathlon_id_4_Facility_tr_10766_1st_12590.csv": {
+      "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      },
+      "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      }
+    },
+    "U/Exathlon/825_Exathlon_id_16_Facility_tr_10766_1st_12590.csv": {
+      "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      },
+      "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      }
+    },
+    "U/MSL/142_MSL_id_3_Sensor_tr_1525_1st_4575.csv": {
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      },
+      "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      },
+      "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5": {
+        "patch_size": 96,
+        "channels": 256,
+        "token_dim": 128,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/MSL/146_MSL_id_7_Sensor_tr_554_1st_1172.csv": {
+      "bbcadf73e0f87efd93b8387c75514d58b4a20fc3ed537ce7863912d0a0c6cbdb": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      },
+      "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      },
+      "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5": {
+        "patch_size": 96,
+        "channels": 256,
+        "token_dim": 128,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "U/SED/235_SED_id_2_Medical_tr_2499_1st_3840.csv": {
+      "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      },
+      "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      },
+      "03e432bff961ed362c94fb57e60f15f0bd15396ca8a4575971ff7331e7775746": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 150,
+        "short_series_update_cap": false
+      }
+    },
+    "U/TODS/291_TODS_id_5_Synthetic_tr_500_1st_11.csv": {
+      "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "03e432bff961ed362c94fb57e60f15f0bd15396ca8a4575971ff7331e7775746": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 150,
+        "short_series_update_cap": false
+      },
+      "bcb88bc1cb81a5a0e957db64c5617d6c78961a2062e7d9ed80942ef76ffcc171": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      }
+    },
+    "U/TODS/300_TODS_id_14_Synthetic_tr_1250_1st_2555.csv": {
+      "344213c557699620b868f62dac22ad544b5e9c0a3d117aa7f68a69d9253357fe": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "03e432bff961ed362c94fb57e60f15f0bd15396ca8a4575971ff7331e7775746": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 150,
+        "short_series_update_cap": false
+      },
+      "bcb88bc1cb81a5a0e957db64c5617d6c78961a2062e7d9ed80942ef76ffcc171": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      }
+    },
+    "M/CATSv2/140_CATSv2_id_3_Sensor_tr_28307_1st_28407.csv": {
+      "2d3129d4ba21fbca08134e43298a19c70673aa4b7093fb806020cddf6c76476b": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "d12c7925d44211a397ac0d95aeddbe0e66efe77744d88e07b1ba30258b86de0f": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.0,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      },
+      "9c552649dc15c4e7826d9349695527e070b92da62e3bebeae470418c892f0ff7": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "M/GHL/040_GHL_id_9_Sensor_tr_50000_1st_92001.csv": {
+      "2d3129d4ba21fbca08134e43298a19c70673aa4b7093fb806020cddf6c76476b": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5": {
+        "patch_size": 96,
+        "channels": 256,
+        "token_dim": 128,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      },
+      "31eaac24c5c6abaf64916776b37daa91b6fdfed9faa0480c219a426b3dc1e1de": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 150,
+        "short_series_update_cap": false
+      }
+    },
+    "M/GHL/049_GHL_id_18_Sensor_tr_50000_1st_109001.csv": {
+      "2d3129d4ba21fbca08134e43298a19c70673aa4b7093fb806020cddf6c76476b": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "7a5a54d2508e06b9c481aa80af70d649ada5025ed0fe3747a08347c71f818ed5": {
+        "patch_size": 96,
+        "channels": 256,
+        "token_dim": 128,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 128,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      },
+      "31eaac24c5c6abaf64916776b37daa91b6fdfed9faa0480c219a426b3dc1e1de": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 150,
+        "short_series_update_cap": false
+      }
+    },
+    "M/LTDB/082_LTDB_id_4_Medical_tr_4456_1st_4556.csv": {
+      "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      },
+      "bc5cf0dcd05ab456356ee8cf5777b3016a4bfea38e5889e942d1781b6f44e2dd": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 300,
+        "short_series_update_cap": false
+      },
+      "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      }
+    },
+    "M/SVDB/090_SVDB_id_7_Medical_tr_12157_1st_12257.csv": {
+      "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 600,
+        "short_series_update_cap": false
+      },
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "M/SVDB/107_SVDB_id_24_Medical_tr_32805_1st_32905.csv": {
+      "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 600,
+        "short_series_update_cap": false
+      },
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "M/SVDB/113_SVDB_id_30_Medical_tr_4552_1st_4652.csv": {
+      "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 600,
+        "short_series_update_cap": false
+      },
+      "aa28527cca6eb79c7a27a5ab94e42da9f036dab8eebf9362a899b6dcdbf940db": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 2000,
+        "gb_activation_step": 400,
+        "short_series_update_cap": false
+      },
+      "8ef70c63f59b3efbb0bb26a778239656b8c64c4a2f0fcc64b5712455e0fbbf03": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1000,
+        "gb_activation_step": 200,
+        "short_series_update_cap": false
+      }
+    },
+    "M/TAO/120_TAO_id_5_Environment_tr_500_1st_3.csv": {
+      "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 600,
+        "short_series_update_cap": false
+      },
+      "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      },
+      "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      }
+    },
+    "M/TAO/126_TAO_id_11_Environment_tr_500_1st_7.csv": {
+      "8fc874818830f85e3cff91052854066cf561c26c89630b9e881a041a2d15d35d": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 1500,
+        "gb_activation_step": 600,
+        "short_series_update_cap": false
+      },
+      "1c2f6d0719174a7f6ddb53ff6fee777f795eed725bd4258b513e4103215919c0": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      },
+      "65e9294a5073e6425a641ba28620ad0a682b891d008ed0cef98a0f6e2a7930df": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "alignment_objective": "both",
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "embedding_batch_size": 2048,
+        "score_batch_size": 2048,
+        "memory_score_block_size": 8192,
+        "max_gb_rows": 50000,
+        "effective_steps": 750,
+        "gb_activation_step": 75,
+        "short_series_update_cap": false
+      }
+    }
+  },
+  "subset_execution_signatures": {
+    "U/UCR": {
+      "e10_patch128_batch64_long": "cc49323a405a9b4174af06287dff515f4eb403ba46b6e374dfea324dff1c9a47",
+      "v1_t17_ucr_anchor": "87e46d81ff04b294008e03b194dd078e6d973569bd7d3430766b09caf3de1f21",
+      "e09_long_patch_batch64": "8194b3a04af70b1782fe9288e960838b3943f1ce925b87cd675ed62d104b15af"
+    },
+    "U/Exathlon": {
+      "v1_t05_tao_anchor": "1af187737bd01506e5855f374f55ce5e9c537c359777e46f40f8981f3e7c4819",
+      "e08_short_patch_long_train": "ada1f63f4f6224f75f4fd4fc8078f4d74a7d1ccc704fa09c87898c5b60c6f649",
+      "v1_t22_exathlon_anchor": "5db842b434c7cd269ad4775d4a450990b147e5da7971692207b7cb2a89b1a4ec"
+    },
+    "U/MSL": {
+      "e09_long_patch_batch64": "99e71fd94203d599308a53fa7a4a7e86046428a1bbca5e38a519e3485d704b1e",
+      "v1_t05_tao_anchor": "1af187737bd01506e5855f374f55ce5e9c537c359777e46f40f8981f3e7c4819",
+      "e06_wide_encoder": "27783f4697a847e5cde5c9410d1b66536b46fd077106632d7f4568a2c6f3f84f"
+    },
+    "U/SED": {
+      "v1_t05_tao_anchor": "6352ff0f9a4ea37e53c6cebcae27cc0ccf5c152dde64c848552f7eff645ccac6",
+      "v1_t13_tods_anchor": "f266fd23f42685f8593282e01daa8d32cb522ebfb63f25a5939327f4363bc4d6",
+      "v1_t10_sed_anchor": "b15ba69712a411a541c21e938700b18f603c5fc34e5b5ca480307132baea9fcb"
+    },
+    "U/TODS": {
+      "e08_short_patch_long_train": "ada1f63f4f6224f75f4fd4fc8078f4d74a7d1ccc704fa09c87898c5b60c6f649",
+      "v1_t10_sed_anchor": "459b40e17ac6248dc8b0ba73858e5d7b34a82b13f10de45ffadcd18a794e4579",
+      "e07_short_patch_batch64": "fb634dd6f90a963bbce51009f8e20117053fc8886f8f8c5c47aec28e748baf96"
+    },
+    "M/CATSv2": {
+      "e02_low_lr_long_train": "d15e92b7f5432c72054e19f65932a472dd5874ad97b7287cc357672b894922b0",
+      "e03_geometry_balanced_sampling": "42491f1b20ee3216087e89fcb5df6112a9bb4f2c85ffb51d2684b030ef75cd39",
+      "e04_base_high_decay": "ba901a110e9319b99b951460ab1de961e68332622d22b555b3c12487c67b228c"
+    },
+    "M/GHL": {
+      "e02_low_lr_long_train": "ad9576e46aec5c3f1b1a817140092bf7f927803b13dd85796fd3f6b98746d07f",
+      "e06_wide_encoder": "27783f4697a847e5cde5c9410d1b66536b46fd077106632d7f4568a2c6f3f84f",
+      "v1_t06_cats_ghl_anchor": "634aaa7f252b1156b68b4611fbc2cfc26d47f6721ae6919094d75f2f1c89988b"
+    },
+    "M/LTDB": {
+      "e05_compact_encoder": "9ed311eb3afe380ceb0ae7b101811df56f88ee516f5ad3d3f4553e3c48ac2221",
+      "v1_t05_tao_anchor": "6352ff0f9a4ea37e53c6cebcae27cc0ccf5c152dde64c848552f7eff645ccac6",
+      "v1_t13_tods_anchor": "f266fd23f42685f8593282e01daa8d32cb522ebfb63f25a5939327f4363bc4d6"
+    },
+    "M/SVDB": {
+      "v1_t08_svdb_anchor": "802adbaeda6abdfc42ee5f341194dc3eab1b87ee0cfddf1b9839e412e5eebc39",
+      "e10_patch128_batch64_long": "cbf67ebcebe10387bf43c8a71ec94766bb0685114fb475f1d385ff1edb293b65",
+      "e05_compact_encoder": "6cf22ee08d8e5fc0412ef3ccc97b7552d2a4124418642dfbba6790347427b3fe"
+    },
+    "M/TAO": {
+      "v1_t08_svdb_anchor": "66a818b002f5c330ef0289e979714b2dc3b448ed3c8c7e813605ac1e9365808b",
+      "v1_t13_tods_anchor": "679d071ffdb9d58d15b4c6676b5fcf69a50a379181897a529ebbb6a154c27b81",
+      "v1_t22_exathlon_anchor": "5db842b434c7cd269ad4775d4a450990b147e5da7971692207b7cb2a89b1a4ec"
+    }
+  },
+  "declared_final_gb_min_splits": [
+    4,
+    16,
+    64,
+    256
+  ],
+  "declared_top_ks": [
+    1,
+    3,
+    5,
+    9,
+    15
+  ],
+  "final_gb_min_splits": [
+    4
+  ],
+  "top_ks": [
+    3
+  ],
+  "selection": {
+    "score": "macro mean VUS-PR only",
+    "tie_breakers": [
+      "canonical_id"
+    ],
+    "stage1_head": {
+      "final_gb_min_split": 4,
+      "top_k": 3
+    },
+    "stage1_rule": "Rank training candidates without Eval; retain exactly the top three and confirm those candidates on Tuning seeds 2027 and 2028 before choosing a training configuration.",
+    "stage2_rule": "Freeze the training configuration first, then rank final-memory heads. Do not perform a joint 320-way selection.",
+    "dataset_specific_rule": "Every dataset selects its own training and head parameters; track-level fallback is forbidden."
+  },
+  "metadata": {
+    "stage1a_plan_fingerprint": "82710806f9bc2c98c2406649963222a82e7c3394902d7437a544947d0827c6d8",
+    "stage1a_selection_fingerprint": "cd9405844d0ecfb37a0a768da40882b35d540e9c1e0c07fd125063915c94f282",
+    "stage1a_summary_sha256": "345b1c794f557ed0cbed8881ec9c453a47f688f44402bd5d87bde6f89f4d509c",
+    "generated_from_complete_stage1a": true,
+    "eval_feedback": false
+  },
+  "execution_environment": {
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "torch_deterministic_algorithms": true,
+    "CUDA_VISIBLE_DEVICES": "isolated_physical_gpu_per_worker",
+    "runtime_eligible_for_paper": false
+  },
+  "shortlist_size": 3,
+  "training_shortlists": {
+    "U/UCR": [
+      "e10_patch128_batch64_long",
+      "v1_t17_ucr_anchor",
+      "e09_long_patch_batch64"
+    ],
+    "U/Exathlon": [
+      "v1_t05_tao_anchor",
+      "e08_short_patch_long_train",
+      "v1_t22_exathlon_anchor"
+    ],
+    "U/MSL": [
+      "e09_long_patch_batch64",
+      "v1_t05_tao_anchor",
+      "e06_wide_encoder"
+    ],
+    "U/SED": [
+      "v1_t05_tao_anchor",
+      "v1_t13_tods_anchor",
+      "v1_t10_sed_anchor"
+    ],
+    "U/TODS": [
+      "e08_short_patch_long_train",
+      "v1_t10_sed_anchor",
+      "e07_short_patch_batch64"
+    ],
+    "M/CATSv2": [
+      "e02_low_lr_long_train",
+      "e03_geometry_balanced_sampling",
+      "e04_base_high_decay"
+    ],
+    "M/GHL": [
+      "e02_low_lr_long_train",
+      "e06_wide_encoder",
+      "v1_t06_cats_ghl_anchor"
+    ],
+    "M/LTDB": [
+      "e05_compact_encoder",
+      "v1_t05_tao_anchor",
+      "v1_t13_tods_anchor"
+    ],
+    "M/SVDB": [
+      "v1_t08_svdb_anchor",
+      "e10_patch128_batch64_long",
+      "e05_compact_encoder"
+    ],
+    "M/TAO": [
+      "v1_t08_svdb_anchor",
+      "v1_t13_tods_anchor",
+      "v1_t22_exathlon_anchor"
+    ]
+  },
+  "training_winners": null,
+  "prior_summary": {
+    "path": "../lineage/stage1a/stage_vuspr_search_summary.json",
+    "sha256": "345b1c794f557ed0cbed8881ec9c453a47f688f44402bd5d87bde6f89f4d509c"
+  },
+  "series_count": 22,
+  "expected_logical_units": 132,
+  "expected_units": 132,
+  "variants_per_unit": 1,
+  "prior_summary_validation": {
+    "summary_sha256": "345b1c794f557ed0cbed8881ec9c453a47f688f44402bd5d87bde6f89f4d509c",
+    "phase": "stage1a",
+    "plan_fingerprint": "82710806f9bc2c98c2406649963222a82e7c3394902d7437a544947d0827c6d8",
+    "selection_fingerprint": "cd9405844d0ecfb37a0a768da40882b35d540e9c1e0c07fd125063915c94f282"
+  },
+  "plan_fingerprint": "baa29a7eb659024d9351f4bb5b43598830f9006ca5e791f1271a6be8e8013415",
+  "created_at": "2026-07-24T11:31:38.559578+00:00"
+}
