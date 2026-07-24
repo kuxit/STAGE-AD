@@ -74,6 +74,9 @@ class StageConfig:
     final_gb_min_split: int | None = None
     gb_max_rounds: int = 64
     gb_sampling_power: float = 0.5
+    patch_statistics_weight: float = 0.0
+    memory_radius_weight: float = 0.0
+    memory_radius_quantile: float = 0.90
     top_k: int = 3
     embedding_batch_size: int = 2048
     score_batch_size: int = 2048
@@ -115,6 +118,12 @@ class StageConfig:
             raise ValueError("final_gb_min_split must be at least four")
         if not 0.0 <= self.gb_sampling_power <= 1.0:
             raise ValueError("gb_sampling_power must be in [0, 1]")
+        if self.patch_statistics_weight < 0.0:
+            raise ValueError("patch_statistics_weight must be non-negative")
+        if self.memory_radius_weight < 0.0:
+            raise ValueError("memory_radius_weight must be non-negative")
+        if not 0.0 < self.memory_radius_quantile <= 1.0:
+            raise ValueError("memory_radius_quantile must lie in (0, 1]")
         if self.score_batch_size < 1 or self.memory_score_block_size < 1:
             raise ValueError("score block sizes must be positive")
 
@@ -268,6 +277,89 @@ class PatchRevIN(nn.Module):
         return (x - mean) / torch.sqrt(variance + self.eps)
 
 
+def robust_feature_calibration(values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Fit label-blind per-channel location and scale on the training prefix.
+
+    PatchRevIN deliberately removes level and scale from the shape pathway.
+    STAGE-v3 retains those cues in a separate descriptor after robustly
+    calibrating them against the filename-declared training prefix.  Median
+    and MAD keep a short transient from controlling the calibration; standard
+    deviation and one are deterministic fallbacks for constant channels.
+    """
+
+    array = np.asarray(values, dtype=np.float32)
+    if array.ndim != 2 or len(array) < 2 or not np.isfinite(array).all():
+        raise ValueError("feature calibration expects a finite 2-D training prefix")
+    center = np.median(array, axis=0).astype(np.float32)
+    mad = (
+        1.4826
+        * np.median(np.abs(array - center[None, :]), axis=0)
+    ).astype(np.float32)
+    standard = array.std(axis=0, dtype=np.float64).astype(np.float32)
+    scale = np.where(mad > 1e-6, mad, standard)
+    scale = np.where(scale > 1e-6, scale, np.ones_like(scale))
+    return center, scale.astype(np.float32)
+
+
+def robust_patch_statistics_calibration(
+    values: np.ndarray,
+    patch_size: int,
+    feature_center: np.ndarray,
+    feature_scale: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Calibrate patch mean and log-scale descriptors on training windows."""
+
+    array = np.asarray(values, dtype=np.float64)
+    size = int(patch_size)
+    if array.ndim != 2 or size < 2 or len(array) < size:
+        raise ValueError("patch-statistics calibration received invalid values")
+    center = np.asarray(feature_center, dtype=np.float64).reshape(1, -1)
+    scale = np.asarray(feature_scale, dtype=np.float64).reshape(1, -1)
+    if center.shape[1] != array.shape[1] or scale.shape != center.shape:
+        raise ValueError("feature calibration dimensions do not match values")
+    standardized = (array - center) / scale
+    cumulative = np.vstack(
+        [np.zeros((1, standardized.shape[1]), dtype=np.float64), standardized.cumsum(axis=0)]
+    )
+    cumulative_squared = np.vstack(
+        [
+            np.zeros((1, standardized.shape[1]), dtype=np.float64),
+            np.square(standardized).cumsum(axis=0),
+        ]
+    )
+    means = (cumulative[size:] - cumulative[:-size]) / float(size)
+    second_moments = (
+        cumulative_squared[size:] - cumulative_squared[:-size]
+    ) / float(size)
+    standard_deviations = np.sqrt(
+        np.maximum(second_moments - np.square(means), 1e-8)
+    )
+    statistics = np.concatenate(
+        [means, np.log(standard_deviations + 1e-4)],
+        axis=1,
+    )
+    statistics_center = np.median(statistics, axis=0)
+    statistics_mad = 1.4826 * np.median(
+        np.abs(statistics - statistics_center[None, :]),
+        axis=0,
+    )
+    statistics_standard = statistics.std(axis=0)
+    statistics_scale = np.where(
+        statistics_mad > 1e-6,
+        statistics_mad,
+        statistics_standard,
+    )
+    statistics_scale = np.where(
+        statistics_scale > 1e-6,
+        statistics_scale,
+        np.ones_like(statistics_scale),
+    )
+    return (
+        statistics_center.astype(np.float32),
+        statistics_scale.astype(np.float32),
+    )
+
+
 class DilatedResidualBlock(nn.Module):
     """Non-causal dilated temporal mixing with a stable residual path."""
 
@@ -312,10 +404,76 @@ class DilatedResidualBlock(nn.Module):
 class StageEncoder(nn.Module):
     """Dilated residual token encoder used by STAGE."""
 
-    def __init__(self, in_channels: int, config: StageConfig) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        config: StageConfig,
+        *,
+        feature_center: np.ndarray | None = None,
+        feature_scale: np.ndarray | None = None,
+        statistics_center: np.ndarray | None = None,
+        statistics_scale: np.ndarray | None = None,
+    ) -> None:
         super().__init__()
         config.validate()
         self.config = config
+        if (feature_center is None) != (feature_scale is None):
+            raise ValueError("feature_center and feature_scale must be provided together")
+        if feature_center is None:
+            center = np.zeros(int(in_channels), dtype=np.float32)
+            scale = np.ones(int(in_channels), dtype=np.float32)
+        else:
+            center = np.asarray(feature_center, dtype=np.float32).reshape(-1)
+            scale = np.asarray(feature_scale, dtype=np.float32).reshape(-1)
+            if (
+                len(center) != int(in_channels)
+                or len(scale) != int(in_channels)
+                or not np.isfinite(center).all()
+                or not np.isfinite(scale).all()
+                or np.any(scale <= 0.0)
+            ):
+                raise ValueError("invalid feature calibration")
+        self.register_buffer(
+            "feature_center",
+            torch.from_numpy(center).reshape(1, int(in_channels), 1),
+        )
+        self.register_buffer(
+            "feature_scale",
+            torch.from_numpy(scale).reshape(1, int(in_channels), 1),
+        )
+        if (statistics_center is None) != (statistics_scale is None):
+            raise ValueError(
+                "statistics_center and statistics_scale must be provided together"
+            )
+        statistics_dimensions = 2 * int(in_channels)
+        if statistics_center is None:
+            descriptor_center = np.zeros(statistics_dimensions, dtype=np.float32)
+            descriptor_scale = np.ones(statistics_dimensions, dtype=np.float32)
+        else:
+            descriptor_center = np.asarray(
+                statistics_center,
+                dtype=np.float32,
+            ).reshape(-1)
+            descriptor_scale = np.asarray(
+                statistics_scale,
+                dtype=np.float32,
+            ).reshape(-1)
+            if (
+                len(descriptor_center) != statistics_dimensions
+                or len(descriptor_scale) != statistics_dimensions
+                or not np.isfinite(descriptor_center).all()
+                or not np.isfinite(descriptor_scale).all()
+                or np.any(descriptor_scale <= 0.0)
+            ):
+                raise ValueError("invalid patch-statistics calibration")
+        self.register_buffer(
+            "statistics_center",
+            torch.from_numpy(descriptor_center).reshape(1, statistics_dimensions),
+        )
+        self.register_buffer(
+            "statistics_scale",
+            torch.from_numpy(descriptor_scale).reshape(1, statistics_dimensions),
+        )
         self.revin = PatchRevIN()
         self.stem = nn.Sequential(
             nn.Conv1d(
@@ -367,9 +525,43 @@ class StageEncoder(nn.Module):
             x = block(x)
         return self.token_head(x).transpose(1, 2).contiguous()
 
+    def embed_patch(
+        self,
+        x: torch.Tensor,
+        tokens: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """Fuse shape evidence with bounded level/scale evidence.
+
+        The overlap objective remains defined on timestamp tokens and shared
+        intervals.  The deterministic statistics branch only changes the
+        geometry used by the intermediate partition, final memory, and query
+        distance.  With zero weight this function is bit-for-bit equivalent to
+        the legacy shape-only embedding path.
+        """
+
+        if tokens is None:
+            tokens = self.encode_tokens(x)
+        shape = self.embed_tokens(tokens)
+        weight = float(self.config.patch_statistics_weight)
+        if weight == 0.0:
+            return shape
+        standardized = (x - self.feature_center) / self.feature_scale
+        level = standardized.mean(dim=-1)
+        local_scale = torch.sqrt(
+            standardized.var(dim=-1, unbiased=False).clamp_min(1e-8)
+        )
+        log_scale = torch.log(local_scale + 1e-4)
+        statistics = torch.cat([level, log_scale], dim=1)
+        statistics = torch.tanh(
+            ((statistics - self.statistics_center) / self.statistics_scale) / 3.0
+        )
+        statistics = F.normalize(statistics, dim=1)
+        shape = F.normalize(shape, dim=1)
+        return F.normalize(torch.cat([shape, weight * statistics], dim=1), dim=1)
+
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         tokens = self.encode_tokens(x)
-        return tokens, self.embed_tokens(tokens)
+        return tokens, self.embed_patch(x, tokens)
 
 
 def off_diagonal(matrix: torch.Tensor) -> torch.Tensor:
@@ -661,25 +853,93 @@ def select_gb_rows(total_rows: int, maximum: int) -> np.ndarray:
     )
 
 
+@dataclass(frozen=True)
+class CalibratedExemplarMemory:
+    """Observed exemplars with geometry-derived uncertainty metadata."""
+
+    vectors: np.ndarray
+    region_radii: np.ndarray
+    region_sizes: np.ndarray
+    representative_source_rows: np.ndarray
+
+    def __len__(self) -> int:
+        return int(len(self.vectors))
+
+
+def _build_calibrated_exemplar_memory(
+    embeddings: np.ndarray,
+    config: StageConfig,
+    *,
+    seed: int,
+) -> tuple[CalibratedExemplarMemory, GranularPartition]:
+    selected = select_gb_rows(len(embeddings), int(config.max_gb_rows))
+    source = np.asarray(embeddings[selected], dtype=np.float32)
+    source = source / np.maximum(np.linalg.norm(source, axis=1, keepdims=True), 1e-12)
+    partition = build_granular_partition(source, config, seed=int(seed))
+    representatives: list[int] = []
+    radii: list[float] = []
+    sizes: list[int] = []
+    for ball in partition.balls:
+        members = source[ball]
+        center = members.mean(axis=0)
+        local = int(np.argmin(np.sum((members - center[None, :]) ** 2, axis=1)))
+        representative = int(ball[local])
+        representatives.append(representative)
+        exemplar = source[representative]
+        squared_distances = np.maximum(
+            0.0,
+            2.0 - 2.0 * (members @ exemplar),
+        )
+        radii.append(
+            float(
+                np.quantile(
+                    squared_distances,
+                    float(config.memory_radius_quantile),
+                )
+            )
+        )
+        sizes.append(int(len(ball)))
+    representatives_array = np.asarray(representatives, dtype=np.int64)
+    memory = source[representatives_array]
+    memory = memory / np.maximum(np.linalg.norm(memory, axis=1, keepdims=True), 1e-12)
+    calibrated = CalibratedExemplarMemory(
+        vectors=memory.astype(np.float32),
+        region_radii=np.asarray(radii, dtype=np.float32),
+        region_sizes=np.asarray(sizes, dtype=np.int64),
+        representative_source_rows=selected[representatives_array],
+    )
+    return calibrated, partition
+
+
 def build_gb_exemplar_memory(
     embeddings: np.ndarray,
     config: StageConfig,
     *,
     seed: int,
 ) -> tuple[np.ndarray, GranularPartition]:
-    selected = select_gb_rows(len(embeddings), int(config.max_gb_rows))
-    source = np.asarray(embeddings[selected], dtype=np.float32)
-    partition = build_granular_partition(source, config, seed=int(seed))
-    representatives: list[int] = []
-    for ball in partition.balls:
-        members = source[ball]
-        center = members.mean(axis=0)
-        local = int(np.argmin(np.sum((members - center[None, :]) ** 2, axis=1)))
-        representatives.append(int(ball[local]))
-    representatives_array = np.asarray(representatives, dtype=np.int64)
-    memory = source[representatives_array]
-    memory = memory / np.maximum(np.linalg.norm(memory, axis=1, keepdims=True), 1e-12)
-    return memory.astype(np.float32), partition
+    """Build the legacy observed-exemplar memory without score calibration."""
+
+    calibrated, partition = _build_calibrated_exemplar_memory(
+        embeddings,
+        config,
+        seed=seed,
+    )
+    return calibrated.vectors, partition
+
+
+def build_calibrated_exemplar_memory(
+    embeddings: np.ndarray,
+    config: StageConfig,
+    *,
+    seed: int,
+) -> tuple[CalibratedExemplarMemory, GranularPartition]:
+    """Build observed exemplars and retain each region's empirical spread."""
+
+    return _build_calibrated_exemplar_memory(
+        embeddings,
+        config,
+        seed=seed,
+    )
 
 
 def sample_from_partition(
@@ -917,15 +1177,25 @@ def fit_encoder(
 
 def score_embeddings(
     queries: np.ndarray,
-    memory: np.ndarray,
+    memory: np.ndarray | CalibratedExemplarMemory,
     device: torch.device,
     config: StageConfig,
 ) -> np.ndarray:
     if len(memory) < 1:
         raise ValueError("memory is empty")
     top_k = min(int(config.top_k), len(memory))
-    memory_tensor = torch.from_numpy(np.asarray(memory, dtype=np.float32)).to(device)
+    if isinstance(memory, CalibratedExemplarMemory):
+        memory_array = memory.vectors
+        radius_penalty = (
+            float(config.memory_radius_weight)
+            * np.asarray(memory.region_radii, dtype=np.float32)
+        )
+    else:
+        memory_array = np.asarray(memory, dtype=np.float32)
+        radius_penalty = np.zeros(len(memory_array), dtype=np.float32)
+    memory_tensor = torch.from_numpy(memory_array).to(device)
     memory_tensor = F.normalize(memory_tensor, dim=1)
+    radius_penalty_tensor = torch.from_numpy(radius_penalty).to(device)
     output: list[np.ndarray] = []
     with torch.inference_mode():
         for offset in range(0, len(queries), int(config.score_batch_size)):
@@ -942,7 +1212,13 @@ def score_embeddings(
             block_size = int(config.memory_score_block_size)
             for memory_offset in range(0, len(memory_tensor), block_size):
                 block = memory_tensor[memory_offset : memory_offset + block_size]
-                squared_distance = (2.0 - 2.0 * (query @ block.T)).clamp_min_(0.0)
+                block_radius_penalty = radius_penalty_tensor[
+                    memory_offset : memory_offset + block_size
+                ]
+                squared_distance = (
+                    (2.0 - 2.0 * (query @ block.T)).clamp_min_(0.0)
+                    + block_radius_penalty[None, :]
+                )
                 block_k = min(top_k, len(block))
                 block_best = torch.topk(
                     squared_distance,
@@ -1060,11 +1336,25 @@ def evaluate_series(
     if train_index < config.patch_size + max(config.overlap_deltas):
         raise ValueError(f"training prefix is too short in {path.name}")
     seed_everything(config.seed)
-    model = StageEncoder(values.shape[1], config).to(device)
+    train_values = values[:train_index]
+    feature_center, feature_scale = robust_feature_calibration(train_values)
+    statistics_center, statistics_scale = robust_patch_statistics_calibration(
+        train_values,
+        config.patch_size,
+        feature_center,
+        feature_scale,
+    )
+    model = StageEncoder(
+        values.shape[1],
+        config,
+        feature_center=feature_center,
+        feature_scale=feature_scale,
+        statistics_center=statistics_center,
+        statistics_scale=statistics_scale,
+    ).to(device)
     parameter_count = int(sum(parameter.numel() for parameter in model.parameters()))
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
-    train_values = values[:train_index]
     train_window_bank = DeviceWindowBank(train_values, device, config.patch_size)
     training = fit_encoder(
         train_values,
@@ -1095,7 +1385,7 @@ def evaluate_series(
         or int(config.final_gb_min_split) == int(config.gb_min_split)
         else replace(config, gb_min_split=int(config.final_gb_min_split))
     )
-    gb_memory, final_partition = build_gb_exemplar_memory(
+    gb_memory, final_partition = build_calibrated_exemplar_memory(
         train_unit, final_memory_config, seed=int(config.seed) + 29
     )
     gb_build_seconds = float(time.perf_counter() - memory_started)
@@ -1112,6 +1402,8 @@ def evaluate_series(
             **metrics,
             "memory_rows": int(len(gb_memory)),
             "memory_ratio": float(len(gb_memory) / len(train_unit)),
+            "mean_region_radius": float(np.mean(gb_memory.region_radii)),
+            "p90_region_radius": float(np.quantile(gb_memory.region_radii, 0.90)),
             "query_seconds": query_seconds,
             "query_ms_per_patch": float(1000.0 * query_seconds / len(full_unit)),
         }
@@ -1125,6 +1417,10 @@ def evaluate_series(
                 "state_dict": model.state_dict(),
                 "config": asdict(config),
                 "in_channels": int(values.shape[1]),
+                "feature_center": feature_center,
+                "feature_scale": feature_scale,
+                "statistics_center": statistics_center,
+                "statistics_scale": statistics_scale,
             },
             artifact / "stage_encoder.pt",
         )
@@ -1148,12 +1444,28 @@ def evaluate_series(
         ),
         "sliding_window": int(sliding_window),
         "training": training,
+        "descriptor": {
+            "shape_dimensions": int(config.embedding_dim),
+            "statistics_dimensions": (
+                0
+                if float(config.patch_statistics_weight) == 0.0
+                else int(2 * values.shape[1])
+            ),
+            "patch_statistics_weight": float(config.patch_statistics_weight),
+            "feature_calibration": "training_prefix_point_median_mad",
+            "statistics_calibration": "training_window_median_mad",
+        },
         "final_gb": {
             "min_split": int(final_memory_config.gb_min_split),
             "initial_k": final_partition.initial_k,
             "final_k": final_partition.final_k,
             "rounds": final_partition.rounds,
             "source_rows": final_partition.source_rows,
+            "radius_weight": float(config.memory_radius_weight),
+            "radius_quantile": float(config.memory_radius_quantile),
+            "mean_radius": float(np.mean(gb_memory.region_radii)),
+            "p90_radius": float(np.quantile(gb_memory.region_radii, 0.90)),
+            "region_sizes": [int(item) for item in gb_memory.region_sizes],
             "build_seconds": gb_build_seconds,
         },
         "methods": methods,
@@ -1212,6 +1524,9 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         ),
         gb_max_rounds=int(args.gb_max_rounds),
         gb_sampling_power=float(args.gb_sampling_power),
+        patch_statistics_weight=float(args.patch_statistics_weight),
+        memory_radius_weight=float(args.memory_radius_weight),
+        memory_radius_quantile=float(args.memory_radius_quantile),
         top_k=int(args.top_k),
         embedding_batch_size=int(args.embedding_batch_size),
         score_batch_size=int(args.score_batch_size),
@@ -1264,6 +1579,30 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--final-gb-min-split", type=int)
     parser.add_argument("--gb-max-rounds", type=int, default=64)
     parser.add_argument("--gb-sampling-power", type=float, default=0.5)
+    parser.add_argument(
+        "--patch-statistics-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Weight of the robust level/scale descriptor concatenated with the "
+            "overlap-trained shape embedding; zero reproduces legacy geometry."
+        ),
+    )
+    parser.add_argument(
+        "--memory-radius-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Additive penalty for references retained from dispersed normal "
+            "regions; zero reproduces legacy nearest-reference scoring."
+        ),
+    )
+    parser.add_argument(
+        "--memory-radius-quantile",
+        type=float,
+        default=0.90,
+        help="Within-region squared-distance quantile used as reference spread.",
+    )
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--embedding-batch-size", type=int, default=2048)
     parser.add_argument("--score-batch-size", type=int, default=2048)
