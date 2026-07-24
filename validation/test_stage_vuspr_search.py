@@ -107,6 +107,18 @@ class StageVUSPRSearchTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must not set axes"):
             search.validate_protocol_payload(payload)
 
+    def test_protocol_rejects_story_contract_drift(self) -> None:
+        payload = search.load_json(PROTOCOL)
+        payload["story_contract"]["alignment_objective"] = "timestamp_token_only"
+        with self.assertRaisesRegex(ValueError, "story_contract"):
+            search.validate_protocol_payload(payload)
+
+    def test_protocol_rejects_main_candidate_that_disables_tempering(self) -> None:
+        payload = search.load_json(PROTOCOL)
+        payload["training_candidates"][0]["parameters"]["gb_sampling_power"] = 1.0
+        with self.assertRaisesRegex(ValueError, "story/same-family"):
+            search.validate_protocol_payload(payload)
+
     def test_stage1b_candidate_scope_is_dataset_specific(self) -> None:
         payload = search.load_json(PROTOCOL)
         identifiers = [item["id"] for item in payload["training_candidates"]]

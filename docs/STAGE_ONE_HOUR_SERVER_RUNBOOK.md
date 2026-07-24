@@ -4,6 +4,13 @@ This run is restricted to STAGE and the official TSB-AD Tuning split.  It
 does not launch, modify, or rerun any baseline and does not consume Eval
 feedback.
 
+The frozen story contract fixes the problem and three mechanism roles, not one
+particular formula: overlap-aware alignment must reduce context variation,
+intermediate geometry must temper abundance-driven exposure, and final
+geometry must retain supported observed exemplars adaptively. The current
+24-candidate run explores mechanism-preserving implementations; complete
+mechanism removals are reserved for diagnostic ablations.
+
 ## CPU work already frozen locally
 
 `configs/stage_vuspr_stage1a_plan.json` contains the complete 528-unit plan:

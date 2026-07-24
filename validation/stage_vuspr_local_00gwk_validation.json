@@ -13,10 +13,19 @@
     "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU"
   },
   "acceptance": {
-    "unit_tests_passed": 16,
+    "unit_tests_passed": 18,
     "selection_split": "official TSB-AD Tuning only",
     "selection_score": "per-dataset macro mean VUS-PR only",
     "eval_feedback": false,
+    "story_contract": {
+      "canonical_guidance_sha256": "bfca67c805c48d169aa5206f429fd9c71f60e0767fbc2f214ec8d02843b1f3a9",
+      "fixed_problem": "coupled_context_and_patch_abundance_bias_within_normality",
+      "alignment_role": "reduce_context_induced_variation_of_shared_temporal_content",
+      "intermediate_geometry_role": "temper_abundance_driven_encoder_exposure",
+      "final_geometry_role": "retain_supported_observed_exemplars_at_adaptive_granularity",
+      "implementation_flexible": true,
+      "main_selection_excludes_controls": true
+    },
     "training_candidates": 24,
     "series": 22,
     "physical_units": 528,
@@ -27,12 +36,12 @@
     "forbidden_artifacts": 0
   },
   "integrity": {
-    "protocol_sha256": "86fefe31cf5a875d9b54e91824321d94c8f15036c9d776a94ca586bb3ad4dd40",
-    "protocol_fingerprint": "75545d7e26fe226b4becb6c6a4a0c0644a13c6deac432c2a157fa98e178f7bf3",
-    "plan_sha256": "2b9effd96f72731a856377087e3a065a37c8383c292ce13623ab5b92f97bbf01",
-    "plan_fingerprint": "5cb996f0663a006c92b5155ec9180dd4478726eb8327f5a5152452be07b3f04d",
+    "protocol_sha256": "bf5ea615c963b1336991ff39dd61602d0490af570edaf1d511d64c68ee6a5f4a",
+    "protocol_fingerprint": "90952b3cf25c2a0278fde9250ba357f63fd0a0cf4261658b5d0ec7a214e097c9",
+    "plan_sha256": "39f45cb38a96521ae38b4b33b464cefb77f6e292c862c153fb471dfdba91089e",
+    "plan_fingerprint": "82710806f9bc2c98c2406649963222a82e7c3394902d7437a544947d0827c6d8",
     "stage_source_sha256": "43a8a8d5526d8a76f3632a34b5bb048e386723f58f41f84e5ef572eafb1c2ebe",
-    "runner_source_sha256": "537ea71df55a6c0d5b0d515971588c8e373b9b08712a0649c80de1853c5f4e7f"
+    "runner_source_sha256": "96b1591a57f37e971ddce8259b69b6cb7c2db1ed09f2435f7e9aefe29625a91d"
   },
   "gpu_smoke": {
     "split": "Tuning",

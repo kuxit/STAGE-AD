@@ -108,10 +108,11 @@ def main() -> int:
             "gpu": torch.cuda.get_device_name(0),
         },
         "acceptance": {
-            "unit_tests_passed": 16,
+            "unit_tests_passed": 18,
             "selection_split": "official TSB-AD Tuning only",
             "selection_score": "per-dataset macro mean VUS-PR only",
             "eval_feedback": False,
+            "story_contract": plan["story_contract"],
             "training_candidates": 24,
             "series": 22,
             "physical_units": 528,

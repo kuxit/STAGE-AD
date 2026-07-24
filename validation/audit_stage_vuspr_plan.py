@@ -46,6 +46,14 @@ def main(argv: Sequence[str] = None) -> int:
         raise RuntimeError("selection split is not official TSB-AD Tuning")
     if protocol["eval_feedback_used_by_runner"] is not False:
         raise RuntimeError("Eval feedback is enabled")
+    if protocol["story_contract"] != search.STORY_CONTRACT:
+        raise RuntimeError("the canonical STAGE story contract drifted")
+    if any(
+        item["resolved_parameters"]["alignment_objective"] != "both"
+        or not 0.0 <= item["resolved_parameters"]["gb_sampling_power"] < 1.0
+        for item in protocol["training_candidates"]
+    ):
+        raise RuntimeError("a main candidate disables a canonical STAGE mechanism")
     if plan["series_count"] != 22:
         raise RuntimeError("the frozen representative Tuning set must have 22 series")
     expected = 24 * 22
@@ -85,6 +93,7 @@ def main(argv: Sequence[str] = None) -> int:
         "selection_score": protocol["selection"]["score"],
         "tie_breakers": protocol["selection"]["tie_breakers"],
         "eval_feedback": False,
+        "story_contract": protocol["story_contract"],
     }
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0

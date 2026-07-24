@@ -12,6 +12,12 @@ result is read-only. The new protocol fixes the short-series update-budget bug
 and selects training/head parameters separately for all ten datasets using
 official-Tuning macro VUS-PR only.
 
+Every main-search candidate preserves the paper's three mechanism roles:
+context-stabilizing alignment, abundance-tempering intermediate geometry, and
+adaptive observed-exemplar retention. Their concrete implementation may evolve
+inside the STAGE family; mechanism-removal controls remain diagnostic ablations
+and cannot become the reported STAGE configuration.
+
 - Protocol: [`configs/stage_vuspr_stage1a.json`](configs/stage_vuspr_stage1a.json)
 - Runner: [`scripts/stage_vuspr_search.py`](scripts/stage_vuspr_search.py)
 - Strict watcher: [`scripts/stage_vuspr_watch.py`](scripts/stage_vuspr_watch.py)

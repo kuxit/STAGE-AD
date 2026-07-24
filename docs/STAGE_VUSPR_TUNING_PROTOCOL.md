@@ -18,6 +18,13 @@ run by this protocol.
 - Architecture family: unchanged.
 - Mechanisms: timestamp/interval alignment, adaptive intermediate geometry,
   and final observed-exemplar geometry remain active.
+- Story contract: every main-selection candidate must preserve the functional
+  roles of overlap-aware alignment, abundance-tempering intermediate geometry,
+  and adaptive observed-exemplar retention. Their implementation is flexible:
+  the alignment objective, geometry construction, sublinear sampling rule,
+  exemplar selection, and score aggregation may be improved without changing
+  the fixed problem. Mechanism-removal controls are ineligible for the main
+  winner.
 - Selection split: official TSB-AD Tuning only.
 - Selection objective: per-dataset macro VUS-PR only.
 - Exact ties: canonical candidate/head identifier only.

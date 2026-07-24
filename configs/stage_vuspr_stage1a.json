@@ -6,6 +6,15 @@
   "selection_split": "official TSB-AD Tuning only",
   "eval_feedback_used_by_runner": false,
   "confirmatory_claim_eligible": false,
+  "story_contract": {
+    "canonical_guidance_sha256": "bfca67c805c48d169aa5206f429fd9c71f60e0767fbc2f214ec8d02843b1f3a9",
+    "fixed_problem": "coupled_context_and_patch_abundance_bias_within_normality",
+    "alignment_role": "reduce_context_induced_variation_of_shared_temporal_content",
+    "intermediate_geometry_role": "temper_abundance_driven_encoder_exposure",
+    "final_geometry_role": "retain_supported_observed_exemplars_at_adaptive_granularity",
+    "implementation_flexible": true,
+    "main_selection_excludes_controls": true
+  },
   "expected_source_sha256": "43a8a8d5526d8a76f3632a34b5bb048e386723f58f41f84e5ef572eafb1c2ebe",
   "seeds": [2026],
   "targets": {
@@ -320,7 +329,7 @@
       }
     },
     {
-      "id": "e03_ball_balanced_sampling",
+      "id": "e03_geometry_balanced_sampling",
       "parameters": {
         "patch_size": 96,
         "channels": 128,
@@ -344,7 +353,7 @@
       }
     },
     {
-      "id": "e04_patch_uniform_sampling",
+      "id": "e04_base_high_decay",
       "parameters": {
         "patch_size": 96,
         "channels": 128,
@@ -352,18 +361,18 @@
         "embedding_dim": 64,
         "dilations": [1, 2, 4, 8, 4, 2],
         "group_norm_groups": 8,
-        "dropout": 0.0,
+        "dropout": 0.1,
         "batch_size": 256,
         "steps": 1000,
         "gb_activation_fraction": 0.2,
         "learning_rate": 0.0001,
-        "weight_decay": 0.0001,
+        "weight_decay": 0.001,
         "grad_clip": 1.0,
         "overlap_deltas": [24, 48],
         "overlap_trim": 8,
         "gb_min_split": 4,
         "gb_max_rounds": 64,
-        "gb_sampling_power": 1.0,
+        "gb_sampling_power": 0.5,
         "max_gb_rows": 50000
       }
     },
@@ -560,7 +569,7 @@
       }
     },
     {
-      "id": "e13_batch128_balanced_geometry",
+      "id": "e13_batch128_geometry_balanced",
       "parameters": {
         "patch_size": 96,
         "channels": 128,

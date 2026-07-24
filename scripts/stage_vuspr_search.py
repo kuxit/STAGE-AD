@@ -78,6 +78,21 @@ EXPECTED_FINAL_SPLITS = [4, 16, 64, 256]
 EXPECTED_TOP_KS = [1, 3, 5, 9, 15]
 CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 EXPECTED_SELECTION_SCORE = "macro mean VUS-PR only"
+STORY_CONTRACT = {
+    "canonical_guidance_sha256": (
+        "bfca67c805c48d169aa5206f429fd9c71f60e0767fbc2f214ec8d02843b1f3a9"
+    ),
+    "fixed_problem": "coupled_context_and_patch_abundance_bias_within_normality",
+    "alignment_role": (
+        "reduce_context_induced_variation_of_shared_temporal_content"
+    ),
+    "intermediate_geometry_role": "temper_abundance_driven_encoder_exposure",
+    "final_geometry_role": (
+        "retain_supported_observed_exemplars_at_adaptive_granularity"
+    ),
+    "implementation_flexible": True,
+    "main_selection_excludes_controls": True,
+}
 
 INTEGER_CONFIG_FIELDS = {
     "patch_size",
@@ -230,6 +245,7 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         "seeds",
         "metrics",
         "selection",
+        "story_contract",
     }
     allowed = required | {
         "phase",
@@ -266,6 +282,12 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("expected_source_sha256 must be a SHA-256 hex digest")
     if payload.get("metrics") != list(METRICS):
         raise ValueError(f"metrics must be exactly {list(METRICS)}")
+    if payload.get("story_contract") != STORY_CONTRACT:
+        raise ValueError(
+            "story_contract must preserve the canonical STAGE problem and "
+            "the functional roles of alignment, intermediate geometry, and "
+            "final observed-exemplar geometry"
+        )
 
     raw_selection = payload.get("selection")
     expected_selection_fields = {
@@ -370,9 +392,11 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             or int(resolved["group_norm_groups"]) != 8
             or int(resolved["gb_min_split"]) != 4
             or int(resolved["gb_max_rounds"]) != 64
+            or str(resolved["alignment_objective"]) != "both"
+            or not 0.0 <= float(resolved["gb_sampling_power"]) < 1.0
         ):
             raise ValueError(
-                f"{candidate_id} violates the frozen same-family/training-GB boundary"
+                f"{candidate_id} violates the frozen story/same-family boundary"
             )
         candidates.append(
             {
@@ -453,6 +477,7 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         "selection_split": SELECTION_SPLIT,
         "eval_feedback_used_by_runner": False,
         "confirmatory_claim_eligible": False,
+        "story_contract": dict(STORY_CONTRACT),
         "expected_source_sha256": expected_source.lower(),
         "phase": phase,
         "metadata": dict(metadata),
@@ -676,6 +701,7 @@ def _plan_stable_payload(
         "phase": protocol["phase"],
         "selection_split": SELECTION_SPLIT,
         "eval_feedback": False,
+        "story_contract": protocol["story_contract"],
         "protocol_schema": protocol["schema_version"],
         "protocol_sha256": protocol_sha256,
         "protocol_fingerprint": protocol_fingerprint,
