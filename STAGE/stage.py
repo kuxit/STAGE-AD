@@ -80,8 +80,11 @@ class StageConfig:
     gb_sampling_power: float = 0.5
     gb_refresh_fraction: float | None = None
     patch_statistics_weight: float = 0.0
+    final_geometry_mode: str = "control"
     memory_radius_weight: float = 0.0
     memory_radius_quantile: float = 0.90
+    temporal_support_fraction: float = 0.50
+    temporal_transition_weight: float = 0.0
     top_k: int = 3
     embedding_batch_size: int = 2048
     score_batch_size: int = 2048
@@ -142,10 +145,22 @@ class StageConfig:
             )
         if self.patch_statistics_weight < 0.0:
             raise ValueError("patch_statistics_weight must be non-negative")
+        if self.final_geometry_mode not in {
+            "control",
+            "independent_support",
+            "support_radius",
+            "support_radius_combined",
+            "support_radius_transition",
+        }:
+            raise ValueError("unsupported final_geometry_mode")
         if self.memory_radius_weight < 0.0:
             raise ValueError("memory_radius_weight must be non-negative")
         if not 0.0 < self.memory_radius_quantile <= 1.0:
             raise ValueError("memory_radius_quantile must lie in (0, 1]")
+        if not 0.0 < self.temporal_support_fraction <= 1.0:
+            raise ValueError("temporal_support_fraction must lie in (0, 1]")
+        if not 0.0 <= self.temporal_transition_weight <= 1.0:
+            raise ValueError("temporal_transition_weight must lie in [0, 1]")
         if self.score_batch_size < 1 or self.memory_score_block_size < 1:
             raise ValueError("score block sizes must be positive")
 
@@ -1060,9 +1075,89 @@ class CalibratedExemplarMemory:
     region_radii: np.ndarray
     region_sizes: np.ndarray
     representative_source_rows: np.ndarray
+    effective_support: np.ndarray | None = None
+    temporal_components: np.ndarray | None = None
+    transition_vectors: np.ndarray | None = None
 
     def __len__(self) -> int:
         return int(len(self.vectors))
+
+
+def temporal_independence_weights(
+    starts: np.ndarray,
+    patch_size: int,
+    fraction: float,
+) -> tuple[np.ndarray, float, int]:
+    """Downweight near-duplicate patches using their original time support.
+
+    The weight of one patch is the inverse number of starts in its local
+    temporal neighbourhood.  A long run of unit-stride overlapping windows
+    therefore contributes roughly by covered time rather than raw patch count.
+    No labels or Eval information enter this calculation.
+    """
+
+    source = np.asarray(starts, dtype=np.int64)
+    if source.ndim != 1 or len(source) < 1:
+        raise ValueError("starts must be a non-empty vector")
+    if int(patch_size) < 1 or not 0.0 < float(fraction) <= 1.0:
+        raise ValueError("invalid temporal-support parameters")
+    order = np.argsort(source, kind="stable")
+    ordered = source[order]
+    radius = max(1, int(round(int(patch_size) * float(fraction))))
+    left = np.searchsorted(ordered, ordered - radius, side="left")
+    right = np.searchsorted(ordered, ordered + radius, side="right")
+    counts = np.maximum(1, right - left)
+    ordered_weights = 1.0 / counts.astype(np.float64)
+    weights = np.empty(len(source), dtype=np.float64)
+    weights[order] = ordered_weights
+    effective_support = float(np.sum(ordered_weights))
+    components = int(
+        1 + np.count_nonzero(np.diff(ordered) > max(1, int(patch_size)))
+    )
+    return weights.astype(np.float32), effective_support, components
+
+
+def temporal_transition_embeddings(
+    embeddings: np.ndarray,
+    lag: int,
+) -> np.ndarray:
+    """Return unit transition directions without changing the base embedding."""
+
+    source = np.asarray(embeddings, dtype=np.float32)
+    if source.ndim != 2 or len(source) < 1 or int(lag) < 1:
+        raise ValueError("invalid transition-embedding inputs")
+    lag = min(int(lag), max(1, len(source) - 1))
+    transition = np.zeros_like(source)
+    transition[lag:] = source[lag:] - source[:-lag]
+    if len(source) > lag:
+        transition[:lag] = transition[lag]
+    norm = np.linalg.norm(transition, axis=1, keepdims=True)
+    transition = transition / np.maximum(norm, 1e-12)
+    transition[norm[:, 0] <= 1e-12] = 0.0
+    return transition.astype(np.float32)
+
+
+def augment_temporal_geometry(
+    embeddings: np.ndarray,
+    transitions: np.ndarray,
+    weight: float,
+) -> np.ndarray:
+    """Embed state and transition in one lightweight joint geometry."""
+
+    state = np.asarray(embeddings, dtype=np.float32)
+    motion = np.asarray(transitions, dtype=np.float32)
+    if state.shape != motion.shape or state.ndim != 2:
+        raise ValueError("state and transition geometries must match")
+    if not 0.0 <= float(weight) <= 1.0:
+        raise ValueError("transition weight must lie in [0, 1]")
+    state_scale = math.sqrt(max(0.0, 1.0 - float(weight)))
+    motion_scale = math.sqrt(float(weight))
+    joint = np.concatenate(
+        [state_scale * state, motion_scale * motion],
+        axis=1,
+    )
+    joint /= np.maximum(np.linalg.norm(joint, axis=1, keepdims=True), 1e-12)
+    return joint.astype(np.float32)
 
 
 def _build_calibrated_exemplar_memory(
@@ -1108,6 +1203,107 @@ def _build_calibrated_exemplar_memory(
         representative_source_rows=selected[representatives_array],
     )
     return calibrated, partition
+
+
+def build_support_calibrated_exemplar_memory(
+    embeddings: np.ndarray,
+    config: StageConfig,
+    *,
+    seed: int,
+    independent_representatives: bool,
+    transition_embeddings: np.ndarray | None = None,
+) -> tuple[CalibratedExemplarMemory, GranularPartition]:
+    """Build observed exemplars with de-duplicated temporal support metadata.
+
+    Granular regions remain data-adaptive.  Within each region, the optional
+    representative is chosen around a center weighted by distinct temporal
+    support rather than by the number of highly overlapping windows.
+    """
+
+    selected = select_gb_rows(len(embeddings), int(config.max_gb_rows))
+    source = np.asarray(embeddings[selected], dtype=np.float32)
+    source /= np.maximum(np.linalg.norm(source, axis=1, keepdims=True), 1e-12)
+    partition = build_granular_partition(source, config, seed=int(seed))
+    representatives: list[int] = []
+    radii: list[float] = []
+    sizes: list[int] = []
+    supports: list[float] = []
+    components: list[int] = []
+    for ball in partition.balls:
+        members = source[ball]
+        source_rows = selected[ball]
+        weights, effective_support, component_count = temporal_independence_weights(
+            source_rows,
+            int(config.patch_size),
+            float(config.temporal_support_fraction),
+        )
+        if independent_representatives:
+            center = np.average(members, axis=0, weights=weights)
+        else:
+            center = members.mean(axis=0)
+        local = int(np.argmin(np.sum((members - center[None, :]) ** 2, axis=1)))
+        representative = int(ball[local])
+        representatives.append(representative)
+        exemplar = source[representative]
+        squared_distances = np.maximum(
+            0.0,
+            2.0 - 2.0 * (members @ exemplar),
+        )
+        radii.append(
+            float(
+                np.quantile(
+                    squared_distances,
+                    float(config.memory_radius_quantile),
+                )
+            )
+        )
+        sizes.append(int(len(ball)))
+        supports.append(float(effective_support))
+        components.append(int(component_count))
+    representatives_array = np.asarray(representatives, dtype=np.int64)
+    memory = source[representatives_array]
+    memory /= np.maximum(np.linalg.norm(memory, axis=1, keepdims=True), 1e-12)
+    radii_array = np.asarray(radii, dtype=np.float32)
+    if len(memory) > 1:
+        pairwise = np.maximum(0.0, 2.0 - 2.0 * (memory @ memory.T))
+        np.fill_diagonal(pairwise, np.inf)
+        separation_cap = 0.5 * np.min(pairwise, axis=1)
+        radii_array = np.minimum(radii_array, separation_cap.astype(np.float32))
+    representative_rows = selected[representatives_array]
+    transitions = None
+    if transition_embeddings is not None:
+        transition_source = np.asarray(transition_embeddings, dtype=np.float32)
+        if transition_source.shape != np.asarray(embeddings).shape:
+            raise ValueError("transition embeddings do not match base embeddings")
+        transitions = transition_source[representative_rows].copy()
+    calibrated = CalibratedExemplarMemory(
+        vectors=memory.astype(np.float32),
+        region_radii=radii_array,
+        region_sizes=np.asarray(sizes, dtype=np.int64),
+        representative_source_rows=representative_rows,
+        effective_support=np.asarray(supports, dtype=np.float32),
+        temporal_components=np.asarray(components, dtype=np.int64),
+        transition_vectors=transitions,
+    )
+    return calibrated, partition
+
+
+def support_radius_penalty(
+    memory: CalibratedExemplarMemory,
+    weight: float,
+) -> np.ndarray:
+    """Penalize broad, strongly supported normal regions conservatively."""
+
+    if float(weight) < 0.0:
+        raise ValueError("radius weight must be non-negative")
+    radii = np.asarray(memory.region_radii, dtype=np.float32)
+    if memory.effective_support is None:
+        support = np.ones(len(memory), dtype=np.float32)
+    else:
+        support = np.asarray(memory.effective_support, dtype=np.float32)
+    maximum = max(float(np.max(support)), 1e-12)
+    support_factor = np.sqrt(np.maximum(support, 0.0) / maximum)
+    return (float(weight) * radii * support_factor).astype(np.float32)
 
 
 def build_gb_exemplar_memory(

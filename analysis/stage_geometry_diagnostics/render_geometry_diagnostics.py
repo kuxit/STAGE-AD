@@ -288,8 +288,26 @@ def _plot_scores_and_examples(axis: plt.Axes, visual: Mapping[str, Any]) -> None
         inset.axis("off")
 
 
-def render_unit(item: Mapping[str, Any], output_dir: Path) -> dict[str, Any]:
-    visual = item["diagnostics"]["visual_diagnostics"]
+def render_unit(
+    item: Mapping[str, Any],
+    output_dir: Path,
+    candidate_id: str | None = None,
+) -> dict[str, Any]:
+    diagnostics = item["diagnostics"]
+    candidate = (
+        str(candidate_id)
+        if candidate_id is not None
+        else str(item["canonical_training_candidate_id"])
+    )
+    geometry_visuals = diagnostics.get("visual_diagnostics_by_geometry")
+    if isinstance(geometry_visuals, Mapping):
+        visual = geometry_visuals.get(candidate)
+        if not isinstance(visual, Mapping):
+            raise ValueError(
+                f"missing geometry diagnostic for candidate {candidate}"
+            )
+    else:
+        visual = diagnostics["visual_diagnostics"]
     if visual.get("schema_version") != "stage-geometry-visual-diagnostics-v1":
         raise ValueError("unsupported visual-diagnostic schema")
     if (
@@ -300,7 +318,6 @@ def render_unit(item: Mapping[str, Any], output_dir: Path) -> dict[str, Any]:
 
     track = str(item["track"])
     dataset = str(item["dataset"])
-    candidate = str(item["canonical_training_candidate_id"])
     seed = int(item["seed"])
     stem = f"{track}_{dataset}_{candidate}_seed{seed}_{str(item['file']).replace('.csv', '')}"
     stem = "".join(character if character.isalnum() or character in "-_" else "_" for character in stem)
@@ -335,7 +352,13 @@ def render_unit(item: Mapping[str, Any], output_dir: Path) -> dict[str, Any]:
     figure.savefig(pdf_path, bbox_inches="tight")
     plt.close(figure)
 
-    memories = item["diagnostics"]["final_memories"]
+    memories = [
+        memory
+        for memory in diagnostics["final_memories"]
+        if memory.get("geometry_candidate_id", candidate) == candidate
+    ]
+    if not memories:
+        raise ValueError(f"missing memory diagnostics for candidate {candidate}")
     selected_memory = next(
         (
             memory
@@ -413,10 +436,22 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     arguments = parser.parse_args()
 
-    rows = [
-        render_unit(item, arguments.output_dir)
-        for _, item in iter_units(arguments.result_root)
-    ]
+    rows: list[dict[str, Any]] = []
+    for _, item in iter_units(arguments.result_root):
+        geometry_visuals = item.get("diagnostics", {}).get(
+            "visual_diagnostics_by_geometry"
+        )
+        if isinstance(geometry_visuals, Mapping):
+            for candidate_id in sorted(geometry_visuals):
+                rows.append(
+                    render_unit(
+                        item,
+                        arguments.output_dir,
+                        candidate_id=str(candidate_id),
+                    )
+                )
+        else:
+            rows.append(render_unit(item, arguments.output_dir))
     if not rows:
         raise RuntimeError("no completed unit contains visual diagnostics")
     write_index(rows, arguments.output_dir)

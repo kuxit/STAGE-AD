@@ -1,0 +1,900 @@
+{
+  "schema_version": "stage-vuspr-search-v1",
+  "phase": "geometry_g2",
+  "study_id": "stage-majority-local-support-geometry-g2-20260725",
+  "status": "posthoc_development_only",
+  "selection_split": "official TSB-AD Tuning only",
+  "eval_feedback_used_by_runner": false,
+  "confirmatory_claim_eligible": false,
+  "story_contract": {
+    "canonical_guidance_sha256": "bfca67c805c48d169aa5206f429fd9c71f60e0767fbc2f214ec8d02843b1f3a9",
+    "fixed_problem": "coupled_context_and_patch_abundance_bias_within_normality",
+    "alignment_role": "reduce_context_induced_variation_of_shared_temporal_content",
+    "intermediate_geometry_role": "temper_abundance_driven_encoder_exposure",
+    "final_geometry_role": "retain_supported_observed_exemplars_at_adaptive_granularity",
+    "implementation_flexible": true,
+    "main_selection_excludes_controls": true
+  },
+  "expected_source_sha256": "971233ea4da19809e26b017633678554170672a56845a88ad2754db3d0dc4e2c",
+  "seeds": [
+    2026
+  ],
+  "targets": {
+    "U": [
+      "MSL",
+      "SED"
+    ],
+    "M": [
+      "CATSv2",
+      "GHL"
+    ]
+  },
+  "metrics": [
+    "VUS-PR",
+    "VUS-ROC",
+    "R-based-F1",
+    "AUC-PR",
+    "AUC-ROC",
+    "Standard-F1"
+  ],
+  "selection": {
+    "score": "macro mean VUS-PR only",
+    "tie_breakers": [
+      "canonical_id"
+    ],
+    "stage1_head": {
+      "final_gb_min_split": 4,
+      "top_k": 3
+    },
+    "stage1_rule": "Compare only complete official Tuning coverage after one shared encoder pass per series. Final geometry may use timestamp-distinct support, locally calibrated radii, and label-blind state-transition consistency.",
+    "stage2_rule": "This diagnostic does not authorize Eval or parameter lock. A successful mechanism requires a separately frozen multi-seed Tuning protocol.",
+    "dataset_specific_rule": "All comparisons are dataset-specific; track fallback is forbidden."
+  },
+  "final_gb_min_splits": [
+    4,
+    64
+  ],
+  "top_ks": [
+    1,
+    3
+  ],
+  "training_candidates": [
+    {
+      "id": "msl_g0_control",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "control",
+        "memory_radius_weight": 0.0,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "msl_g1_independent_support",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "independent_support",
+        "memory_radius_weight": 0.0,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "msl_g2_support_radius",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "msl_g3_support_radius_combined",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_combined",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "msl_g4_support_radius_transition",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_transition",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.25
+      }
+    },
+    {
+      "id": "sed_g0_control",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "control",
+        "memory_radius_weight": 0.0,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "sed_g1_independent_support",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "independent_support",
+        "memory_radius_weight": 0.0,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "sed_g2_support_radius",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "sed_g3_support_radius_combined",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_combined",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "sed_g4_support_radius_transition",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_transition",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.25
+      }
+    },
+    {
+      "id": "catsv2_g0_control",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "control",
+        "memory_radius_weight": 0.0,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "catsv2_g1_independent_support",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "independent_support",
+        "memory_radius_weight": 0.0,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "catsv2_g2_support_radius",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "catsv2_g3_support_radius_combined",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_combined",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "catsv2_g4_support_radius_transition",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_transition",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.25
+      }
+    },
+    {
+      "id": "ghl_g0_control",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "control",
+        "memory_radius_weight": 0.0,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "ghl_g1_independent_support",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "independent_support",
+        "memory_radius_weight": 0.0,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "ghl_g2_support_radius",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "ghl_g3_support_radius_combined",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_combined",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.0
+      }
+    },
+    {
+      "id": "ghl_g4_support_radius_transition",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual",
+        "final_geometry_mode": "support_radius_transition",
+        "memory_radius_weight": 0.5,
+        "temporal_support_fraction": 0.5,
+        "temporal_transition_weight": 0.25
+      }
+    }
+  ],
+  "shortlist_size": 5,
+  "training_shortlists": {
+    "U/MSL": [
+      "msl_g0_control",
+      "msl_g1_independent_support",
+      "msl_g2_support_radius",
+      "msl_g3_support_radius_combined",
+      "msl_g4_support_radius_transition"
+    ],
+    "U/SED": [
+      "sed_g0_control",
+      "sed_g1_independent_support",
+      "sed_g2_support_radius",
+      "sed_g3_support_radius_combined",
+      "sed_g4_support_radius_transition"
+    ],
+    "M/CATSv2": [
+      "catsv2_g0_control",
+      "catsv2_g1_independent_support",
+      "catsv2_g2_support_radius",
+      "catsv2_g3_support_radius_combined",
+      "catsv2_g4_support_radius_transition"
+    ],
+    "M/GHL": [
+      "ghl_g0_control",
+      "ghl_g1_independent_support",
+      "ghl_g2_support_radius",
+      "ghl_g3_support_radius_combined",
+      "ghl_g4_support_radius_transition"
+    ]
+  },
+  "metadata": {
+    "base_model": "STAGE_majority_local",
+    "frozen_encoder_type": "dilated_residual",
+    "shared_encoder_per_series": true,
+    "diagnostic_projection": true,
+    "diagnostic_final_gb_min_split": 4,
+    "diagnostic_top_k": 1,
+    "diagnostic_datasets": [
+      "U/MSL",
+      "U/SED",
+      "M/CATSv2",
+      "M/GHL"
+    ],
+    "diagnostic_axes": {
+      "g0_control": "unchanged majority-local observed-exemplar memory",
+      "g1_independent_support": "choose each observed representative after de-duplicating overlapping timestamp support",
+      "g2_support_radius": "penalize broad, strongly supported normal regions while keeping the legacy representative",
+      "g3_support_radius_combined": "combine timestamp-distinct representatives with support-calibrated local radii",
+      "g4_support_radius_transition": "add label-blind state-transition geometry to the combined memory"
+    },
+    "visual_evidence": [
+      "raw normal and anomalous time-series intervals",
+      "training-normal, Eval-normal, Eval-anomaly embedding projection",
+      "selected observed prototypes with support, radius, and source time",
+      "normal-versus-anomaly score separation"
+    ],
+    "visuals_are_posthoc": true,
+    "selection_uses_visuals": false,
+    "eval_feedback": false
+  }
+}

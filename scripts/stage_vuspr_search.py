@@ -127,8 +127,10 @@ FLOAT_CONFIG_FIELDS = {
     "patch_statistics_weight",
     "memory_radius_weight",
     "memory_radius_quantile",
+    "temporal_support_fraction",
+    "temporal_transition_weight",
 }
-STRING_CONFIG_FIELDS = {"encoder_type"}
+STRING_CONFIG_FIELDS = {"encoder_type", "final_geometry_mode"}
 ENCODER_TYPES = (
     "dilated_residual",
     "depthwise_tcn",
@@ -348,9 +350,11 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         "stage2",
         "encoder_e1",
         "geometry_d1",
+        "geometry_g2",
     }:
         raise ValueError(
-            "phase must be stage1a, stage1b, stage2, encoder_e1, or geometry_d1"
+            "phase must be stage1a, stage1b, stage2, encoder_e1, "
+            "geometry_d1, or geometry_g2"
         )
     metadata = payload.get("metadata", {})
     if not isinstance(metadata, Mapping):
@@ -361,16 +365,20 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         payload["final_gb_min_splits"], "final_gb_min_splits", minimum=4
     )
     declared_top_ks = _unique_int_list(payload["top_ks"], "top_ks", minimum=1)
-    if phase != "geometry_d1" and declared_final_splits != EXPECTED_FINAL_SPLITS:
+    if phase not in {"geometry_d1", "geometry_g2"} and (
+        declared_final_splits != EXPECTED_FINAL_SPLITS
+    ):
         raise ValueError(f"final_gb_min_splits must remain {EXPECTED_FINAL_SPLITS}")
-    if phase != "geometry_d1" and declared_top_ks != EXPECTED_TOP_KS:
+    if phase not in {"geometry_d1", "geometry_g2"} and (
+        declared_top_ks != EXPECTED_TOP_KS
+    ):
         raise ValueError(f"top_ks must remain {EXPECTED_TOP_KS}")
     if phase == "stage1a" and seeds != [2026]:
         raise ValueError("stage1a seeds are frozen to [2026]")
     if phase == "encoder_e1" and seeds != [2026]:
         raise ValueError("encoder_e1 seeds are frozen to [2026]")
-    if phase == "geometry_d1" and seeds != [2026]:
-        raise ValueError("geometry_d1 seeds are frozen to [2026]")
+    if phase in {"geometry_d1", "geometry_g2"} and seeds != [2026]:
+        raise ValueError(f"{phase} seeds are frozen to [2026]")
     if phase == "stage1b" and seeds != [2027, 2028]:
         raise ValueError("stage1b seeds are frozen to [2027, 2028]")
     if phase == "stage2" and seeds != [2026, 2027, 2028]:
@@ -378,11 +386,11 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     if phase in {"stage1a", "stage1b"}:
         final_splits = [4]
         top_ks = [3]
-    elif phase == "geometry_d1":
+    elif phase in {"geometry_d1", "geometry_g2"}:
         if declared_final_splits != [4, 64]:
-            raise ValueError("geometry_d1 final_gb_min_splits must be [4, 64]")
+            raise ValueError(f"{phase} final_gb_min_splits must be [4, 64]")
         if declared_top_ks != [1, 3]:
-            raise ValueError("geometry_d1 top_ks must be [1, 3]")
+            raise ValueError(f"{phase} top_ks must be [1, 3]")
         final_splits = declared_final_splits
         top_ks = declared_top_ks
     else:
@@ -409,7 +417,7 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         targets[track] = cleaned
     expected_targets = (
         GEOMETRY_DIAGNOSTIC_TARGETS
-        if phase == "geometry_d1"
+        if phase in {"geometry_d1", "geometry_g2"}
         else EXPECTED_TARGETS
     )
     if targets != expected_targets:
@@ -443,10 +451,14 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             or not 0.0 <= float(resolved["gb_sampling_power"]) < 1.0
         )
         if family_valid or (
-            phase != "geometry_d1" and int(resolved["gb_min_split"]) != 4
+            phase not in {"geometry_d1", "geometry_g2"}
+            and int(resolved["gb_min_split"]) != 4
         ) or (
             phase == "geometry_d1"
             and int(resolved["gb_min_split"]) not in {4, 32}
+        ) or (
+            phase == "geometry_g2"
+            and int(resolved["gb_min_split"]) != 4
         ):
             raise ValueError(
                 f"{candidate_id} violates the frozen story/same-family boundary"
@@ -507,14 +519,16 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         metadata = dict(metadata)
         metadata["reference_selected_heads"] = normalized_reference_heads
     shortlist_size = _require_int(payload.get("shortlist_size", 3), "shortlist_size", 1)
-    expected_shortlist_size = 4 if phase == "geometry_d1" else 3
+    expected_shortlist_size = (
+        4 if phase == "geometry_d1" else 5 if phase == "geometry_g2" else 3
+    )
     if shortlist_size != expected_shortlist_size:
         raise ValueError(
             f"shortlist_size must remain {expected_shortlist_size}"
         )
     raw_shortlists = payload.get("training_shortlists")
     training_shortlists: dict[str, list[str]] | None = None
-    if phase in {"stage1b", "encoder_e1", "geometry_d1"}:
+    if phase in {"stage1b", "encoder_e1", "geometry_d1", "geometry_g2"}:
         required_shortlist_keys = subset_keys
         if not isinstance(raw_shortlists, Mapping) or set(raw_shortlists) != required_shortlist_keys:
             raise ValueError(
@@ -537,7 +551,7 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     elif raw_shortlists is not None:
         raise ValueError(
             "training_shortlists is allowed only for stage1b, encoder_e1, "
-            "or geometry_d1"
+            "geometry_d1, or geometry_g2"
         )
 
     raw_winners = payload.get("training_winners")
@@ -645,7 +659,7 @@ def _candidate_ids_for_subset(
     subset = f"{track}/{dataset}"
     if phase == "stage1a":
         return all_ids
-    if phase in {"stage1b", "encoder_e1", "geometry_d1"}:
+    if phase in {"stage1b", "encoder_e1", "geometry_d1", "geometry_g2"}:
         shortlists = protocol["training_shortlists"]
         return [str(item) for item in shortlists[subset]]
     return [str(protocol["training_winners"][subset])]
@@ -687,6 +701,16 @@ def training_execution_signature(
     behavior.pop("steps")
     behavior.pop("gb_activation_fraction")
     behavior.pop("gb_refresh_fraction")
+    # Final-memory geometry is evaluated after a shared encoder pass.  These
+    # fields must not create duplicate GPU training units.
+    for geometry_field in (
+        "final_geometry_mode",
+        "memory_radius_weight",
+        "memory_radius_quantile",
+        "temporal_support_fraction",
+        "temporal_transition_weight",
+    ):
+        behavior.pop(geometry_field)
     behavior.update(
         effective_steps=int(effective_steps),
         gb_activation_step=int(activation_step),
@@ -1401,12 +1425,18 @@ def valid_unit(
     variants = item.get("variants")
     if not isinstance(variants, list):
         return False
+    geometry_candidate_ids = (
+        list(group["candidate_ids"])
+        if plan["phase"] == "geometry_g2"
+        else [str(group["canonical_candidate_id"])]
+    )
     expected = {
-        (int(split), int(top_k))
+        (candidate_id, int(split), int(top_k))
+        for candidate_id in geometry_candidate_ids
         for split in plan["final_gb_min_splits"]
         for top_k in plan["top_ks"]
     }
-    observed: set[tuple[int, int]] = set()
+    observed: set[tuple[str, int, int]] = set()
     partition_metadata: dict[str, tuple[int, str, int]] = {}
     canonical_k: dict[tuple[str, int], int] = {}
     cached_metrics: dict[tuple[str, int], Mapping[str, Any]] = {}
@@ -1417,7 +1447,11 @@ def valid_unit(
         split = variant.get("final_gb_min_split")
         top_k = variant.get("top_k")
         effective = variant.get("effective_top_k")
+        geometry_candidate_id = variant.get("geometry_candidate_id")
         if (
+            geometry_candidate_id not in geometry_candidate_ids
+            or not isinstance(variant.get("geometry_mode"), str)
+            or
             isinstance(split, bool)
             or not isinstance(split, int)
             or isinstance(top_k, bool)
@@ -1438,7 +1472,7 @@ def valid_unit(
             or not _finite_metric_mapping(variant.get("metrics"))
         ):
             return False
-        key = (split, top_k)
+        key = (str(geometry_candidate_id), split, top_k)
         if key in observed:
             return False
         observed.add(key)
@@ -1497,6 +1531,25 @@ def valid_unit(
         return False
     if not visual_required and visual is not None:
         return False
+    geometry_visuals = diagnostics.get("visual_diagnostics_by_geometry")
+    if plan["phase"] == "geometry_g2" and visual_required:
+        if (
+            not isinstance(geometry_visuals, Mapping)
+            or set(geometry_visuals) != set(geometry_candidate_ids)
+            or any(
+                not _valid_visual_diagnostics(value)
+                for value in geometry_visuals.values()
+            )
+        ):
+            return False
+    elif plan["phase"] != "geometry_g2" and geometry_visuals is not None:
+        if (
+            not isinstance(geometry_visuals, Mapping)
+            or set(geometry_visuals) != {
+                str(group["canonical_candidate_id"])
+            }
+        ):
+            return False
     environment = diagnostics.get("environment")
     if not isinstance(environment, Mapping) or (
         environment.get("CUBLAS_WORKSPACE_CONFIG") != CUBLAS_WORKSPACE_CONFIG
@@ -1512,6 +1565,8 @@ def score_embeddings_multi_k(
     device: torch.device,
     config: stage_impl.StageConfig,
     top_ks: Sequence[int],
+    *,
+    memory_penalty: np.ndarray | None = None,
 ) -> dict[int, np.ndarray]:
     """Return several top-k distance means from one distance pass per memory.
 
@@ -1540,6 +1595,17 @@ def score_embeddings_multi_k(
     effective = {value: min(value, len(memory_array)) for value in requested}
     maximum_k = max(effective.values())
     memory_tensor = F.normalize(torch.from_numpy(memory_array).to(device), dim=1)
+    if memory_penalty is None:
+        penalty_array = np.zeros(len(memory_array), dtype=np.float32)
+    else:
+        penalty_array = np.asarray(memory_penalty, dtype=np.float32)
+        if (
+            penalty_array.shape != (len(memory_array),)
+            or not np.isfinite(penalty_array).all()
+            or np.any(penalty_array < 0.0)
+        ):
+            raise ValueError("memory penalty must be a finite non-negative vector")
+    penalty_tensor = torch.from_numpy(penalty_array).to(device)
     outputs: dict[int, list[np.ndarray]] = {value: [] for value in requested}
 
     with torch.inference_mode():
@@ -1557,7 +1623,13 @@ def score_embeddings_multi_k(
             block_size = int(config.memory_score_block_size)
             for memory_offset in range(0, len(memory_tensor), block_size):
                 block = memory_tensor[memory_offset : memory_offset + block_size]
-                squared_distance = (2.0 - 2.0 * (query @ block.T)).clamp_min_(0.0)
+                block_penalty = penalty_tensor[
+                    memory_offset : memory_offset + block_size
+                ]
+                squared_distance = (
+                    (2.0 - 2.0 * (query @ block.T)).clamp_min_(0.0)
+                    + block_penalty[None, :]
+                )
                 block_k = min(maximum_k, len(block))
                 block_best = torch.topk(
                     squared_distance,
@@ -1955,8 +2027,8 @@ def execute_unit(
     memory_diagnostics: list[dict[str, Any]] = []
     partition_cache: dict[str, dict[str, Any]] = {}
     point_score_cache: dict[tuple[str, int], np.ndarray] = {}
-    diagnostic_memory: stage_impl.CalibratedExemplarMemory | None = None
-    diagnostic_patch_scores: np.ndarray | None = None
+    diagnostic_memories: dict[str, stage_impl.CalibratedExemplarMemory] = {}
+    diagnostic_patch_scores: dict[str, np.ndarray] = {}
     diagnostic_split = int(
         plan.get("metadata", {}).get(
             "diagnostic_final_gb_min_split",
@@ -1969,101 +2041,238 @@ def execute_unit(
             plan["top_ks"][0],
         )
     )
-    for final_split in plan["final_gb_min_splits"]:
-        final_config = replace(training_config, gb_min_split=int(final_split))
-        memory_started = time.perf_counter()
-        calibrated_memory, partition = (
-            stage_impl.build_calibrated_exemplar_memory(
-                train_unit, final_config, seed=int(seed) + 29
-            )
+    geometry_candidate_ids = (
+        list(group["candidate_ids"])
+        if plan["phase"] == "geometry_g2"
+        else [str(group["canonical_candidate_id"])]
+    )
+    transition_lag = max(1, int(training_config.patch_size) // 4)
+    train_transitions: np.ndarray | None = None
+    full_transitions: np.ndarray | None = None
+    for geometry_candidate_id in geometry_candidate_ids:
+        geometry_candidate = _candidate_by_id(plan, geometry_candidate_id)
+        geometry_kwargs = dict(geometry_candidate["resolved_parameters"])
+        geometry_kwargs.update(
+            seed=int(seed),
+            top_k=max(int(item) for item in plan["top_ks"]),
         )
-        memory = calibrated_memory.vectors
-        build_seconds = float(time.perf_counter() - memory_started)
-        partition_fingerprint = final_partition_fingerprint(partition)
-        memory_fingerprint = array_fingerprint(memory)
-        prior_partition = partition_cache.get(partition_fingerprint)
-        if prior_partition is None:
-            canonical_split = int(final_split)
-            unique_effective_top_ks = list(
-                dict.fromkeys(min(int(top_k), int(len(memory))) for top_k in plan["top_ks"])
+        geometry_config = stage_impl.StageConfig(**geometry_kwargs)
+        geometry_config.validate()
+        geometry_mode = str(geometry_config.final_geometry_mode)
+        if geometry_mode == "support_radius_transition":
+            if train_transitions is None or full_transitions is None:
+                train_transitions = stage_impl.temporal_transition_embeddings(
+                    train_unit, transition_lag
+                )
+                full_transitions = stage_impl.temporal_transition_embeddings(
+                    full_unit, transition_lag
+                )
+
+        for final_split in plan["final_gb_min_splits"]:
+            final_config = replace(
+                geometry_config,
+                gb_min_split=int(final_split),
             )
-            query_started = time.perf_counter()
-            patch_scores_by_effective = score_embeddings_multi_k(
-                full_unit, memory, device, final_config, unique_effective_top_ks
-            )
-            if int(final_split) == diagnostic_split:
-                effective_diagnostic_k = min(diagnostic_k, int(len(memory)))
-                diagnostic_memory = calibrated_memory
-                diagnostic_patch_scores = patch_scores_by_effective[
-                    effective_diagnostic_k
-                ].copy()
-            query_seconds = float(time.perf_counter() - query_started)
-            for effective_k, patch_score in patch_scores_by_effective.items():
-                point_score_cache[(partition_fingerprint, int(effective_k))] = (
-                    stage_impl.aggregate_patch_scores(
-                        patch_score, len(values), training_config.patch_size
+            memory_started = time.perf_counter()
+            if geometry_mode == "control":
+                calibrated_memory, partition = (
+                    stage_impl.build_calibrated_exemplar_memory(
+                        train_unit,
+                        final_config,
+                        seed=int(seed) + 29,
                     )
                 )
-            partition_cache[partition_fingerprint] = {
-                "canonical_final_gb_min_split": canonical_split,
-                "memory_fingerprint": memory_fingerprint,
-                "memory_rows": int(len(memory)),
-            }
-            partition_reused = False
-            distance_passes = 1
-        else:
-            if (
-                prior_partition["memory_fingerprint"] != memory_fingerprint
-                or int(prior_partition["memory_rows"]) != int(len(memory))
-            ):
-                raise RuntimeError(
-                    "identical final partition membership produced different memory"
+            else:
+                calibrated_memory, partition = (
+                    stage_impl.build_support_calibrated_exemplar_memory(
+                        train_unit,
+                        final_config,
+                        seed=int(seed) + 29,
+                        independent_representatives=geometry_mode
+                        in {
+                            "independent_support",
+                            "support_radius_combined",
+                            "support_radius_transition",
+                        },
+                        transition_embeddings=(
+                            train_transitions
+                            if geometry_mode == "support_radius_transition"
+                            else None
+                        ),
+                    )
                 )
-            canonical_split = int(prior_partition["canonical_final_gb_min_split"])
-            query_seconds = 0.0
-            partition_reused = True
-            distance_passes = 0
-
-        canonical_k_by_effective: dict[int, int] = {}
-        for requested_k in plan["top_ks"]:
-            effective_k = min(int(requested_k), int(len(memory)))
-            canonical_k_by_effective.setdefault(effective_k, int(requested_k))
-            pending_variants.append(
+            memory = calibrated_memory.vectors
+            query_vectors = full_unit
+            memory_vectors = memory
+            memory_penalty = np.zeros(len(memory), dtype=np.float32)
+            if geometry_mode in {
+                "support_radius",
+                "support_radius_combined",
+                "support_radius_transition",
+            }:
+                memory_penalty = stage_impl.support_radius_penalty(
+                    calibrated_memory,
+                    float(final_config.memory_radius_weight),
+                )
+            if geometry_mode == "support_radius_transition":
+                if (
+                    full_transitions is None
+                    or calibrated_memory.transition_vectors is None
+                ):
+                    raise RuntimeError("transition geometry was not constructed")
+                query_vectors = stage_impl.augment_temporal_geometry(
+                    full_unit,
+                    full_transitions,
+                    float(final_config.temporal_transition_weight),
+                )
+                memory_vectors = stage_impl.augment_temporal_geometry(
+                    memory,
+                    calibrated_memory.transition_vectors,
+                    float(final_config.temporal_transition_weight),
+                )
+            build_seconds = float(time.perf_counter() - memory_started)
+            base_partition_fingerprint = final_partition_fingerprint(partition)
+            partition_fingerprint = fingerprint(
                 {
+                    "geometry_candidate_id": geometry_candidate_id,
+                    "geometry_mode": geometry_mode,
+                    "base_partition_fingerprint": base_partition_fingerprint,
+                }
+            )
+            memory_fingerprint = array_fingerprint(memory_vectors)
+            prior_partition = partition_cache.get(partition_fingerprint)
+            if prior_partition is None:
+                canonical_split = int(final_split)
+                unique_effective_top_ks = list(
+                    dict.fromkeys(
+                        min(int(top_k), int(len(memory)))
+                        for top_k in plan["top_ks"]
+                    )
+                )
+                query_started = time.perf_counter()
+                patch_scores_by_effective = score_embeddings_multi_k(
+                    query_vectors,
+                    memory_vectors,
+                    device,
+                    final_config,
+                    unique_effective_top_ks,
+                    memory_penalty=memory_penalty,
+                )
+                if int(final_split) == diagnostic_split:
+                    effective_diagnostic_k = min(
+                        diagnostic_k,
+                        int(len(memory)),
+                    )
+                    diagnostic_memories[geometry_candidate_id] = calibrated_memory
+                    diagnostic_patch_scores[geometry_candidate_id] = (
+                        patch_scores_by_effective[effective_diagnostic_k].copy()
+                    )
+                query_seconds = float(time.perf_counter() - query_started)
+                for effective_k, patch_score in patch_scores_by_effective.items():
+                    point_score_cache[
+                        (partition_fingerprint, int(effective_k))
+                    ] = stage_impl.aggregate_patch_scores(
+                        patch_score,
+                        len(values),
+                        training_config.patch_size,
+                    )
+                partition_cache[partition_fingerprint] = {
+                    "canonical_final_gb_min_split": canonical_split,
+                    "memory_fingerprint": memory_fingerprint,
+                    "memory_rows": int(len(memory)),
+                }
+                partition_reused = False
+                distance_passes = 1
+            else:
+                if (
+                    prior_partition["memory_fingerprint"] != memory_fingerprint
+                    or int(prior_partition["memory_rows"]) != int(len(memory))
+                ):
+                    raise RuntimeError(
+                        "identical geometry identity produced different memory"
+                    )
+                canonical_split = int(
+                    prior_partition["canonical_final_gb_min_split"]
+                )
+                query_seconds = 0.0
+                partition_reused = True
+                distance_passes = 0
+
+            canonical_k_by_effective: dict[int, int] = {}
+            for requested_k in plan["top_ks"]:
+                effective_k = min(int(requested_k), int(len(memory)))
+                canonical_k_by_effective.setdefault(
+                    effective_k,
+                    int(requested_k),
+                )
+                pending_variants.append(
+                    {
+                        "geometry_candidate_id": geometry_candidate_id,
+                        "geometry_mode": geometry_mode,
+                        "final_gb_min_split": int(final_split),
+                        "canonical_final_gb_min_split": canonical_split,
+                        "final_partition_fingerprint": partition_fingerprint,
+                        "memory_fingerprint": memory_fingerprint,
+                        "top_k": int(requested_k),
+                        "effective_top_k": effective_k,
+                        "top_k_clamped": bool(
+                            effective_k < int(requested_k)
+                        ),
+                        "canonical_top_k": canonical_k_by_effective[
+                            effective_k
+                        ],
+                        "memory_rows": int(len(memory)),
+                        "memory_ratio": float(len(memory) / len(train_unit)),
+                        "score_cache_key": (
+                            partition_fingerprint,
+                            effective_k,
+                        ),
+                    }
+                )
+            memory_diagnostics.append(
+                {
+                    "geometry_candidate_id": geometry_candidate_id,
+                    "geometry_mode": geometry_mode,
                     "final_gb_min_split": int(final_split),
                     "canonical_final_gb_min_split": canonical_split,
                     "final_partition_fingerprint": partition_fingerprint,
+                    "base_partition_fingerprint": base_partition_fingerprint,
                     "memory_fingerprint": memory_fingerprint,
-                    "top_k": int(requested_k),
-                    "effective_top_k": effective_k,
-                    "top_k_clamped": bool(effective_k < int(requested_k)),
-                    "canonical_top_k": canonical_k_by_effective[effective_k],
+                    "partition_reused": partition_reused,
+                    "initial_k": int(partition.initial_k),
+                    "final_k": int(partition.final_k),
+                    "rounds": int(partition.rounds),
+                    "source_rows": int(partition.source_rows),
                     "memory_rows": int(len(memory)),
-                    "memory_ratio": float(len(memory) / len(train_unit)),
-                    "score_cache_key": (partition_fingerprint, effective_k),
+                    "mean_effective_support": (
+                        None
+                        if calibrated_memory.effective_support is None
+                        else float(
+                            np.mean(calibrated_memory.effective_support)
+                        )
+                    ),
+                    "mean_temporal_components": (
+                        None
+                        if calibrated_memory.temporal_components is None
+                        else float(
+                            np.mean(calibrated_memory.temporal_components)
+                        )
+                    ),
+                    "mean_radius_penalty": float(np.mean(memory_penalty)),
+                    "transition_lag": (
+                        transition_lag
+                        if geometry_mode == "support_radius_transition"
+                        else None
+                    ),
+                    "build_seconds": build_seconds,
+                    "query_seconds_all_top_ks": query_seconds,
+                    "distance_passes": distance_passes,
+                    "effective_top_ks": {
+                        str(int(top_k)): min(int(top_k), int(len(memory)))
+                        for top_k in plan["top_ks"]
+                    },
                 }
             )
-        memory_diagnostics.append(
-            {
-                "final_gb_min_split": int(final_split),
-                "canonical_final_gb_min_split": canonical_split,
-                "final_partition_fingerprint": partition_fingerprint,
-                "memory_fingerprint": memory_fingerprint,
-                "partition_reused": partition_reused,
-                "initial_k": int(partition.initial_k),
-                "final_k": int(partition.final_k),
-                "rounds": int(partition.rounds),
-                "source_rows": int(partition.source_rows),
-                "memory_rows": int(len(memory)),
-                "build_seconds": build_seconds,
-                "query_seconds_all_top_ks": query_seconds,
-                "distance_passes": distance_passes,
-                "effective_top_ks": {
-                    str(int(top_k)): min(int(top_k), int(len(memory)))
-                    for top_k in plan["top_ks"]
-                },
-            }
-        )
 
     # The remaining work is label loading plus CPU-only official metrics.  Drop
     # model/embedding allocations before it starts so other workers can use the
@@ -2089,19 +2298,37 @@ def execute_unit(
         variants.append({**pending, "metrics": metric_cache[cache_key]})
 
     visual_diagnostics = None
+    visual_diagnostics_by_geometry: dict[str, dict[str, Any]] | None = None
     if bool(plan.get("metadata", {}).get("diagnostic_projection", False)):
-        if diagnostic_memory is None or diagnostic_patch_scores is None:
-            raise RuntimeError("diagnostic memory/score head was not generated")
-        visual_diagnostics = build_visual_diagnostics(
-            train_unit=train_unit,
-            full_unit=full_unit,
-            memory=diagnostic_memory,
-            values=values,
-            labels=labels,
-            train_index=train_index,
-            patch_size=training_config.patch_size,
-            patch_scores=diagnostic_patch_scores,
+        missing_diagnostics = set(geometry_candidate_ids) - set(
+            diagnostic_memories
         )
+        if missing_diagnostics or set(diagnostic_memories) != set(
+            diagnostic_patch_scores
+        ):
+            raise RuntimeError(
+                "diagnostic memory/score heads were not generated for "
+                f"{sorted(missing_diagnostics)}"
+            )
+        visual_diagnostics_by_geometry = {}
+        for geometry_candidate_id in geometry_candidate_ids:
+            visual_diagnostics_by_geometry[geometry_candidate_id] = (
+                build_visual_diagnostics(
+                    train_unit=train_unit,
+                    full_unit=full_unit,
+                    memory=diagnostic_memories[geometry_candidate_id],
+                    values=values,
+                    labels=labels,
+                    train_index=train_index,
+                    patch_size=training_config.patch_size,
+                    patch_scores=diagnostic_patch_scores[
+                        geometry_candidate_id
+                    ],
+                )
+            )
+        visual_diagnostics = visual_diagnostics_by_geometry[
+            str(group["canonical_candidate_id"])
+        ]
     del train_unit, full_unit
 
     payload = {
@@ -2139,6 +2366,9 @@ def execute_unit(
             "training": training,
             "final_memories": memory_diagnostics,
             "visual_diagnostics": visual_diagnostics,
+            "visual_diagnostics_by_geometry": (
+                visual_diagnostics_by_geometry
+            ),
             "unique_final_partitions": len(partition_cache),
             "unique_effective_heads": len(metric_cache),
             "environment": _environment_identity(),
@@ -2856,7 +3086,12 @@ def summarize_results(
         seen_units += 1
         seen_logical_units += len(group["candidate_ids"])
         for variant in item["variants"]:
-            for candidate_id in group["candidate_ids"]:
+            candidate_ids_for_variant = (
+                [str(variant["geometry_candidate_id"])]
+                if plan["phase"] == "geometry_g2"
+                else list(group["candidate_ids"])
+            )
+            for candidate_id in candidate_ids_for_variant:
                 current_series_rows.append(
                     {
                     "file": file_name,
@@ -2919,7 +3154,13 @@ def summarize_results(
             plan, int(row["final_gb_min_split"]), int(row["top_k"])
         )
 
-    if phase in {"stage1a", "stage1b", "encoder_e1", "geometry_d1"}:
+    if phase in {
+        "stage1a",
+        "stage1b",
+        "encoder_e1",
+        "geometry_d1",
+        "geometry_g2",
+    }:
         rows = _rank_groups(rows, ("track", "dataset"), candidate=True)
         track_seed_fields = (
             "track",
@@ -2982,7 +3223,7 @@ def summarize_results(
         "plan_fingerprint": plan["plan_fingerprint"],
     }
     shortlist_size = int(plan["shortlist_size"])
-    if phase in {"stage1a", "geometry_d1"}:
+    if phase in {"stage1a", "geometry_d1", "geometry_g2"}:
         training_shortlists: dict[str, list[str]] = {}
         for track, datasets in plan["targets"].items():
             for dataset in datasets:
@@ -2993,13 +3234,29 @@ def summarize_results(
                     if row["track"] == track
                     and row["dataset"] == dataset
                 ]
-                training_shortlists[subset] = _take_unique_training_candidates(
-                    ranked,
-                    lambda candidate_id, s=subset: plan[
-                        "subset_execution_signatures"
-                    ][s][candidate_id],
-                    shortlist_size,
-                )
+                if phase == "geometry_g2":
+                    selected: list[str] = []
+                    for row in ranked:
+                        candidate_id = str(row["training_candidate_id"])
+                        if candidate_id not in selected:
+                            selected.append(candidate_id)
+                        if len(selected) == shortlist_size:
+                            break
+                    if len(selected) != shortlist_size:
+                        raise RuntimeError(
+                            f"{subset} lacks complete geometry candidates"
+                        )
+                    training_shortlists[subset] = selected
+                else:
+                    training_shortlists[subset] = (
+                        _take_unique_training_candidates(
+                            ranked,
+                            lambda candidate_id, s=subset: plan[
+                                "subset_execution_signatures"
+                            ][s][candidate_id],
+                            shortlist_size,
+                        )
+                    )
         selection_payload["training_shortlists"] = training_shortlists
         if phase == "geometry_d1":
             selection_payload["diagnostic_only"] = True
@@ -3007,6 +3264,14 @@ def summarize_results(
                 "robust_level_scale",
                 "direct_timestamp_pairwise",
                 "coarser_refreshed_intermediate_geometry",
+            ]
+        elif phase == "geometry_g2":
+            selection_payload["diagnostic_only"] = True
+            selection_payload["diagnostic_axes"] = [
+                "independent_timestamp_support",
+                "support_calibrated_local_radius",
+                "combined_support_and_radius",
+                "joint_state_transition_geometry",
             ]
     elif phase == "encoder_e1":
         selection_payload.update(
