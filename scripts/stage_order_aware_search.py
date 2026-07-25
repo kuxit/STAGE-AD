@@ -605,7 +605,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             gpus = [item.strip() for item in args.gpus.split(",") if item.strip()]
             if not gpus or int(args.workers_per_gpu) < 1:
                 raise ValueError("run needs GPUs and positive workers-per-gpu")
-            run_parent(repo, protocol, result_root, metrics_root, args.python.resolve(), gpus, int(args.workers_per_gpu))
+            # Keep the virtual-environment launcher path intact.  ``Path.resolve``
+            # dereferences ``.venv/bin/python`` to the system interpreter and
+            # silently drops the environment's site-packages.
+            python = Path(os.path.abspath(args.python))
+            run_parent(repo, protocol, result_root, metrics_root, python, gpus, int(args.workers_per_gpu))
             return 0
         if args.command == "summarize":
             print(json.dumps(summarize(repo, protocol, result_root, metrics_root), indent=2))
