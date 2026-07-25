@@ -1,0 +1,92 @@
+{
+  "schema_version": "stage-order-aware-protocol-v1",
+  "phase": "order_aware_stage1_seed2026",
+  "selection_split": "official TSB-AD Tuning only",
+  "selection_metric": "macro VUS-PR only",
+  "eval_feedback": false,
+  "seeds": [2026],
+  "baseline_reference": {
+    "role": "post-freeze Eval comparison only",
+    "methods": 15,
+    "datasets": 10,
+    "metrics": 6,
+    "latex_table_sha256": "8a656ba02640831fc48ba5270b57caed94dc2436fbf52525aaf1943c024cc107"
+  },
+  "lineage": {
+    "model_source_sha256": "d695dea2385a1a4cfe7a92d8b70006315fc0fc2ce288742c40be9cf78d9e2899",
+    "prior_tuning_lock_sha256": "3b71466a91c6e99a19d4a59e22e4aca9eacb7f6a05a0027a02c2e067125737e",
+    "prior_lock_use": "training and head anchors only; all executed units use the new order-aware model"
+  },
+  "files": {
+    "U": {
+      "UCR": ["305_UCR_id_3_Medical_tr_3000_1st_5948.csv", "312_UCR_id_10_Facility_tr_19948_1st_52000.csv", "323_UCR_id_21_HumanActivity_tr_48812_1st_128430.csv", "347_UCR_id_45_Sensor_tr_2851_1st_5365.csv", "386_UCR_id_84_Environment_tr_2046_1st_5703.csv", "429_UCR_id_127_Medical_tr_14825_1st_29000.csv"],
+      "Exathlon": ["813_Exathlon_id_4_Facility_tr_10766_1st_12590.csv", "825_Exathlon_id_16_Facility_tr_10766_1st_12590.csv"],
+      "MSL": ["142_MSL_id_3_Sensor_tr_1525_1st_4575.csv", "146_MSL_id_7_Sensor_tr_554_1st_1172.csv"],
+      "SED": ["235_SED_id_2_Medical_tr_2499_1st_3840.csv"],
+      "TODS": ["291_TODS_id_5_Synthetic_tr_500_1st_11.csv", "300_TODS_id_14_Synthetic_tr_1250_1st_2555.csv"]
+    },
+    "M": {
+      "CATSv2": ["140_CATSv2_id_3_Sensor_tr_28307_1st_28407.csv"],
+      "GHL": ["040_GHL_id_9_Sensor_tr_50000_1st_92001.csv", "049_GHL_id_18_Sensor_tr_50000_1st_109001.csv"],
+      "LTDB": ["082_LTDB_id_4_Medical_tr_4456_1st_4556.csv"],
+      "SVDB": ["090_SVDB_id_7_Medical_tr_12157_1st_12257.csv", "107_SVDB_id_24_Medical_tr_32805_1st_32905.csv", "113_SVDB_id_30_Medical_tr_4552_1st_4652.csv"],
+      "TAO": ["120_TAO_id_5_Environment_tr_500_1st_3.csv", "126_TAO_id_11_Environment_tr_500_1st_7.csv"]
+    }
+  },
+  "order_candidates": [
+    {
+      "id": "oa00_balanced_default",
+      "order_dimension_fraction": 0.50,
+      "parameters": {"haar_levels": 3, "local_tap_blocks": 2, "multiscale_alignment_weight": 0.25, "invariant_alignment_weight": 0.50, "order_alignment_weight": 1.00, "token_mask_fraction": 0.10, "token_mask_span": 4}
+    },
+    {
+      "id": "oa01_light_order",
+      "order_dimension_fraction": 0.25,
+      "parameters": {"haar_levels": 2, "local_tap_blocks": 2, "multiscale_alignment_weight": 0.25, "invariant_alignment_weight": 0.50, "order_alignment_weight": 0.50, "token_mask_fraction": 0.10, "token_mask_span": 4}
+    },
+    {
+      "id": "oa02_balanced_mild",
+      "order_dimension_fraction": 0.50,
+      "parameters": {"haar_levels": 2, "local_tap_blocks": 2, "multiscale_alignment_weight": 0.25, "invariant_alignment_weight": 0.50, "order_alignment_weight": 0.50, "token_mask_fraction": 0.10, "token_mask_span": 4}
+    },
+    {
+      "id": "oa03_balanced_strong",
+      "order_dimension_fraction": 0.50,
+      "parameters": {"haar_levels": 3, "local_tap_blocks": 2, "multiscale_alignment_weight": 0.25, "invariant_alignment_weight": 0.50, "order_alignment_weight": 1.50, "token_mask_fraction": 0.10, "token_mask_span": 4}
+    },
+    {
+      "id": "oa04_order_rich",
+      "order_dimension_fraction": 0.75,
+      "parameters": {"haar_levels": 3, "local_tap_blocks": 2, "multiscale_alignment_weight": 0.25, "invariant_alignment_weight": 0.25, "order_alignment_weight": 1.00, "token_mask_fraction": 0.10, "token_mask_span": 4}
+    },
+    {
+      "id": "oa05_low_mask",
+      "order_dimension_fraction": 0.50,
+      "parameters": {"haar_levels": 3, "local_tap_blocks": 2, "multiscale_alignment_weight": 0.25, "invariant_alignment_weight": 0.50, "order_alignment_weight": 1.00, "token_mask_fraction": 0.05, "token_mask_span": 2}
+    }
+  ],
+  "fixed_head_by_subset": {
+    "U/UCR": {"final_gb_min_split": 4, "top_k": 1},
+    "U/Exathlon": {"final_gb_min_split": 16, "top_k": 1},
+    "U/MSL": {"final_gb_min_split": 64, "top_k": 15},
+    "U/SED": {"final_gb_min_split": 64, "top_k": 9},
+    "U/TODS": {"final_gb_min_split": 4, "top_k": 1},
+    "M/CATSv2": {"final_gb_min_split": 4, "top_k": 1},
+    "M/GHL": {"final_gb_min_split": 4, "top_k": 1},
+    "M/LTDB": {"final_gb_min_split": 4, "top_k": 5},
+    "M/SVDB": {"final_gb_min_split": 4, "top_k": 1},
+    "M/TAO": {"final_gb_min_split": 16, "top_k": 9}
+  },
+  "base_config_by_subset": {
+    "U/UCR": {"patch_size": 128, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.1, "batch_size": 64, "steps": 2000, "gb_activation_fraction": 0.2, "learning_rate": 0.0003, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [32,64], "overlap_trim": 8, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.5, "max_gb_rows": 50000},
+    "U/Exathlon": {"patch_size": 64, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.2, "batch_size": 256, "steps": 750, "gb_activation_fraction": 0.4, "learning_rate": 0.0001, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [16,32], "overlap_trim": 4, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.5, "max_gb_rows": 50000},
+    "U/MSL": {"patch_size": 192, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.1, "batch_size": 64, "steps": 1000, "gb_activation_fraction": 0.2, "learning_rate": 0.0001, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [48,96], "overlap_trim": 12, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.5, "max_gb_rows": 50000},
+    "U/SED": {"patch_size": 64, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.2, "batch_size": 256, "steps": 750, "gb_activation_fraction": 0.4, "learning_rate": 0.0001, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [16,32], "overlap_trim": 4, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.5, "max_gb_rows": 50000},
+    "U/TODS": {"patch_size": 48, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.1, "batch_size": 64, "steps": 1500, "gb_activation_fraction": 0.2, "learning_rate": 0.0003, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [12,24], "overlap_trim": 4, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.25, "max_gb_rows": 50000},
+    "M/CATSv2": {"patch_size": 96, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.0, "batch_size": 256, "steps": 2000, "gb_activation_fraction": 0.2, "learning_rate": 0.00005, "weight_decay": 0.00001, "grad_clip": 1.0, "overlap_deltas": [24,48], "overlap_trim": 8, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.25, "max_gb_rows": 50000},
+    "M/GHL": {"patch_size": 96, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.0, "batch_size": 256, "steps": 2000, "gb_activation_fraction": 0.2, "learning_rate": 0.00005, "weight_decay": 0.00001, "grad_clip": 1.0, "overlap_deltas": [24,48], "overlap_trim": 8, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.25, "max_gb_rows": 50000},
+    "M/LTDB": {"patch_size": 64, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.2, "batch_size": 256, "steps": 750, "gb_activation_fraction": 0.4, "learning_rate": 0.0001, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [16,32], "overlap_trim": 4, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.5, "max_gb_rows": 50000},
+    "M/SVDB": {"patch_size": 96, "channels": 64, "token_dim": 32, "embedding_dim": 32, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.1, "batch_size": 256, "steps": 1000, "gb_activation_fraction": 0.2, "learning_rate": 0.0003, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [24,48], "overlap_trim": 8, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.5, "max_gb_rows": 50000},
+    "M/TAO": {"patch_size": 128, "channels": 128, "token_dim": 64, "embedding_dim": 64, "dilations": [1,2,4,8,4,2], "group_norm_groups": 8, "dropout": 0.1, "batch_size": 256, "steps": 1500, "gb_activation_fraction": 0.4, "learning_rate": 0.001, "weight_decay": 0.0001, "grad_clip": 1.0, "overlap_deltas": [32,64], "overlap_trim": 8, "gb_min_split": 4, "gb_max_rounds": 64, "gb_sampling_power": 0.25, "max_gb_rows": 50000}
+  }
+}

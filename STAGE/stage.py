@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Standalone STAGE research implementation.
+"""Clean standalone implementation of the validated STAGE majority-local model.
 
 This file intentionally contains the complete model-side pipeline:
 
@@ -12,6 +12,12 @@ This file intentionally contains the complete model-side pipeline:
 * a fixed, protocol-declared optimizer-update budget for every series;
 * top-k squared unit-Euclidean patch scoring and overlap-to-point aggregation;
 * a portable command-line experiment runner.
+
+This release implements the order-aware majority-local path.  Local tokens
+are aligned only after the shallow encoder, while the deep encoder is read by
+separate distribution-invariant and signed multi-resolution temporal heads.
+The final embedding therefore preserves both local motif statistics and their
+temporal arrangement before granular normal-memory construction.
 
 The model and training code do not import PaAno, GBOC, or any project module.
 For benchmark reporting only, ``--metrics-root`` may point to the repository's
@@ -55,11 +61,14 @@ SIX_METRICS = (
 
 @dataclass(frozen=True)
 class StageConfig:
-    encoder_type: str = "dilated_residual"
     patch_size: int = 96
     channels: int = 128
     token_dim: int = 64
     embedding_dim: int = 64
+    invariant_dim: int = 32
+    order_dim: int = 32
+    haar_levels: int = 3
+    local_tap_blocks: int = 2
     dilations: tuple[int, ...] = (1, 2, 4, 8, 4, 2)
     group_norm_groups: int = 8
     dropout: float = 0.10
@@ -70,24 +79,16 @@ class StageConfig:
     weight_decay: float = 1e-4
     grad_clip: float = 1.0
     overlap_deltas: tuple[int, ...] = (24, 48)
-    overlap_trim: int = 8
-    alignment_objective: str = "both"
+    overlap_trim: int = 10
     multiscale_alignment_weight: float = 0.25
-    timestamp_pairwise_weight: float = 0.0
-    patch_geometry_mode: str = "moments"
-    order_residual_gate_init: float = 0.10
-    transition_alignment_weight: float = 0.0
+    invariant_alignment_weight: float = 0.50
+    order_alignment_weight: float = 1.00
+    token_mask_fraction: float = 0.10
+    token_mask_span: int = 4
     gb_min_split: int = 4
     final_gb_min_split: int | None = None
     gb_max_rounds: int = 64
     gb_sampling_power: float = 0.5
-    gb_refresh_fraction: float | None = None
-    patch_statistics_weight: float = 0.0
-    final_geometry_mode: str = "control"
-    memory_radius_weight: float = 0.0
-    memory_radius_quantile: float = 0.90
-    temporal_support_fraction: float = 0.50
-    temporal_transition_weight: float = 0.0
     top_k: int = 3
     embedding_batch_size: int = 2048
     score_batch_size: int = 2048
@@ -96,20 +97,24 @@ class StageConfig:
     seed: int = 2026
 
     def validate(self) -> None:
-        if self.encoder_type not in {
-            "dilated_residual",
-            "depthwise_tcn",
-            "multiscale_depthwise_tcn",
-        }:
-            raise ValueError("unsupported encoder_type")
         if self.patch_size < 8:
             raise ValueError("patch_size must be at least 8")
         if not self.dilations:
             raise ValueError("at least one dilation is required")
+        if not 1 <= self.local_tap_blocks < len(self.dilations):
+            raise ValueError("local_tap_blocks must split the residual stack")
         if self.channels % self.group_norm_groups:
             raise ValueError("channels must be divisible by group_norm_groups")
         if self.token_dim < 2 or self.embedding_dim < 2:
             raise ValueError("token and embedding dimensions must exceed one")
+        if self.invariant_dim < 2 or self.order_dim < 2:
+            raise ValueError("invariant and order dimensions must exceed one")
+        if self.invariant_dim + self.order_dim != self.embedding_dim:
+            raise ValueError("embedding_dim must equal invariant_dim + order_dim")
+        if self.haar_levels < 1:
+            raise ValueError("haar_levels must be positive")
+        if 2 ** self.haar_levels > self.patch_size:
+            raise ValueError("haar_levels create segments shorter than one token")
         if self.batch_size < 4:
             raise ValueError("batch_size must be at least four")
         if self.steps < 1:
@@ -120,61 +125,24 @@ class StageConfig:
             raise ValueError("dropout must be in [0, 1)")
         if any(delta <= 0 or delta >= self.patch_size for delta in self.overlap_deltas):
             raise ValueError("overlap deltas must lie strictly inside a patch")
-        if any(self.patch_size - delta - 2 * self.overlap_trim < 1 for delta in self.overlap_deltas):
-            raise ValueError("overlap_trim removes the complete aligned region")
+        if any(self.patch_size - delta - 2 * self.overlap_trim < 2 for delta in self.overlap_deltas):
+            raise ValueError("overlap_trim leaves too few aligned local tokens")
         if self.multiscale_alignment_weight < 0.0:
             raise ValueError("multiscale_alignment_weight must be non-negative")
-        if self.timestamp_pairwise_weight < 0.0:
-            raise ValueError("timestamp_pairwise_weight must be non-negative")
-        if self.patch_geometry_mode not in {
-            "moments",
-            "ordered_pyramid",
-            "order_relations",
-            "hybrid",
-        }:
-            raise ValueError("unsupported patch_geometry_mode")
-        if not 0.0 < self.order_residual_gate_init < 1.0:
-            raise ValueError("order_residual_gate_init must lie in (0, 1)")
-        if self.transition_alignment_weight < 0.0:
-            raise ValueError("transition_alignment_weight must be non-negative")
-        if self.alignment_objective not in {
-            "both",
-            "timestamp_token_only",
-            "interval_only",
-            "context_only",
-        }:
-            raise ValueError("unsupported alignment_objective")
+        if self.invariant_alignment_weight < 0.0:
+            raise ValueError("invariant_alignment_weight must be non-negative")
+        if self.order_alignment_weight < 0.0:
+            raise ValueError("order_alignment_weight must be non-negative")
+        if not 0.0 <= self.token_mask_fraction < 1.0:
+            raise ValueError("token_mask_fraction must lie in [0, 1)")
+        if self.token_mask_span < 1:
+            raise ValueError("token_mask_span must be positive")
         if self.gb_min_split < 4:
             raise ValueError("gb_min_split must be at least four")
         if self.final_gb_min_split is not None and self.final_gb_min_split < 4:
             raise ValueError("final_gb_min_split must be at least four")
         if not 0.0 <= self.gb_sampling_power <= 1.0:
             raise ValueError("gb_sampling_power must be in [0, 1]")
-        if self.gb_refresh_fraction is not None and not (
-            self.gb_activation_fraction < self.gb_refresh_fraction < 1.0
-        ):
-            raise ValueError(
-                "gb_refresh_fraction must lie strictly between "
-                "gb_activation_fraction and one"
-            )
-        if self.patch_statistics_weight < 0.0:
-            raise ValueError("patch_statistics_weight must be non-negative")
-        if self.final_geometry_mode not in {
-            "control",
-            "independent_support",
-            "support_radius",
-            "support_radius_combined",
-            "support_radius_transition",
-        }:
-            raise ValueError("unsupported final_geometry_mode")
-        if self.memory_radius_weight < 0.0:
-            raise ValueError("memory_radius_weight must be non-negative")
-        if not 0.0 < self.memory_radius_quantile <= 1.0:
-            raise ValueError("memory_radius_quantile must lie in (0, 1]")
-        if not 0.0 < self.temporal_support_fraction <= 1.0:
-            raise ValueError("temporal_support_fraction must lie in (0, 1]")
-        if not 0.0 <= self.temporal_transition_weight <= 1.0:
-            raise ValueError("temporal_transition_weight must lie in [0, 1]")
         if self.score_batch_size < 1 or self.memory_score_block_size < 1:
             raise ValueError("score block sizes must be positive")
 
@@ -328,89 +296,6 @@ class PatchRevIN(nn.Module):
         return (x - mean) / torch.sqrt(variance + self.eps)
 
 
-def robust_feature_calibration(values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Fit label-blind per-channel location and scale on the training prefix.
-
-    PatchRevIN deliberately removes level and scale from the shape pathway.
-    STAGE-v3 retains those cues in a separate descriptor after robustly
-    calibrating them against the filename-declared training prefix.  Median
-    and MAD keep a short transient from controlling the calibration; standard
-    deviation and one are deterministic fallbacks for constant channels.
-    """
-
-    array = np.asarray(values, dtype=np.float32)
-    if array.ndim != 2 or len(array) < 2 or not np.isfinite(array).all():
-        raise ValueError("feature calibration expects a finite 2-D training prefix")
-    center = np.median(array, axis=0).astype(np.float32)
-    mad = (
-        1.4826
-        * np.median(np.abs(array - center[None, :]), axis=0)
-    ).astype(np.float32)
-    standard = array.std(axis=0, dtype=np.float64).astype(np.float32)
-    scale = np.where(mad > 1e-6, mad, standard)
-    scale = np.where(scale > 1e-6, scale, np.ones_like(scale))
-    return center, scale.astype(np.float32)
-
-
-def robust_patch_statistics_calibration(
-    values: np.ndarray,
-    patch_size: int,
-    feature_center: np.ndarray,
-    feature_scale: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Calibrate patch mean and log-scale descriptors on training windows."""
-
-    array = np.asarray(values, dtype=np.float64)
-    size = int(patch_size)
-    if array.ndim != 2 or size < 2 or len(array) < size:
-        raise ValueError("patch-statistics calibration received invalid values")
-    center = np.asarray(feature_center, dtype=np.float64).reshape(1, -1)
-    scale = np.asarray(feature_scale, dtype=np.float64).reshape(1, -1)
-    if center.shape[1] != array.shape[1] or scale.shape != center.shape:
-        raise ValueError("feature calibration dimensions do not match values")
-    standardized = (array - center) / scale
-    cumulative = np.vstack(
-        [np.zeros((1, standardized.shape[1]), dtype=np.float64), standardized.cumsum(axis=0)]
-    )
-    cumulative_squared = np.vstack(
-        [
-            np.zeros((1, standardized.shape[1]), dtype=np.float64),
-            np.square(standardized).cumsum(axis=0),
-        ]
-    )
-    means = (cumulative[size:] - cumulative[:-size]) / float(size)
-    second_moments = (
-        cumulative_squared[size:] - cumulative_squared[:-size]
-    ) / float(size)
-    standard_deviations = np.sqrt(
-        np.maximum(second_moments - np.square(means), 1e-8)
-    )
-    statistics = np.concatenate(
-        [means, np.log(standard_deviations + 1e-4)],
-        axis=1,
-    )
-    statistics_center = np.median(statistics, axis=0)
-    statistics_mad = 1.4826 * np.median(
-        np.abs(statistics - statistics_center[None, :]),
-        axis=0,
-    )
-    statistics_standard = statistics.std(axis=0)
-    statistics_scale = np.where(
-        statistics_mad > 1e-6,
-        statistics_mad,
-        statistics_standard,
-    )
-    statistics_scale = np.where(
-        statistics_scale > 1e-6,
-        statistics_scale,
-        np.ones_like(statistics_scale),
-    )
-    return (
-        statistics_center.astype(np.float32),
-        statistics_scale.astype(np.float32),
-    )
-
-
 class DilatedResidualBlock(nn.Module):
     """Non-causal dilated temporal mixing with a stable residual path."""
 
@@ -452,143 +337,24 @@ class DilatedResidualBlock(nn.Module):
         return residual + self.layer_scale * x
 
 
-class DepthwiseResidualBlock(nn.Module):
-    """Parameter-efficient temporal mixing with pointwise channel interaction."""
-
-    def __init__(
-        self,
-        channels: int,
-        dilation: int,
-        groups: int,
-        dropout: float,
-        *,
-        multiscale: bool,
-    ) -> None:
-        super().__init__()
-        channels = int(channels)
-        dilation = int(dilation)
-        self.norm = nn.GroupNorm(int(groups), channels)
-        if multiscale:
-            branch_dilations = tuple(
-                dict.fromkeys(
-                    (
-                        max(1, dilation // 2),
-                        dilation,
-                        min(16, 2 * dilation),
-                    )
-                )
-            )
-        else:
-            branch_dilations = (dilation,)
-        self.depthwise = nn.ModuleList(
-            [
-                nn.Conv1d(
-                    channels,
-                    channels,
-                    kernel_size=5,
-                    padding=2 * branch_dilation,
-                    dilation=branch_dilation,
-                    groups=channels,
-                    bias=False,
-                )
-                for branch_dilation in branch_dilations
-            ]
-        )
-        self.branch_logits = nn.Parameter(torch.zeros(len(self.depthwise)))
-        self.channel_mixer = nn.Conv1d(
-            channels,
-            2 * channels,
-            kernel_size=1,
-            bias=False,
-        )
-        self.dropout = nn.Dropout(float(dropout))
-        self.layer_scale = nn.Parameter(torch.full((1, channels, 1), 0.1))
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        residual = x
-        normalized = F.gelu(self.norm(x))
-        weights = torch.softmax(self.branch_logits, dim=0)
-        mixed = torch.zeros_like(normalized)
-        for weight, convolution in zip(weights, self.depthwise):
-            mixed = mixed + weight * convolution(normalized)
-        mixed = F.glu(self.channel_mixer(F.gelu(mixed)), dim=1)
-        mixed = self.dropout(mixed)
-        return residual + self.layer_scale * mixed
-
-
 class StageEncoder(nn.Module):
-    """Timestamp-preserving token encoder used by STAGE."""
+    """Hierarchical STAGE encoder with local alignment and ordered readout.
+
+    The shallow tap is used exclusively by shifted-overlap learning.  The deep
+    token sequence is never forced to ignore shifted context; instead it is
+    summarized by two explicit subspaces: distribution-invariant mean/std and
+    signed Haar temporal moments.  Their normalized concatenation defines the
+    geometry used by granular sampling, final memory, and anomaly scoring.
+    """
 
     def __init__(
         self,
         in_channels: int,
         config: StageConfig,
-        *,
-        feature_center: np.ndarray | None = None,
-        feature_scale: np.ndarray | None = None,
-        statistics_center: np.ndarray | None = None,
-        statistics_scale: np.ndarray | None = None,
     ) -> None:
         super().__init__()
         config.validate()
         self.config = config
-        if (feature_center is None) != (feature_scale is None):
-            raise ValueError("feature_center and feature_scale must be provided together")
-        if feature_center is None:
-            center = np.zeros(int(in_channels), dtype=np.float32)
-            scale = np.ones(int(in_channels), dtype=np.float32)
-        else:
-            center = np.asarray(feature_center, dtype=np.float32).reshape(-1)
-            scale = np.asarray(feature_scale, dtype=np.float32).reshape(-1)
-            if (
-                len(center) != int(in_channels)
-                or len(scale) != int(in_channels)
-                or not np.isfinite(center).all()
-                or not np.isfinite(scale).all()
-                or np.any(scale <= 0.0)
-            ):
-                raise ValueError("invalid feature calibration")
-        self.register_buffer(
-            "feature_center",
-            torch.from_numpy(center).reshape(1, int(in_channels), 1),
-        )
-        self.register_buffer(
-            "feature_scale",
-            torch.from_numpy(scale).reshape(1, int(in_channels), 1),
-        )
-        if (statistics_center is None) != (statistics_scale is None):
-            raise ValueError(
-                "statistics_center and statistics_scale must be provided together"
-            )
-        statistics_dimensions = 2 * int(in_channels)
-        if statistics_center is None:
-            descriptor_center = np.zeros(statistics_dimensions, dtype=np.float32)
-            descriptor_scale = np.ones(statistics_dimensions, dtype=np.float32)
-        else:
-            descriptor_center = np.asarray(
-                statistics_center,
-                dtype=np.float32,
-            ).reshape(-1)
-            descriptor_scale = np.asarray(
-                statistics_scale,
-                dtype=np.float32,
-            ).reshape(-1)
-            if (
-                len(descriptor_center) != statistics_dimensions
-                or len(descriptor_scale) != statistics_dimensions
-                or not np.isfinite(descriptor_center).all()
-                or not np.isfinite(descriptor_scale).all()
-                or np.any(descriptor_scale <= 0.0)
-            ):
-                raise ValueError("invalid patch-statistics calibration")
-        self.register_buffer(
-            "statistics_center",
-            torch.from_numpy(descriptor_center).reshape(1, statistics_dimensions),
-        )
-        self.register_buffer(
-            "statistics_scale",
-            torch.from_numpy(descriptor_scale).reshape(1, statistics_dimensions),
-        )
         self.revin = PatchRevIN()
         self.stem = nn.Sequential(
             nn.Conv1d(
@@ -601,207 +367,215 @@ class StageEncoder(nn.Module):
             nn.GroupNorm(int(config.group_norm_groups), int(config.channels)),
             nn.GELU(),
         )
-        if config.encoder_type == "dilated_residual":
-            block_factory = lambda dilation: DilatedResidualBlock(
-                channels=config.channels,
-                dilation=dilation,
-                groups=config.group_norm_groups,
-                dropout=config.dropout,
-            )
-        else:
-            block_factory = lambda dilation: DepthwiseResidualBlock(
-                channels=config.channels,
-                dilation=dilation,
-                groups=config.group_norm_groups,
-                dropout=config.dropout,
-                multiscale=(
-                    config.encoder_type == "multiscale_depthwise_tcn"
-                ),
-            )
         self.blocks = nn.ModuleList(
-            [block_factory(dilation) for dilation in config.dilations]
+            [
+                DilatedResidualBlock(
+                    channels=config.channels,
+                    dilation=dilation,
+                    groups=config.group_norm_groups,
+                    dropout=config.dropout,
+                )
+                for dilation in config.dilations
+            ]
         )
-        self.token_head = nn.Sequential(
+        self.local_token_head = nn.Sequential(
             nn.GroupNorm(int(config.group_norm_groups), int(config.channels)),
             nn.GELU(),
             nn.Conv1d(int(config.channels), int(config.token_dim), kernel_size=1),
         )
-        self.embedding_head = nn.Sequential(
-            nn.LayerNorm(2 * int(config.token_dim)),
-            nn.Linear(2 * int(config.token_dim), int(config.embedding_dim)),
+        self.global_token_head = nn.Sequential(
+            nn.GroupNorm(int(config.group_norm_groups), int(config.channels)),
+            nn.GELU(),
+            nn.Conv1d(int(config.channels), int(config.token_dim), kernel_size=1),
         )
-        order_multiplier = {
-            "moments": 0,
-            "ordered_pyramid": 4,
-            "order_relations": 6,
-            "hybrid": 10,
-        }[str(config.patch_geometry_mode)]
-        self.order_feature_dimensions = int(order_multiplier * config.token_dim)
-        if self.order_feature_dimensions:
-            self.order_head: nn.Module | None = nn.Sequential(
-                nn.LayerNorm(self.order_feature_dimensions),
-                nn.Linear(
-                    self.order_feature_dimensions,
-                    int(config.embedding_dim),
-                ),
-                nn.GELU(),
-                nn.Linear(
-                    int(config.embedding_dim),
-                    int(config.embedding_dim),
-                ),
-            )
-            gate_probability = float(config.order_residual_gate_init)
-            gate_logit = math.log(gate_probability / (1.0 - gate_probability))
-            self.order_residual_gate = nn.Parameter(
-                torch.full((int(config.embedding_dim),), gate_logit)
-            )
-        else:
-            self.order_head = None
-            self.register_parameter("order_residual_gate", None)
-
-    @staticmethod
-    def _relative_lags(length: int) -> tuple[int, int, int]:
-        """Return three deterministic lags at roughly 1/8, 1/4 and 1/2."""
-
-        if length < 2:
-            return (0, 0, 0)
-        maximum = int(length) - 1
-        return tuple(
-            min(maximum, max(1, int(round(float(length) * fraction))))
-            for fraction in (0.125, 0.25, 0.50)
+        invariant_input = 2 * int(config.token_dim)
+        order_input = (2 ** int(config.haar_levels) - 1) * int(config.token_dim)
+        self.invariant_head = nn.Sequential(
+            nn.LayerNorm(invariant_input),
+            nn.Linear(invariant_input, int(config.invariant_dim)),
+        )
+        self.order_head = nn.Sequential(
+            nn.LayerNorm(order_input),
+            nn.Linear(order_input, int(config.order_dim)),
         )
 
     @staticmethod
-    def _deterministic_temporal_bins(
+    def _validate_token_mask(
         tokens: torch.Tensor,
-        output_size: int,
+        token_mask: torch.Tensor | None,
+    ) -> torch.Tensor | None:
+        if token_mask is None:
+            return None
+        if token_mask.ndim != 2 or token_mask.shape != tokens.shape[:2]:
+            raise ValueError("token_mask must have shape [batch, time]")
+        mask = token_mask.to(device=tokens.device, dtype=tokens.dtype)
+        if not torch.isfinite(mask).all() or torch.any(mask < 0.0):
+            raise ValueError("token_mask must be finite and non-negative")
+        return mask
+
+    @staticmethod
+    def _masked_mean(
+        values: torch.Tensor,
+        mask: torch.Tensor | None,
     ) -> torch.Tensor:
-        """Pool ordered temporal bins without adaptive-pooling CUDA kernels.
+        if mask is None:
+            return values.mean(dim=1)
+        weights = mask.unsqueeze(-1)
+        denominator = weights.sum(dim=1).clamp_min(1.0)
+        return (values * weights).sum(dim=1) / denominator
 
-        ``adaptive_avg_pool1d`` dispatches through an adaptive 2-D backward
-        kernel on CUDA.  That kernel has no deterministic implementation in
-        PyTorch 2.5, so strict reproducibility fails before an O1 candidate
-        can finish training.  Explicit slice means implement the same bin
-        boundaries while keeping autograd on deterministic reductions.
-        """
+    @classmethod
+    def _masked_mean_std(
+        cls,
+        values: torch.Tensor,
+        mask: torch.Tensor | None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if mask is None:
+            mean = values.mean(dim=1)
+            variance = values.var(dim=1, unbiased=False)
+            return mean, torch.sqrt(variance.clamp_min(1e-8))
+        mean = cls._masked_mean(values, mask)
+        weights = mask.unsqueeze(-1)
+        denominator = weights.sum(dim=1).clamp_min(1.0)
+        variance = (
+            (values - mean.unsqueeze(1)).pow(2) * weights
+        ).sum(dim=1) / denominator
+        return mean, torch.sqrt(variance.clamp_min(1e-8))
 
-        if tokens.ndim != 3:
-            raise ValueError("tokens must have shape [batch, time, features]")
-        bins = int(output_size)
-        length = int(tokens.shape[1])
-        if bins < 1 or length < bins:
-            raise ValueError("temporal pooling requires length >= output_size")
-        pooled: list[torch.Tensor] = []
-        for index in range(bins):
-            start = (index * length) // bins
-            end = ((index + 1) * length + bins - 1) // bins
-            pooled.append(tokens[:, start:end].mean(dim=1))
-        return torch.stack(pooled, dim=1)
+    def _invariant_descriptor_from_unit(
+        self,
+        unit_tokens: torch.Tensor,
+        token_mask: torch.Tensor | None,
+    ) -> torch.Tensor:
+        mean, std = self._masked_mean_std(unit_tokens, token_mask)
+        return torch.cat([mean, std], dim=1)
 
-    def order_features(self, tokens: torch.Tensor) -> torch.Tensor:
-        """Extract order-sensitive, shift-local sufficient statistics.
+    def _haar_descriptor_from_unit(
+        self,
+        unit_tokens: torch.Tensor,
+        token_mask: torch.Tensor | None,
+    ) -> torch.Tensor:
+        length = int(unit_tokens.shape[1])
+        moments: list[torch.Tensor] = []
+        for level in range(int(self.config.haar_levels)):
+            children = 2 ** (level + 1)
+            boundaries = [
+                int(round(index * length / children))
+                for index in range(children + 1)
+            ]
+            for parent in range(2 ** level):
+                left_start = boundaries[2 * parent]
+                midpoint = boundaries[2 * parent + 1]
+                right_stop = boundaries[2 * parent + 2]
+                if not left_start < midpoint < right_stop:
+                    raise ValueError("token sequence is too short for Haar levels")
+                left_mask = (
+                    None
+                    if token_mask is None
+                    else token_mask[:, left_start:midpoint]
+                )
+                right_mask = (
+                    None
+                    if token_mask is None
+                    else token_mask[:, midpoint:right_stop]
+                )
+                left_mean = self._masked_mean(
+                    unit_tokens[:, left_start:midpoint],
+                    left_mask,
+                )
+                right_mean = self._masked_mean(
+                    unit_tokens[:, midpoint:right_stop],
+                    right_mask,
+                )
+                moments.append((left_mean - right_mean) / math.sqrt(2.0))
+        return torch.cat(moments, dim=1)
 
-        Ordered pyramid residuals preserve where a state occurs within the
-        interval.  Signed lag differences preserve transition direction, while
-        lag products preserve recurrence and persistence.  No absolute window
-        position is used, so the same shared interval can still be aligned
-        across shifted contexts.
-        """
+    def invariant_descriptor(
+        self,
+        tokens: torch.Tensor,
+        token_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        if tokens.ndim != 3 or tokens.shape[-1] != self.config.token_dim:
+            raise ValueError("tokens must have shape [batch, time, token_dim]")
+        unit_tokens = F.normalize(tokens, dim=-1)
+        mask = self._validate_token_mask(unit_tokens, token_mask)
+        return self._invariant_descriptor_from_unit(unit_tokens, mask)
+
+    def haar_descriptor(
+        self,
+        tokens: torch.Tensor,
+        token_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """Return signed multi-resolution temporal moments without parameters."""
 
         if tokens.ndim != 3 or tokens.shape[-1] != self.config.token_dim:
             raise ValueError("tokens must have shape [batch, time, token_dim]")
         unit_tokens = F.normalize(tokens, dim=-1)
-        mean = unit_tokens.mean(dim=1, keepdim=True)
-        features: list[torch.Tensor] = []
-        if self.config.patch_geometry_mode in {"ordered_pyramid", "hybrid"}:
-            bins = self._deterministic_temporal_bins(unit_tokens, output_size=4)
-            features.append((bins - mean).flatten(start_dim=1))
-        if self.config.patch_geometry_mode in {"order_relations", "hybrid"}:
-            directional: list[torch.Tensor] = []
-            relational: list[torch.Tensor] = []
-            for lag in self._relative_lags(int(unit_tokens.shape[1])):
-                if lag == 0:
-                    difference = torch.zeros_like(unit_tokens)
-                    product = unit_tokens.square()
-                else:
-                    earlier = unit_tokens[:, :-lag]
-                    later = unit_tokens[:, lag:]
-                    difference = later - earlier
-                    product = earlier * later
-                directional.append(difference.mean(dim=1))
-                relational.append(product.mean(dim=1))
-            features.extend(
-                [
-                    torch.cat(directional, dim=1),
-                    torch.cat(relational, dim=1),
-                ]
-            )
-        if not features:
-            return unit_tokens.new_empty((len(unit_tokens), 0))
-        return torch.cat(features, dim=1)
+        mask = self._validate_token_mask(unit_tokens, token_mask)
+        return self._haar_descriptor_from_unit(unit_tokens, mask)
 
-    def embed_tokens(self, tokens: torch.Tensor) -> torch.Tensor:
-        """Pool the same directional token geometry used by overlap learning."""
-
+    def embed_components(
+        self,
+        tokens: torch.Tensor,
+        token_mask: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if tokens.ndim != 3 or tokens.shape[-1] != self.config.token_dim:
             raise ValueError("tokens must have shape [batch, time, token_dim]")
         unit_tokens = F.normalize(tokens, dim=-1)
-        mean = unit_tokens.mean(dim=1)
-        std = torch.sqrt(unit_tokens.var(dim=1, unbiased=False).clamp_min(1e-8))
-        base = self.embedding_head(torch.cat([mean, std], dim=1))
-        if self.order_head is None:
-            return base
-        order = self.order_head(self.order_features(tokens))
-        if self.order_residual_gate is None:
-            raise AssertionError("order residual gate is missing")
-        gate = torch.sigmoid(self.order_residual_gate).reshape(1, -1)
-        return base + gate * order
+        mask = self._validate_token_mask(unit_tokens, token_mask)
+        invariant_descriptor = self._invariant_descriptor_from_unit(
+            unit_tokens,
+            mask,
+        )
+        order_descriptor = self._haar_descriptor_from_unit(unit_tokens, mask)
+        invariant = self.invariant_head(invariant_descriptor)
+        order = self.order_head(order_descriptor)
+        return F.normalize(invariant, dim=1), F.normalize(order, dim=1)
 
-    def encode_tokens(self, x: torch.Tensor) -> torch.Tensor:
+    def embed_tokens(
+        self,
+        tokens: torch.Tensor,
+        token_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        invariant, order = self.embed_components(tokens, token_mask)
+        return torch.cat([invariant, order], dim=1) / math.sqrt(2.0)
+
+    def encode_hierarchy(
+        self,
+        x: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if x.ndim != 3:
             raise ValueError("StageEncoder expects [batch, channels, time]")
-        x = self.stem(self.revin(x))
-        for block in self.blocks:
-            x = block(x)
-        return self.token_head(x).transpose(1, 2).contiguous()
+        hidden = self.stem(self.revin(x))
+        local_hidden: torch.Tensor | None = None
+        for index, block in enumerate(self.blocks, start=1):
+            hidden = block(hidden)
+            if index == int(self.config.local_tap_blocks):
+                local_hidden = hidden
+        if local_hidden is None:
+            raise AssertionError("local encoder tap was not reached")
+        local_tokens = self.local_token_head(local_hidden).transpose(1, 2).contiguous()
+        global_tokens = self.global_token_head(hidden).transpose(1, 2).contiguous()
+        return local_tokens, global_tokens
+
+    def encode_tokens(self, x: torch.Tensor) -> torch.Tensor:
+        """Return deep tokens for backward-compatible inference helpers."""
+
+        _, global_tokens = self.encode_hierarchy(x)
+        return global_tokens
 
     def embed_patch(
         self,
         x: torch.Tensor,
         tokens: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        """Fuse shape evidence with bounded level/scale evidence.
-
-        The overlap objective remains defined on timestamp tokens and shared
-        intervals.  The deterministic statistics branch only changes the
-        geometry used by the intermediate partition, final memory, and query
-        distance.  With zero weight this function is bit-for-bit equivalent to
-        the legacy shape-only embedding path.
-        """
-
         if tokens is None:
             tokens = self.encode_tokens(x)
-        shape = self.embed_tokens(tokens)
-        weight = float(self.config.patch_statistics_weight)
-        if weight == 0.0:
-            return shape
-        standardized = (x - self.feature_center) / self.feature_scale
-        level = standardized.mean(dim=-1)
-        local_scale = torch.sqrt(
-            standardized.var(dim=-1, unbiased=False).clamp_min(1e-8)
-        )
-        log_scale = torch.log(local_scale + 1e-4)
-        statistics = torch.cat([level, log_scale], dim=1)
-        statistics = torch.tanh(
-            ((statistics - self.statistics_center) / self.statistics_scale) / 3.0
-        )
-        statistics = F.normalize(statistics, dim=1)
-        shape = F.normalize(shape, dim=1)
-        return F.normalize(torch.cat([shape, weight * statistics], dim=1), dim=1)
+        return self.embed_tokens(tokens)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        tokens = self.encode_tokens(x)
-        return tokens, self.embed_patch(x, tokens)
+        _, global_tokens = self.encode_hierarchy(x)
+        return global_tokens, self.embed_tokens(global_tokens)
 
 
 def off_diagonal(matrix: torch.Tensor) -> torch.Tensor:
@@ -858,50 +632,13 @@ def weighted_cross_correlation_identity_loss(
     return diagonal + redundancy, diagonal, redundancy
 
 
-def majority_local_transition_loss(
-    aligned_left: torch.Tensor,
-    aligned_right: torch.Tensor,
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """Align reliable directional changes inside the shared interval.
-
-    Reliability is label-blind and detached from optimization.  A transition
-    contributes in proportion to its current positive cosine agreement across
-    the two shifted contexts; inconsistent transitions are not forcibly
-    collapsed.  This extends majority-local alignment without introducing
-    negatives or an independent prediction task.
-    """
-
-    if aligned_left.ndim != 3 or aligned_right.shape != aligned_left.shape:
-        raise ValueError("transition inputs must be matching token sequences")
-    terms: list[torch.Tensor] = []
-    gates: list[torch.Tensor] = []
-    for lag in StageEncoder._relative_lags(int(aligned_left.shape[1])):
-        if lag == 0:
-            continue
-        left_delta = aligned_left[:, lag:] - aligned_left[:, :-lag]
-        right_delta = aligned_right[:, lag:] - aligned_right[:, :-lag]
-        cosine = (
-            F.normalize(left_delta, dim=-1) * F.normalize(right_delta, dim=-1)
-        ).sum(dim=-1)
-        reliability = cosine.detach().clamp(0.0, 1.0)
-        denominator = reliability.sum().clamp_min(1e-4)
-        terms.append((reliability * (1.0 - cosine)).sum() / denominator)
-        gates.append(reliability.mean())
-    if not terms:
-        zero = aligned_left.new_zeros(())
-        return zero, zero
-    return torch.stack(terms).mean(), torch.stack(gates).mean()
-
-
 def temporal_overlap_loss(
     tokens_left: torch.Tensor,
     tokens_right: torch.Tensor,
-    overlap_embedding_left: torch.Tensor,
-    overlap_embedding_right: torch.Tensor,
     delta: int,
     config: StageConfig,
 ) -> tuple[torch.Tensor, dict[str, float]]:
-    """Align only tokens that correspond to the same raw timestamp."""
+    """Align shallow tokens sharing a raw timestamp and reliable local scale."""
 
     patch_size = int(tokens_left.shape[1])
     trim = int(config.overlap_trim)
@@ -916,31 +653,6 @@ def temporal_overlap_loss(
     token_loss, token_diagonal, token_redundancy = cross_correlation_identity_loss(
         aligned_left_raw.reshape(-1, aligned_left_raw.shape[-1]),
         aligned_right_raw.reshape(-1, aligned_right_raw.shape[-1]),
-    )
-    embedding_loss, embedding_diagonal, embedding_redundancy = (
-        cross_correlation_identity_loss(
-            overlap_embedding_left,
-            overlap_embedding_right,
-        )
-    )
-    token_pairwise = (
-        1.0
-        - (
-            F.normalize(aligned_left_raw, dim=-1)
-            * F.normalize(aligned_right_raw, dim=-1)
-        ).sum(dim=-1)
-    ).mean()
-    interval_pairwise = (
-        1.0
-        - (
-            F.normalize(overlap_embedding_left, dim=-1)
-            * F.normalize(overlap_embedding_right, dim=-1)
-        ).sum(dim=-1)
-    ).mean()
-    pairwise_loss = token_pairwise + interval_pairwise
-    transition_loss, transition_gate = majority_local_transition_loss(
-        aligned_left_raw,
-        aligned_right_raw,
     )
     multiscale_loss = token_loss.new_zeros(())
     multiscale_terms = 0
@@ -991,41 +703,19 @@ def temporal_overlap_loss(
         if multiscale_terms:
             multiscale_loss = multiscale_loss / float(multiscale_terms)
 
-    if config.alignment_objective == "both":
-        total = token_loss + embedding_loss
-    elif config.alignment_objective == "timestamp_token_only":
-        total = token_loss
-    elif config.alignment_objective == "interval_only":
-        total = embedding_loss
-    else:
-        raise ValueError(
-            "temporal_overlap_loss does not implement context_only; "
-            "fit_encoder handles that matched-budget control directly"
-        )
-    total = total + float(config.multiscale_alignment_weight) * multiscale_loss
-    total = total + float(config.timestamp_pairwise_weight) * pairwise_loss
-    total = total + float(config.transition_alignment_weight) * transition_loss
+    total = token_loss + float(config.multiscale_alignment_weight) * multiscale_loss
     diagnostics = {
-        "loss": float(total.detach().cpu()),
-        "token_cc": float(token_loss.detach().cpu()),
-        "token_cc_diagonal": float(token_diagonal.detach().cpu()),
-        "token_redundancy": float(token_redundancy.detach().cpu()),
-        "overlap_embedding_cc": float(embedding_loss.detach().cpu()),
-        "overlap_embedding_cc_diagonal": float(embedding_diagonal.detach().cpu()),
-        "embedding_redundancy": float(embedding_redundancy.detach().cpu()),
-        "timestamp_pairwise": float(token_pairwise.detach().cpu()),
-        "interval_pairwise": float(interval_pairwise.detach().cpu()),
-        "pairwise_weight": float(config.timestamp_pairwise_weight),
-        "transition_consistency": float(transition_loss.detach().cpu()),
-        "transition_gate": float(transition_gate.detach().cpu()),
-        "transition_weight": float(config.transition_alignment_weight),
+        "local_loss": float(total.detach().cpu()),
+        "local_token_cc": float(token_loss.detach().cpu()),
+        "local_token_cc_diagonal": float(token_diagonal.detach().cpu()),
+        "local_token_redundancy": float(token_redundancy.detach().cpu()),
         "multiscale_cc": float(multiscale_loss.detach().cpu()),
         "multiscale_gate": float(
             (
                 multiscale_gate_total / float(max(1, multiscale_terms))
             ).detach().cpu()
         ),
-        "aligned_tokens": int(left_stop - left_start),
+        "aligned_local_tokens": int(left_stop - left_start),
     }
     return total, diagnostics
 
@@ -1240,274 +930,28 @@ def select_gb_rows(total_rows: int, maximum: int) -> np.ndarray:
     )
 
 
-@dataclass(frozen=True)
-class CalibratedExemplarMemory:
-    """Observed exemplars with geometry-derived uncertainty metadata."""
-
-    vectors: np.ndarray
-    region_radii: np.ndarray
-    region_sizes: np.ndarray
-    representative_source_rows: np.ndarray
-    effective_support: np.ndarray | None = None
-    temporal_components: np.ndarray | None = None
-    transition_vectors: np.ndarray | None = None
-
-    def __len__(self) -> int:
-        return int(len(self.vectors))
-
-
-def temporal_independence_weights(
-    starts: np.ndarray,
-    patch_size: int,
-    fraction: float,
-) -> tuple[np.ndarray, float, int]:
-    """Downweight near-duplicate patches using their original time support.
-
-    The weight of one patch is the inverse number of starts in its local
-    temporal neighbourhood.  A long run of unit-stride overlapping windows
-    therefore contributes roughly by covered time rather than raw patch count.
-    No labels or Eval information enter this calculation.
-    """
-
-    source = np.asarray(starts, dtype=np.int64)
-    if source.ndim != 1 or len(source) < 1:
-        raise ValueError("starts must be a non-empty vector")
-    if int(patch_size) < 1 or not 0.0 < float(fraction) <= 1.0:
-        raise ValueError("invalid temporal-support parameters")
-    order = np.argsort(source, kind="stable")
-    ordered = source[order]
-    radius = max(1, int(round(int(patch_size) * float(fraction))))
-    left = np.searchsorted(ordered, ordered - radius, side="left")
-    right = np.searchsorted(ordered, ordered + radius, side="right")
-    counts = np.maximum(1, right - left)
-    ordered_weights = 1.0 / counts.astype(np.float64)
-    weights = np.empty(len(source), dtype=np.float64)
-    weights[order] = ordered_weights
-    effective_support = float(np.sum(ordered_weights))
-    components = int(
-        1 + np.count_nonzero(np.diff(ordered) > max(1, int(patch_size)))
-    )
-    return weights.astype(np.float32), effective_support, components
-
-
-def temporal_transition_embeddings(
-    embeddings: np.ndarray,
-    lag: int,
-) -> np.ndarray:
-    """Return unit transition directions without changing the base embedding."""
-
-    source = np.asarray(embeddings, dtype=np.float32)
-    if source.ndim != 2 or len(source) < 1 or int(lag) < 1:
-        raise ValueError("invalid transition-embedding inputs")
-    lag = min(int(lag), max(1, len(source) - 1))
-    transition = np.zeros_like(source)
-    transition[lag:] = source[lag:] - source[:-lag]
-    if len(source) > lag:
-        transition[:lag] = transition[lag]
-    norm = np.linalg.norm(transition, axis=1, keepdims=True)
-    transition = transition / np.maximum(norm, 1e-12)
-    transition[norm[:, 0] <= 1e-12] = 0.0
-    return transition.astype(np.float32)
-
-
-def augment_temporal_geometry(
-    embeddings: np.ndarray,
-    transitions: np.ndarray,
-    weight: float,
-) -> np.ndarray:
-    """Embed state and transition in one lightweight joint geometry."""
-
-    state = np.asarray(embeddings, dtype=np.float32)
-    motion = np.asarray(transitions, dtype=np.float32)
-    if state.shape != motion.shape or state.ndim != 2:
-        raise ValueError("state and transition geometries must match")
-    if not 0.0 <= float(weight) <= 1.0:
-        raise ValueError("transition weight must lie in [0, 1]")
-    state_scale = math.sqrt(max(0.0, 1.0 - float(weight)))
-    motion_scale = math.sqrt(float(weight))
-    joint = np.concatenate(
-        [state_scale * state, motion_scale * motion],
-        axis=1,
-    )
-    joint /= np.maximum(np.linalg.norm(joint, axis=1, keepdims=True), 1e-12)
-    return joint.astype(np.float32)
-
-
-def _build_calibrated_exemplar_memory(
-    embeddings: np.ndarray,
-    config: StageConfig,
-    *,
-    seed: int,
-) -> tuple[CalibratedExemplarMemory, GranularPartition]:
-    selected = select_gb_rows(len(embeddings), int(config.max_gb_rows))
-    source = np.asarray(embeddings[selected], dtype=np.float32)
-    source = source / np.maximum(np.linalg.norm(source, axis=1, keepdims=True), 1e-12)
-    partition = build_granular_partition(source, config, seed=int(seed))
-    representatives: list[int] = []
-    radii: list[float] = []
-    sizes: list[int] = []
-    for ball in partition.balls:
-        members = source[ball]
-        center = members.mean(axis=0)
-        local = int(np.argmin(np.sum((members - center[None, :]) ** 2, axis=1)))
-        representative = int(ball[local])
-        representatives.append(representative)
-        exemplar = source[representative]
-        squared_distances = np.maximum(
-            0.0,
-            2.0 - 2.0 * (members @ exemplar),
-        )
-        radii.append(
-            float(
-                np.quantile(
-                    squared_distances,
-                    float(config.memory_radius_quantile),
-                )
-            )
-        )
-        sizes.append(int(len(ball)))
-    representatives_array = np.asarray(representatives, dtype=np.int64)
-    memory = source[representatives_array]
-    memory = memory / np.maximum(np.linalg.norm(memory, axis=1, keepdims=True), 1e-12)
-    calibrated = CalibratedExemplarMemory(
-        vectors=memory.astype(np.float32),
-        region_radii=np.asarray(radii, dtype=np.float32),
-        region_sizes=np.asarray(sizes, dtype=np.int64),
-        representative_source_rows=selected[representatives_array],
-    )
-    return calibrated, partition
-
-
-def build_support_calibrated_exemplar_memory(
-    embeddings: np.ndarray,
-    config: StageConfig,
-    *,
-    seed: int,
-    independent_representatives: bool,
-    transition_embeddings: np.ndarray | None = None,
-) -> tuple[CalibratedExemplarMemory, GranularPartition]:
-    """Build observed exemplars with de-duplicated temporal support metadata.
-
-    Granular regions remain data-adaptive.  Within each region, the optional
-    representative is chosen around a center weighted by distinct temporal
-    support rather than by the number of highly overlapping windows.
-    """
-
-    selected = select_gb_rows(len(embeddings), int(config.max_gb_rows))
-    source = np.asarray(embeddings[selected], dtype=np.float32)
-    source /= np.maximum(np.linalg.norm(source, axis=1, keepdims=True), 1e-12)
-    partition = build_granular_partition(source, config, seed=int(seed))
-    representatives: list[int] = []
-    radii: list[float] = []
-    sizes: list[int] = []
-    supports: list[float] = []
-    components: list[int] = []
-    for ball in partition.balls:
-        members = source[ball]
-        source_rows = selected[ball]
-        weights, effective_support, component_count = temporal_independence_weights(
-            source_rows,
-            int(config.patch_size),
-            float(config.temporal_support_fraction),
-        )
-        if independent_representatives:
-            center = np.average(members, axis=0, weights=weights)
-        else:
-            center = members.mean(axis=0)
-        local = int(np.argmin(np.sum((members - center[None, :]) ** 2, axis=1)))
-        representative = int(ball[local])
-        representatives.append(representative)
-        exemplar = source[representative]
-        squared_distances = np.maximum(
-            0.0,
-            2.0 - 2.0 * (members @ exemplar),
-        )
-        radii.append(
-            float(
-                np.quantile(
-                    squared_distances,
-                    float(config.memory_radius_quantile),
-                )
-            )
-        )
-        sizes.append(int(len(ball)))
-        supports.append(float(effective_support))
-        components.append(int(component_count))
-    representatives_array = np.asarray(representatives, dtype=np.int64)
-    memory = source[representatives_array]
-    memory /= np.maximum(np.linalg.norm(memory, axis=1, keepdims=True), 1e-12)
-    radii_array = np.asarray(radii, dtype=np.float32)
-    if len(memory) > 1:
-        pairwise = np.maximum(0.0, 2.0 - 2.0 * (memory @ memory.T))
-        np.fill_diagonal(pairwise, np.inf)
-        separation_cap = 0.5 * np.min(pairwise, axis=1)
-        radii_array = np.minimum(radii_array, separation_cap.astype(np.float32))
-    representative_rows = selected[representatives_array]
-    transitions = None
-    if transition_embeddings is not None:
-        transition_source = np.asarray(transition_embeddings, dtype=np.float32)
-        if transition_source.shape != np.asarray(embeddings).shape:
-            raise ValueError("transition embeddings do not match base embeddings")
-        transitions = transition_source[representative_rows].copy()
-    calibrated = CalibratedExemplarMemory(
-        vectors=memory.astype(np.float32),
-        region_radii=radii_array,
-        region_sizes=np.asarray(sizes, dtype=np.int64),
-        representative_source_rows=representative_rows,
-        effective_support=np.asarray(supports, dtype=np.float32),
-        temporal_components=np.asarray(components, dtype=np.int64),
-        transition_vectors=transitions,
-    )
-    return calibrated, partition
-
-
-def support_radius_penalty(
-    memory: CalibratedExemplarMemory,
-    weight: float,
-) -> np.ndarray:
-    """Penalize broad, strongly supported normal regions conservatively."""
-
-    if float(weight) < 0.0:
-        raise ValueError("radius weight must be non-negative")
-    radii = np.asarray(memory.region_radii, dtype=np.float32)
-    if memory.effective_support is None:
-        support = np.ones(len(memory), dtype=np.float32)
-    else:
-        support = np.asarray(memory.effective_support, dtype=np.float32)
-    maximum = max(float(np.max(support)), 1e-12)
-    support_factor = np.sqrt(np.maximum(support, 0.0) / maximum)
-    return (float(weight) * radii * support_factor).astype(np.float32)
-
-
 def build_gb_exemplar_memory(
     embeddings: np.ndarray,
     config: StageConfig,
     *,
     seed: int,
 ) -> tuple[np.ndarray, GranularPartition]:
-    """Build the legacy observed-exemplar memory without score calibration."""
+    """Retain one observed exemplar nearest each adaptive region mean."""
 
-    calibrated, partition = _build_calibrated_exemplar_memory(
-        embeddings,
-        config,
-        seed=seed,
-    )
-    return calibrated.vectors, partition
-
-
-def build_calibrated_exemplar_memory(
-    embeddings: np.ndarray,
-    config: StageConfig,
-    *,
-    seed: int,
-) -> tuple[CalibratedExemplarMemory, GranularPartition]:
-    """Build observed exemplars and retain each region's empirical spread."""
-
-    return _build_calibrated_exemplar_memory(
-        embeddings,
-        config,
-        seed=seed,
-    )
+    selected = select_gb_rows(len(embeddings), int(config.max_gb_rows))
+    source = np.asarray(embeddings[selected], dtype=np.float32)
+    source = source / np.maximum(np.linalg.norm(source, axis=1, keepdims=True), 1e-12)
+    partition = build_granular_partition(source, config, seed=int(seed))
+    representatives: list[int] = []
+    for ball in partition.balls:
+        members = source[ball]
+        center = members.mean(axis=0)
+        local = int(np.argmin(np.sum((members - center[None, :]) ** 2, axis=1)))
+        representatives.append(int(ball[local]))
+    representatives_array = np.asarray(representatives, dtype=np.int64)
+    memory = source[representatives_array]
+    memory = memory / np.maximum(np.linalg.norm(memory, axis=1, keepdims=True), 1e-12)
+    return memory.astype(np.float32), partition
 
 
 def sample_from_partition(
@@ -1567,6 +1011,36 @@ def resolve_training_steps(
     return requested_steps, False
 
 
+def random_span_keep_mask(
+    batch_size: int,
+    length: int,
+    mask_fraction: float,
+    span_length: int,
+    device: torch.device,
+) -> torch.Tensor:
+    """Create independent short-span token masks without device synchronisation."""
+
+    batch = int(batch_size)
+    tokens = int(length)
+    target = int(round(float(mask_fraction) * tokens))
+    if target <= 0:
+        return torch.ones((batch, tokens), device=device, dtype=torch.float32)
+    span = max(1, min(int(span_length), tokens))
+    spans_per_row = max(1, int(round(target / span)))
+    maximum_start = tokens - span
+    starts = torch.randint(
+        0,
+        maximum_start + 1,
+        (batch, spans_per_row, 1),
+        device=device,
+    )
+    positions = torch.arange(tokens, device=device).view(1, 1, tokens)
+    masked = ((positions >= starts) & (positions < starts + span)).any(dim=1)
+    keep = (~masked).to(dtype=torch.float32)
+    invalid = keep.sum(dim=1) < 2
+    return torch.where(invalid[:, None], torch.ones_like(keep), keep)
+
+
 def fit_encoder(
     values: np.ndarray,
     model: StageEncoder,
@@ -1607,53 +1081,15 @@ def fit_encoder(
     rng = np.random.default_rng(int(config.seed))
     gb_activation_step = int(round(effective_steps * config.gb_activation_fraction))
     gb_activation_step = min(max(1, gb_activation_step), max(1, effective_steps - 1))
-    gb_refresh_step = (
-        None
-        if config.gb_refresh_fraction is None
-        else int(round(effective_steps * float(config.gb_refresh_fraction)))
-    )
-    if gb_refresh_step is not None:
-        gb_refresh_step = min(
-            max(gb_activation_step + 1, gb_refresh_step),
-            max(gb_activation_step + 1, effective_steps - 1),
-        )
-    partition_build_steps = {gb_activation_step}
-    if gb_refresh_step is not None:
-        partition_build_steps.add(gb_refresh_step)
     partition: GranularPartition | None = None
     partition_starts: np.ndarray | None = None
     partition_sample_counts: np.ndarray | None = None
-    partition_history: list[dict[str, Any]] = []
     history: list[dict[str, Any]] = []
     peak_grad_norm = 0.0
     started = time.perf_counter()
 
     for step in range(effective_steps):
-        if step in partition_build_steps:
-            if partition is not None:
-                partition_history.append(
-                    {
-                        "built_at_step": int(
-                            gb_activation_step
-                            if not partition_history
-                            else gb_refresh_step
-                        ),
-                        "initial_k": partition.initial_k,
-                        "final_k": partition.final_k,
-                        "rounds": partition.rounds,
-                        "rows": partition.source_rows,
-                        "region_sizes": [
-                            int(len(ball)) for ball in partition.balls
-                        ],
-                        "region_sample_counts": (
-                            []
-                            if partition_sample_counts is None
-                            else [
-                                int(item) for item in partition_sample_counts
-                            ]
-                        ),
-                    }
-                )
+        if step == gb_activation_step:
             warm_local_rows = select_gb_rows(
                 len(eligible_starts), int(config.max_gb_rows)
             )
@@ -1698,42 +1134,64 @@ def fit_encoder(
         left = window_bank.batch(starts)
         right = window_bank.batch(starts + delta)
         optimizer.zero_grad(set_to_none=True)
-        tokens_left = model.encode_tokens(left)
-        tokens_right = model.encode_tokens(right)
-        trim = int(config.overlap_trim)
-        left_overlap = tokens_left[:, delta + trim : config.patch_size - trim]
-        right_overlap = tokens_right[:, trim : config.patch_size - delta - trim]
-        overlap_embedding_left = model.embed_tokens(left_overlap)
-        overlap_embedding_right = model.embed_tokens(right_overlap)
-        if config.alignment_objective == "context_only":
-            context_left = model.embed_tokens(tokens_left)
-            context_right = model.embed_tokens(tokens_right)
-            loss, diagonal, redundancy = cross_correlation_identity_loss(
-                context_left,
-                context_right,
-            )
-            diagnostics = {
+        local_left, global_left = model.encode_hierarchy(left)
+        local_right, global_right = model.encode_hierarchy(right)
+
+        local_loss, diagnostics = temporal_overlap_loss(
+            local_left,
+            local_right,
+            delta,
+            config,
+        )
+
+        combined_global = torch.cat([global_left, global_right], dim=0)
+        mask_first = random_span_keep_mask(
+            len(combined_global),
+            combined_global.shape[1],
+            config.token_mask_fraction,
+            config.token_mask_span,
+            combined_global.device,
+        )
+        mask_second = random_span_keep_mask(
+            len(combined_global),
+            combined_global.shape[1],
+            config.token_mask_fraction,
+            config.token_mask_span,
+            combined_global.device,
+        )
+        invariant_first, order_first = model.embed_components(
+            combined_global,
+            mask_first,
+        )
+        invariant_second, order_second = model.embed_components(
+            combined_global,
+            mask_second,
+        )
+        invariant_loss, invariant_diagonal, invariant_redundancy = (
+            cross_correlation_identity_loss(invariant_first, invariant_second)
+        )
+        order_loss, order_diagonal, order_redundancy = (
+            cross_correlation_identity_loss(order_first, order_second)
+        )
+        loss = (
+            local_loss
+            + float(config.invariant_alignment_weight) * invariant_loss
+            + float(config.order_alignment_weight) * order_loss
+        )
+        diagnostics.update(
+            {
                 "loss": float(loss.detach().cpu()),
-                "token_cc": 0.0,
-                "token_cc_diagonal": 0.0,
-                "token_redundancy": 0.0,
-                "overlap_embedding_cc": float(loss.detach().cpu()),
-                "overlap_embedding_cc_diagonal": float(diagonal.detach().cpu()),
-                "embedding_redundancy": float(redundancy.detach().cpu()),
-                "transition_consistency": 0.0,
-                "transition_gate": 0.0,
-                "transition_weight": float(config.transition_alignment_weight),
-                "aligned_tokens": 0,
+                "invariant_cc": float(invariant_loss.detach().cpu()),
+                "invariant_cc_diagonal": float(invariant_diagonal.detach().cpu()),
+                "invariant_redundancy": float(invariant_redundancy.detach().cpu()),
+                "order_cc": float(order_loss.detach().cpu()),
+                "order_cc_diagonal": float(order_diagonal.detach().cpu()),
+                "order_redundancy": float(order_redundancy.detach().cpu()),
+                "token_keep_fraction": float(
+                    0.5 * (mask_first.mean() + mask_second.mean()).detach().cpu()
+                ),
             }
-        else:
-            loss, diagnostics = temporal_overlap_loss(
-                tokens_left,
-                tokens_right,
-                overlap_embedding_left,
-                overlap_embedding_right,
-                delta,
-                config,
-            )
+        )
         if not torch.isfinite(loss):
             raise FloatingPointError(f"non-finite loss at step {step}")
         loss.backward()
@@ -1756,38 +1214,14 @@ def fit_encoder(
             )
     if device.type == "cuda":
         torch.cuda.synchronize(device)
-    if partition is not None:
-        partition_history.append(
-            {
-                "built_at_step": int(
-                    gb_activation_step
-                    if len(partition_history) == 0
-                    else gb_refresh_step
-                ),
-                "initial_k": partition.initial_k,
-                "final_k": partition.final_k,
-                "rounds": partition.rounds,
-                "rows": partition.source_rows,
-                "region_sizes": [int(len(ball)) for ball in partition.balls],
-                "region_sample_counts": (
-                    []
-                    if partition_sample_counts is None
-                    else [int(item) for item in partition_sample_counts]
-                ),
-            }
-        )
     return {
         "elapsed_seconds": float(time.perf_counter() - started),
         "gb_activation_step": int(gb_activation_step),
-        "gb_refresh_step": (
-            None if gb_refresh_step is None else int(gb_refresh_step)
-        ),
         "requested_steps": int(requested_steps),
         "total_steps": int(effective_steps),
         "small_data_update_cap": bool(small_data_update_cap),
         "peak_grad_norm": float(peak_grad_norm),
         "history": history,
-        "training_gb_history": partition_history,
         "training_gb": (
             None
             if partition is None
@@ -1810,25 +1244,16 @@ def fit_encoder(
 
 def score_embeddings(
     queries: np.ndarray,
-    memory: np.ndarray | CalibratedExemplarMemory,
+    memory: np.ndarray,
     device: torch.device,
     config: StageConfig,
 ) -> np.ndarray:
     if len(memory) < 1:
         raise ValueError("memory is empty")
     top_k = min(int(config.top_k), len(memory))
-    if isinstance(memory, CalibratedExemplarMemory):
-        memory_array = memory.vectors
-        radius_penalty = (
-            float(config.memory_radius_weight)
-            * np.asarray(memory.region_radii, dtype=np.float32)
-        )
-    else:
-        memory_array = np.asarray(memory, dtype=np.float32)
-        radius_penalty = np.zeros(len(memory_array), dtype=np.float32)
+    memory_array = np.asarray(memory, dtype=np.float32)
     memory_tensor = torch.from_numpy(memory_array).to(device)
     memory_tensor = F.normalize(memory_tensor, dim=1)
-    radius_penalty_tensor = torch.from_numpy(radius_penalty).to(device)
     output: list[np.ndarray] = []
     with torch.inference_mode():
         for offset in range(0, len(queries), int(config.score_batch_size)):
@@ -1845,13 +1270,7 @@ def score_embeddings(
             block_size = int(config.memory_score_block_size)
             for memory_offset in range(0, len(memory_tensor), block_size):
                 block = memory_tensor[memory_offset : memory_offset + block_size]
-                block_radius_penalty = radius_penalty_tensor[
-                    memory_offset : memory_offset + block_size
-                ]
-                squared_distance = (
-                    (2.0 - 2.0 * (query @ block.T)).clamp_min_(0.0)
-                    + block_radius_penalty[None, :]
-                )
+                squared_distance = (2.0 - 2.0 * (query @ block.T)).clamp_min_(0.0)
                 block_k = min(top_k, len(block))
                 block_best = torch.topk(
                     squared_distance,
@@ -1970,21 +1389,7 @@ def evaluate_series(
         raise ValueError(f"training prefix is too short in {path.name}")
     seed_everything(config.seed)
     train_values = values[:train_index]
-    feature_center, feature_scale = robust_feature_calibration(train_values)
-    statistics_center, statistics_scale = robust_patch_statistics_calibration(
-        train_values,
-        config.patch_size,
-        feature_center,
-        feature_scale,
-    )
-    model = StageEncoder(
-        values.shape[1],
-        config,
-        feature_center=feature_center,
-        feature_scale=feature_scale,
-        statistics_center=statistics_center,
-        statistics_scale=statistics_scale,
-    ).to(device)
+    model = StageEncoder(values.shape[1], config).to(device)
     parameter_count = int(sum(parameter.numel() for parameter in model.parameters()))
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
@@ -2018,7 +1423,7 @@ def evaluate_series(
         or int(config.final_gb_min_split) == int(config.gb_min_split)
         else replace(config, gb_min_split=int(config.final_gb_min_split))
     )
-    gb_memory, final_partition = build_calibrated_exemplar_memory(
+    gb_memory, final_partition = build_gb_exemplar_memory(
         train_unit, final_memory_config, seed=int(config.seed) + 29
     )
     gb_build_seconds = float(time.perf_counter() - memory_started)
@@ -2035,8 +1440,6 @@ def evaluate_series(
             **metrics,
             "memory_rows": int(len(gb_memory)),
             "memory_ratio": float(len(gb_memory) / len(train_unit)),
-            "mean_region_radius": float(np.mean(gb_memory.region_radii)),
-            "p90_region_radius": float(np.quantile(gb_memory.region_radii, 0.90)),
             "query_seconds": query_seconds,
             "query_ms_per_patch": float(1000.0 * query_seconds / len(full_unit)),
         }
@@ -2050,10 +1453,7 @@ def evaluate_series(
                 "state_dict": model.state_dict(),
                 "config": asdict(config),
                 "in_channels": int(values.shape[1]),
-                "feature_center": feature_center,
-                "feature_scale": feature_scale,
-                "statistics_center": statistics_center,
-                "statistics_scale": statistics_scale,
+                "memory": gb_memory,
             },
             artifact / "stage_encoder.pt",
         )
@@ -2079,20 +1479,26 @@ def evaluate_series(
         "training": training,
         "descriptor": {
             "shape_dimensions": int(config.embedding_dim),
-            "statistics_dimensions": (
-                0
-                if float(config.patch_statistics_weight) == 0.0
-                else int(2 * values.shape[1])
-            ),
-            "patch_statistics_weight": float(config.patch_statistics_weight),
-            "feature_calibration": "training_prefix_point_median_mad",
-            "statistics_calibration": "training_window_median_mad",
+            "invariant_dimensions": int(config.invariant_dim),
+            "order_dimensions": int(config.order_dim),
+            "haar_levels": int(config.haar_levels),
+            "haar_moments": int(2 ** config.haar_levels - 1),
+            "local_tap_blocks": int(config.local_tap_blocks),
+            "local_overlap_trim": int(config.overlap_trim),
             "multiscale_alignment_weight": float(
                 config.multiscale_alignment_weight
             ),
+            "invariant_alignment_weight": float(
+                config.invariant_alignment_weight
+            ),
+            "order_alignment_weight": float(config.order_alignment_weight),
+            "token_mask_fraction": float(config.token_mask_fraction),
+            "token_mask_span": int(config.token_mask_span),
             "scale_reliability_gate": True,
             "scale_reliability_mode": "majority_local_excess_retention",
             "scale_reliability_threshold": 0.5,
+            "temporal_readout": "signed_multiresolution_haar",
+            "embedding_geometry": "equal_energy_invariant_order_concatenation",
         },
         "final_gb": {
             "min_split": int(final_memory_config.gb_min_split),
@@ -2100,11 +1506,7 @@ def evaluate_series(
             "final_k": final_partition.final_k,
             "rounds": final_partition.rounds,
             "source_rows": final_partition.source_rows,
-            "radius_weight": float(config.memory_radius_weight),
-            "radius_quantile": float(config.memory_radius_quantile),
-            "mean_radius": float(np.mean(gb_memory.region_radii)),
-            "p90_radius": float(np.quantile(gb_memory.region_radii, 0.90)),
-            "region_sizes": [int(item) for item in gb_memory.region_sizes],
+            "region_sizes": [int(len(item)) for item in final_partition.balls],
             "build_seconds": gb_build_seconds,
         },
         "methods": methods,
@@ -2140,11 +1542,14 @@ def summarize(records: Sequence[Mapping[str, Any]], output: Path) -> pd.DataFram
 
 def build_config(args: argparse.Namespace) -> StageConfig:
     return StageConfig(
-        encoder_type=str(args.encoder_type),
         patch_size=int(args.patch_size),
         channels=int(args.channels),
         token_dim=int(args.token_dim),
         embedding_dim=int(args.embedding_dim),
+        invariant_dim=int(args.invariant_dim),
+        order_dim=int(args.order_dim),
+        haar_levels=int(args.haar_levels),
+        local_tap_blocks=int(args.local_tap_blocks),
         dilations=tuple(int(item) for item in args.dilations.split(",") if item),
         group_norm_groups=int(args.group_norm_groups),
         dropout=float(args.dropout),
@@ -2157,10 +1562,10 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         overlap_deltas=tuple(int(item) for item in args.overlap_deltas.split(",") if item),
         overlap_trim=int(args.overlap_trim),
         multiscale_alignment_weight=float(args.multiscale_alignment_weight),
-        timestamp_pairwise_weight=float(args.timestamp_pairwise_weight),
-        patch_geometry_mode=str(args.patch_geometry_mode),
-        order_residual_gate_init=float(args.order_residual_gate_init),
-        transition_alignment_weight=float(args.transition_alignment_weight),
+        invariant_alignment_weight=float(args.invariant_alignment_weight),
+        order_alignment_weight=float(args.order_alignment_weight),
+        token_mask_fraction=float(args.token_mask_fraction),
+        token_mask_span=int(args.token_mask_span),
         gb_min_split=int(args.gb_min_split),
         final_gb_min_split=(
             None
@@ -2169,14 +1574,6 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         ),
         gb_max_rounds=int(args.gb_max_rounds),
         gb_sampling_power=float(args.gb_sampling_power),
-        gb_refresh_fraction=(
-            None
-            if args.gb_refresh_fraction is None
-            else float(args.gb_refresh_fraction)
-        ),
-        patch_statistics_weight=float(args.patch_statistics_weight),
-        memory_radius_weight=float(args.memory_radius_weight),
-        memory_radius_quantile=float(args.memory_radius_quantile),
         top_k=int(args.top_k),
         embedding_batch_size=int(args.embedding_batch_size),
         score_batch_size=int(args.score_batch_size),
@@ -2199,25 +1596,23 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Permit AUC-only diagnostics when the official evaluator is unavailable.",
     )
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--require-physical-gpu", default="1")
+    parser.add_argument(
+        "--require-physical-gpu",
+        help="Optional CUDA_VISIBLE_DEVICES identity guard for frozen experiments.",
+    )
     parser.add_argument("--limit", type=int, default=-1)
     parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--save-checkpoints", action="store_true")
     parser.add_argument("--save-scores", action="store_true")
-    parser.add_argument(
-        "--encoder-type",
-        choices=(
-            "dilated_residual",
-            "depthwise_tcn",
-            "multiscale_depthwise_tcn",
-        ),
-        default="dilated_residual",
-    )
     parser.add_argument("--patch-size", type=int, default=96)
     parser.add_argument("--channels", type=int, default=128)
     parser.add_argument("--token-dim", type=int, default=64)
     parser.add_argument("--embedding-dim", type=int, default=64)
+    parser.add_argument("--invariant-dim", type=int, default=32)
+    parser.add_argument("--order-dim", type=int, default=32)
+    parser.add_argument("--haar-levels", type=int, default=3)
+    parser.add_argument("--local-tap-blocks", type=int, default=2)
     parser.add_argument("--dilations", default="1,2,4,8,4,2")
     parser.add_argument("--group-norm-groups", type=int, default=8)
     parser.add_argument("--dropout", type=float, default=0.10)
@@ -2233,74 +1628,21 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--overlap-deltas", default="24,48")
-    parser.add_argument("--overlap-trim", type=int, default=8)
+    parser.add_argument(
+        "--overlap-trim",
+        type=int,
+        default=10,
+        help="Boundary trim for shallow local-token overlap alignment.",
+    )
     parser.add_argument("--multiscale-alignment-weight", type=float, default=0.25)
-    parser.add_argument(
-        "--timestamp-pairwise-weight",
-        type=float,
-        default=0.0,
-        help=(
-            "Weight for direct cosine agreement of corresponding timestamp "
-            "tokens and shared-interval embeddings."
-        ),
-    )
-    parser.add_argument(
-        "--patch-geometry-mode",
-        choices=("moments", "ordered_pyramid", "order_relations", "hybrid"),
-        default="moments",
-        help="Order-sensitive sufficient statistics used by the patch head.",
-    )
-    parser.add_argument(
-        "--order-residual-gate-init",
-        type=float,
-        default=0.10,
-        help="Initial contribution of the complementary order branch.",
-    )
-    parser.add_argument(
-        "--transition-alignment-weight",
-        type=float,
-        default=0.0,
-        help=(
-            "Weight for majority-local consistency of directional token "
-            "changes inside the shared interval."
-        ),
-    )
+    parser.add_argument("--invariant-alignment-weight", type=float, default=0.50)
+    parser.add_argument("--order-alignment-weight", type=float, default=1.00)
+    parser.add_argument("--token-mask-fraction", type=float, default=0.10)
+    parser.add_argument("--token-mask-span", type=int, default=4)
     parser.add_argument("--gb-min-split", type=int, default=4)
     parser.add_argument("--final-gb-min-split", type=int)
     parser.add_argument("--gb-max-rounds", type=int, default=64)
     parser.add_argument("--gb-sampling-power", type=float, default=0.5)
-    parser.add_argument(
-        "--gb-refresh-fraction",
-        type=float,
-        help=(
-            "Optional fraction of training at which the intermediate geometry "
-            "is rebuilt from the current encoder."
-        ),
-    )
-    parser.add_argument(
-        "--patch-statistics-weight",
-        type=float,
-        default=0.0,
-        help=(
-            "Weight of the robust level/scale descriptor concatenated with the "
-            "overlap-trained shape embedding; zero reproduces legacy geometry."
-        ),
-    )
-    parser.add_argument(
-        "--memory-radius-weight",
-        type=float,
-        default=0.0,
-        help=(
-            "Additive penalty for references retained from dispersed normal "
-            "regions; zero reproduces legacy nearest-reference scoring."
-        ),
-    )
-    parser.add_argument(
-        "--memory-radius-quantile",
-        type=float,
-        default=0.90,
-        help="Within-region squared-distance quantile used as reference spread.",
-    )
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--embedding-batch-size", type=int, default=2048)
     parser.add_argument("--score-batch-size", type=int, default=2048)
