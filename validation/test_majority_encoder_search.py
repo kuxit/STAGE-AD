@@ -28,6 +28,10 @@ def load_majority_reference():
 
 
 class MajorityEncoderSearchTests(unittest.TestCase):
+    @unittest.skipUnless(
+        Path(r"F:\Download\STAGE_majority_local.py").is_file(),
+        "local majority-local reference is unavailable",
+    )
     def test_default_encoder_exactly_matches_majority_reference(self) -> None:
         reference = load_majority_reference()
         common = dict(
