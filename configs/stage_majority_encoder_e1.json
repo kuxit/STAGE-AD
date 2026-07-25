@@ -1,0 +1,1238 @@
+{
+  "schema_version": "stage-vuspr-search-v1",
+  "phase": "encoder_e1",
+  "study_id": "stage-majority-local-light-encoder-e1-20260725",
+  "status": "posthoc_development_only",
+  "selection_split": "official TSB-AD Tuning only",
+  "eval_feedback_used_by_runner": false,
+  "confirmatory_claim_eligible": false,
+  "story_contract": {
+    "canonical_guidance_sha256": "bfca67c805c48d169aa5206f429fd9c71f60e0767fbc2f214ec8d02843b1f3a9",
+    "fixed_problem": "coupled_context_and_patch_abundance_bias_within_normality",
+    "alignment_role": "reduce_context_induced_variation_of_shared_temporal_content",
+    "intermediate_geometry_role": "temper_abundance_driven_encoder_exposure",
+    "final_geometry_role": "retain_supported_observed_exemplars_at_adaptive_granularity",
+    "implementation_flexible": true,
+    "main_selection_excludes_controls": true
+  },
+  "expected_source_sha256": "2dbbe12288281425de3a8dbaec5558a89c0f42bfb244123e8460139d4371800e",
+  "seeds": [
+    2026
+  ],
+  "targets": {
+    "U": [
+      "UCR",
+      "Exathlon",
+      "MSL",
+      "SED",
+      "TODS"
+    ],
+    "M": [
+      "CATSv2",
+      "GHL",
+      "LTDB",
+      "SVDB",
+      "TAO"
+    ]
+  },
+  "metrics": [
+    "VUS-PR",
+    "VUS-ROC",
+    "R-based-F1",
+    "AUC-PR",
+    "AUC-ROC",
+    "Standard-F1"
+  ],
+  "selection": {
+    "score": "macro mean VUS-PR only",
+    "tie_breakers": [
+      "canonical_id"
+    ],
+    "stage1_head": {
+      "final_gb_min_split": 4,
+      "top_k": 3
+    },
+    "stage1_rule": "With each dataset's prior Tuning-only training parameters and head fixed, compare the three declared timestamp-preserving encoder backbones by complete official Tuning macro VUS-PR.",
+    "stage2_rule": "Only encoder candidates that pass the seed-2026 gate may be confirmed on additional seeds; no Eval feedback is permitted.",
+    "dataset_specific_rule": "Every dataset selects its own training and head parameters; track-level fallback is forbidden."
+  },
+  "final_gb_min_splits": [
+    4,
+    16,
+    64,
+    256
+  ],
+  "top_ks": [
+    1,
+    3,
+    5,
+    9,
+    15
+  ],
+  "training_candidates": [
+    {
+      "id": "ucr_res",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "ucr_dw",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "ucr_mdw",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "exathlon_res",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "exathlon_dw",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "exathlon_mdw",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "msl_res",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "msl_dw",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "msl_mdw",
+      "parameters": {
+        "patch_size": 192,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          48,
+          96
+        ],
+        "overlap_trim": 12,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "sed_res",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "sed_dw",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "sed_mdw",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "tods_res",
+      "parameters": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "tods_dw",
+      "parameters": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "tods_mdw",
+      "parameters": {
+        "patch_size": 48,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 64,
+        "steps": 1500,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          12,
+          24
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "catsv2_res",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "catsv2_dw",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "catsv2_mdw",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "ghl_res",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "ghl_dw",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "ghl_mdw",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.0,
+        "batch_size": 256,
+        "steps": 2000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 5e-05,
+        "weight_decay": 1e-05,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "ltdb_res",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "ltdb_dw",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "ltdb_mdw",
+      "parameters": {
+        "patch_size": 64,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.2,
+        "batch_size": 256,
+        "steps": 750,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          16,
+          32
+        ],
+        "overlap_trim": 4,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "svdb_res",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "svdb_dw",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "svdb_mdw",
+      "parameters": {
+        "patch_size": 96,
+        "channels": 64,
+        "token_dim": 32,
+        "embedding_dim": 32,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1000,
+        "gb_activation_fraction": 0.2,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          24,
+          48
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.5,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    },
+    {
+      "id": "tao_res",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "dilated_residual"
+      }
+    },
+    {
+      "id": "tao_dw",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "depthwise_tcn"
+      }
+    },
+    {
+      "id": "tao_mdw",
+      "parameters": {
+        "patch_size": 128,
+        "channels": 128,
+        "token_dim": 64,
+        "embedding_dim": 64,
+        "dilations": [
+          1,
+          2,
+          4,
+          8,
+          4,
+          2
+        ],
+        "group_norm_groups": 8,
+        "dropout": 0.1,
+        "batch_size": 256,
+        "steps": 1500,
+        "gb_activation_fraction": 0.4,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "overlap_deltas": [
+          32,
+          64
+        ],
+        "overlap_trim": 8,
+        "gb_min_split": 4,
+        "gb_max_rounds": 64,
+        "gb_sampling_power": 0.25,
+        "max_gb_rows": 50000,
+        "encoder_type": "multiscale_depthwise_tcn"
+      }
+    }
+  ],
+  "shortlist_size": 3,
+  "training_shortlists": {
+    "U/UCR": [
+      "ucr_res",
+      "ucr_dw",
+      "ucr_mdw"
+    ],
+    "U/Exathlon": [
+      "exathlon_res",
+      "exathlon_dw",
+      "exathlon_mdw"
+    ],
+    "U/MSL": [
+      "msl_res",
+      "msl_dw",
+      "msl_mdw"
+    ],
+    "U/SED": [
+      "sed_res",
+      "sed_dw",
+      "sed_mdw"
+    ],
+    "U/TODS": [
+      "tods_res",
+      "tods_dw",
+      "tods_mdw"
+    ],
+    "M/CATSv2": [
+      "catsv2_res",
+      "catsv2_dw",
+      "catsv2_mdw"
+    ],
+    "M/GHL": [
+      "ghl_res",
+      "ghl_dw",
+      "ghl_mdw"
+    ],
+    "M/LTDB": [
+      "ltdb_res",
+      "ltdb_dw",
+      "ltdb_mdw"
+    ],
+    "M/SVDB": [
+      "svdb_res",
+      "svdb_dw",
+      "svdb_mdw"
+    ],
+    "M/TAO": [
+      "tao_res",
+      "tao_dw",
+      "tao_mdw"
+    ]
+  },
+  "metadata": {
+    "base_model": "STAGE_majority_local",
+    "majority_reference_sha256": "704916804f8f37386e480e9167c8b04ed1e3ec27166804865b27d0b338f9fb79",
+    "frozen_axes": [
+      "majority_local_alignment",
+      "intermediate_granular_sampling",
+      "final_observed_exemplar_memory",
+      "dataset_training_parameters",
+      "stage1_fixed_head"
+    ],
+    "encoder_candidates": [
+      "dilated_residual",
+      "depthwise_tcn",
+      "multiscale_depthwise_tcn"
+    ],
+    "selection_metric": "official Tuning macro VUS-PR only",
+    "reference_selected_heads": {
+      "U/UCR": {
+        "final_gb_min_split": 4,
+        "top_k": 1
+      },
+      "U/Exathlon": {
+        "final_gb_min_split": 16,
+        "top_k": 1
+      },
+      "U/MSL": {
+        "final_gb_min_split": 64,
+        "top_k": 15
+      },
+      "U/SED": {
+        "final_gb_min_split": 64,
+        "top_k": 9
+      },
+      "U/TODS": {
+        "final_gb_min_split": 4,
+        "top_k": 1
+      },
+      "M/CATSv2": {
+        "final_gb_min_split": 4,
+        "top_k": 1
+      },
+      "M/GHL": {
+        "final_gb_min_split": 4,
+        "top_k": 1
+      },
+      "M/LTDB": {
+        "final_gb_min_split": 4,
+        "top_k": 5
+      },
+      "M/SVDB": {
+        "final_gb_min_split": 4,
+        "top_k": 1
+      },
+      "M/TAO": {
+        "final_gb_min_split": 16,
+        "top_k": 9
+      }
+    },
+    "global_encoder_rule": "Select one encoder architecture for all ten datasets by the unweighted mean of dataset macro VUS-PR at each dataset's previously frozen head; canonical encoder_type breaks exact ties.",
+    "eval_feedback": false
+  }
+}

@@ -7,6 +7,7 @@ This file intentionally contains the complete model-side pipeline:
 * unit-stride temporal patch access without materialising the whole patch set;
 * a dilated residual token encoder;
 * exact-overlap cross-correlation learning with redundancy reduction;
+* majority-reliable local alignment at temporal scales 2, 4, and 8;
 * a one-shot granular sampler and a final granular exemplar memory;
 * a fixed, protocol-declared optimizer-update budget for every series;
 * top-k squared unit-Euclidean patch scoring and overlap-to-point aggregation;
@@ -54,6 +55,7 @@ SIX_METRICS = (
 
 @dataclass(frozen=True)
 class StageConfig:
+    encoder_type: str = "dilated_residual"
     patch_size: int = 96
     channels: int = 128
     token_dim: int = 64
@@ -86,6 +88,12 @@ class StageConfig:
     seed: int = 2026
 
     def validate(self) -> None:
+        if self.encoder_type not in {
+            "dilated_residual",
+            "depthwise_tcn",
+            "multiscale_depthwise_tcn",
+        }:
+            raise ValueError("unsupported encoder_type")
         if self.patch_size < 8:
             raise ValueError("patch_size must be at least 8")
         if not self.dilations:
@@ -404,8 +412,72 @@ class DilatedResidualBlock(nn.Module):
         return residual + self.layer_scale * x
 
 
+class DepthwiseResidualBlock(nn.Module):
+    """Parameter-efficient temporal mixing with pointwise channel interaction."""
+
+    def __init__(
+        self,
+        channels: int,
+        dilation: int,
+        groups: int,
+        dropout: float,
+        *,
+        multiscale: bool,
+    ) -> None:
+        super().__init__()
+        channels = int(channels)
+        dilation = int(dilation)
+        self.norm = nn.GroupNorm(int(groups), channels)
+        if multiscale:
+            branch_dilations = tuple(
+                dict.fromkeys(
+                    (
+                        max(1, dilation // 2),
+                        dilation,
+                        min(16, 2 * dilation),
+                    )
+                )
+            )
+        else:
+            branch_dilations = (dilation,)
+        self.depthwise = nn.ModuleList(
+            [
+                nn.Conv1d(
+                    channels,
+                    channels,
+                    kernel_size=5,
+                    padding=2 * branch_dilation,
+                    dilation=branch_dilation,
+                    groups=channels,
+                    bias=False,
+                )
+                for branch_dilation in branch_dilations
+            ]
+        )
+        self.branch_logits = nn.Parameter(torch.zeros(len(self.depthwise)))
+        self.channel_mixer = nn.Conv1d(
+            channels,
+            2 * channels,
+            kernel_size=1,
+            bias=False,
+        )
+        self.dropout = nn.Dropout(float(dropout))
+        self.layer_scale = nn.Parameter(torch.full((1, channels, 1), 0.1))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        residual = x
+        normalized = F.gelu(self.norm(x))
+        weights = torch.softmax(self.branch_logits, dim=0)
+        mixed = torch.zeros_like(normalized)
+        for weight, convolution in zip(weights, self.depthwise):
+            mixed = mixed + weight * convolution(normalized)
+        mixed = F.glu(self.channel_mixer(F.gelu(mixed)), dim=1)
+        mixed = self.dropout(mixed)
+        return residual + self.layer_scale * mixed
+
+
 class StageEncoder(nn.Module):
-    """Dilated residual token encoder used by STAGE."""
+    """Timestamp-preserving token encoder used by STAGE."""
 
     def __init__(
         self,
@@ -489,16 +561,25 @@ class StageEncoder(nn.Module):
             nn.GroupNorm(int(config.group_norm_groups), int(config.channels)),
             nn.GELU(),
         )
+        if config.encoder_type == "dilated_residual":
+            block_factory = lambda dilation: DilatedResidualBlock(
+                channels=config.channels,
+                dilation=dilation,
+                groups=config.group_norm_groups,
+                dropout=config.dropout,
+            )
+        else:
+            block_factory = lambda dilation: DepthwiseResidualBlock(
+                channels=config.channels,
+                dilation=dilation,
+                groups=config.group_norm_groups,
+                dropout=config.dropout,
+                multiscale=(
+                    config.encoder_type == "multiscale_depthwise_tcn"
+                ),
+            )
         self.blocks = nn.ModuleList(
-            [
-                DilatedResidualBlock(
-                    channels=config.channels,
-                    dilation=dilation,
-                    groups=config.group_norm_groups,
-                    dropout=config.dropout,
-                )
-                for dilation in config.dilations
-            ]
+            [block_factory(dilation) for dilation in config.dilations]
         )
         self.token_head = nn.Sequential(
             nn.GroupNorm(int(config.group_norm_groups), int(config.channels)),
@@ -592,6 +673,35 @@ def cross_correlation_identity_loss(
     return diagonal + redundancy, diagonal, redundancy
 
 
+def weighted_cross_correlation_identity_loss(
+    left: torch.Tensor,
+    right: torch.Tensor,
+    weights: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Align locally reliable rows while suppressing unreliable coarse views."""
+
+    if left.ndim != 2 or right.shape != left.shape or len(left) < 2:
+        raise ValueError("cross-correlation inputs must be matching 2-D batches")
+    if weights.ndim != 1 or len(weights) != len(left):
+        raise ValueError("cross-correlation weights must match the batch rows")
+    if not torch.isfinite(weights).all() or torch.any(weights <= 0):
+        raise ValueError("cross-correlation weights must be finite and positive")
+    normalized = weights.to(device=left.device, dtype=left.dtype)
+    normalized = normalized / normalized.sum()
+    left = left - torch.sum(normalized[:, None] * left, dim=0, keepdim=True)
+    right = right - torch.sum(normalized[:, None] * right, dim=0, keepdim=True)
+    left = left / torch.sqrt(
+        torch.sum(normalized[:, None] * left.pow(2), dim=0, keepdim=True) + 1e-4
+    )
+    right = right / torch.sqrt(
+        torch.sum(normalized[:, None] * right.pow(2), dim=0, keepdim=True) + 1e-4
+    )
+    correlation = left.T @ (normalized[:, None] * right)
+    diagonal = (torch.diagonal(correlation) - 1.0).pow(2).mean()
+    redundancy = off_diagonal(correlation).pow(2).mean()
+    return diagonal + redundancy, diagonal, redundancy
+
+
 def temporal_overlap_loss(
     tokens_left: torch.Tensor,
     tokens_right: torch.Tensor,
@@ -625,9 +735,9 @@ def temporal_overlap_loss(
     multiscale_loss = token_loss.new_zeros(())
     multiscale_terms = 0
     multiscale_gate_total = token_loss.new_zeros(())
-    fine_energy = 0.5 * (
-        aligned_left_raw.var(dim=1, unbiased=False).mean()
-        + aligned_right_raw.var(dim=1, unbiased=False).mean()
+    fine_energy_rows = 0.5 * (
+        aligned_left_raw.var(dim=1, unbiased=False).mean(dim=1)
+        + aligned_right_raw.var(dim=1, unbiased=False).mean(dim=1)
     )
     if config.multiscale_alignment_weight > 0.0:
         aligned_length = int(aligned_left_raw.shape[1])
@@ -644,17 +754,27 @@ def temporal_overlap_loss(
                 kernel_size=scale,
                 stride=scale,
             ).transpose(1, 2)
-            scale_loss, _, _ = cross_correlation_identity_loss(
+            pooled_energy_rows = 0.5 * (
+                pooled_left.var(dim=1, unbiased=False).mean(dim=1)
+                + pooled_right.var(dim=1, unbiased=False).mean(dim=1)
+            )
+            local_gates = (
+                pooled_energy_rows.detach()
+                / fine_energy_rows.detach().clamp_min(1e-8)
+            ).clamp(0.0, 1.0)
+            local_gates = (2.0 * local_gates - 1.0).clamp(0.0, 1.0)
+            scale_gate = local_gates.mean()
+            coarse_weights = (
+                local_gates[:, None]
+                .expand(-1, pooled_left.shape[1])
+                .reshape(-1)
+                .clamp_min(1e-4)
+            )
+            scale_loss, _, _ = weighted_cross_correlation_identity_loss(
                 pooled_left.reshape(-1, pooled_left.shape[-1]),
                 pooled_right.reshape(-1, pooled_right.shape[-1]),
+                coarse_weights,
             )
-            pooled_energy = 0.5 * (
-                pooled_left.var(dim=1, unbiased=False).mean()
-                + pooled_right.var(dim=1, unbiased=False).mean()
-            )
-            scale_gate = (
-                pooled_energy.detach() / fine_energy.detach().clamp_min(1e-8)
-            ).clamp(0.0, 1.0)
             multiscale_loss = multiscale_loss + scale_gate * scale_loss
             multiscale_gate_total = multiscale_gate_total + scale_gate
             multiscale_terms += 1
@@ -1507,6 +1627,8 @@ def evaluate_series(
                 config.multiscale_alignment_weight
             ),
             "scale_reliability_gate": True,
+            "scale_reliability_mode": "majority_local_excess_retention",
+            "scale_reliability_threshold": 0.5,
         },
         "final_gb": {
             "min_split": int(final_memory_config.gb_min_split),
@@ -1554,6 +1676,7 @@ def summarize(records: Sequence[Mapping[str, Any]], output: Path) -> pd.DataFram
 
 def build_config(args: argparse.Namespace) -> StageConfig:
     return StageConfig(
+        encoder_type=str(args.encoder_type),
         patch_size=int(args.patch_size),
         channels=int(args.channels),
         token_dim=int(args.token_dim),
@@ -1609,6 +1732,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--save-checkpoints", action="store_true")
     parser.add_argument("--save-scores", action="store_true")
+    parser.add_argument(
+        "--encoder-type",
+        choices=(
+            "dilated_residual",
+            "depthwise_tcn",
+            "multiscale_depthwise_tcn",
+        ),
+        default="dilated_residual",
+    )
     parser.add_argument("--patch-size", type=int, default=96)
     parser.add_argument("--channels", type=int, default=128)
     parser.add_argument("--token-dim", type=int, default=64)

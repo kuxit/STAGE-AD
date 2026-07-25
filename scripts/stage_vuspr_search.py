@@ -118,6 +118,12 @@ FLOAT_CONFIG_FIELDS = {
     "grad_clip",
     "gb_sampling_power",
 }
+STRING_CONFIG_FIELDS = {"encoder_type"}
+ENCODER_TYPES = (
+    "dilated_residual",
+    "depthwise_tcn",
+    "multiscale_depthwise_tcn",
+)
 SEQUENCE_CONFIG_FIELDS = {"dilations", "overlap_deltas"}
 FORBIDDEN_TRAINING_FIELDS = {"seed", "top_k"}
 CANDIDATE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
@@ -202,6 +208,14 @@ def _normalize_candidate_parameters(parameters: Mapping[str, Any]) -> dict[str, 
             normalized[name] = _require_int(value, label, 1)
         elif name in FLOAT_CONFIG_FIELDS:
             normalized[name] = _require_number(value, label)
+        elif name in STRING_CONFIG_FIELDS:
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{label} must be a non-empty string")
+            normalized[name] = value.strip()
+            if name == "encoder_type" and normalized[name] not in ENCODER_TYPES:
+                raise ValueError(
+                    f"{label} must be one of {list(ENCODER_TYPES)}"
+                )
         elif name in SEQUENCE_CONFIG_FIELDS:
             if not isinstance(value, list) or not value:
                 raise ValueError(f"{label} must be a non-empty integer list")
@@ -318,8 +332,10 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             raise ValueError(f"selection.{name} must be a non-empty governance statement")
 
     phase = payload.get("phase", "stage1a")
-    if phase not in {"stage1a", "stage1b", "stage2"}:
-        raise ValueError("phase must be stage1a, stage1b, or stage2")
+    if phase not in {"stage1a", "stage1b", "stage2", "encoder_e1"}:
+        raise ValueError(
+            "phase must be stage1a, stage1b, stage2, or encoder_e1"
+        )
     metadata = payload.get("metadata", {})
     if not isinstance(metadata, Mapping):
         raise ValueError("metadata must be an object")
@@ -335,6 +351,8 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError(f"top_ks must remain {EXPECTED_TOP_KS}")
     if phase == "stage1a" and seeds != [2026]:
         raise ValueError("stage1a seeds are frozen to [2026]")
+    if phase == "encoder_e1" and seeds != [2026]:
+        raise ValueError("encoder_e1 seeds are frozen to [2026]")
     if phase == "stage1b" and seeds != [2027, 2028]:
         raise ValueError("stage1b seeds are frozen to [2027, 2028]")
     if phase == "stage2" and seeds != [2026, 2027, 2028]:
@@ -416,16 +434,53 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         for track, datasets in targets.items()
         for dataset in datasets
     }
+    if phase == "encoder_e1":
+        reference_heads = metadata.get("reference_selected_heads")
+        if (
+            not isinstance(reference_heads, Mapping)
+            or set(reference_heads) != subset_keys
+        ):
+            raise ValueError(
+                "encoder_e1 metadata.reference_selected_heads must contain "
+                "exactly every target subset"
+            )
+        normalized_reference_heads: dict[str, dict[str, int]] = {}
+        for subset, raw_head in reference_heads.items():
+            if not isinstance(raw_head, Mapping):
+                raise ValueError(
+                    f"metadata.reference_selected_heads.{subset} must be an object"
+                )
+            split = _require_int(
+                raw_head.get("final_gb_min_split"),
+                f"metadata.reference_selected_heads.{subset}.final_gb_min_split",
+                4,
+            )
+            top_k = _require_int(
+                raw_head.get("top_k"),
+                f"metadata.reference_selected_heads.{subset}.top_k",
+                1,
+            )
+            if split not in declared_final_splits or top_k not in declared_top_ks:
+                raise ValueError(
+                    f"metadata.reference_selected_heads.{subset} is outside "
+                    "the declared head grid"
+                )
+            normalized_reference_heads[str(subset)] = {
+                "final_gb_min_split": split,
+                "top_k": top_k,
+            }
+        metadata = dict(metadata)
+        metadata["reference_selected_heads"] = normalized_reference_heads
     shortlist_size = _require_int(payload.get("shortlist_size", 3), "shortlist_size", 1)
     if shortlist_size != 3:
         raise ValueError("shortlist_size must remain 3")
     raw_shortlists = payload.get("training_shortlists")
     training_shortlists: dict[str, list[str]] | None = None
-    if phase == "stage1b":
+    if phase in {"stage1b", "encoder_e1"}:
         required_shortlist_keys = subset_keys
         if not isinstance(raw_shortlists, Mapping) or set(raw_shortlists) != required_shortlist_keys:
             raise ValueError(
-                "stage1b training_shortlists must contain every dataset subset"
+                f"{phase} training_shortlists must contain every dataset subset"
             )
         training_shortlists = {}
         for key, value in raw_shortlists.items():
@@ -549,7 +604,7 @@ def _candidate_ids_for_subset(
     subset = f"{track}/{dataset}"
     if phase == "stage1a":
         return all_ids
-    if phase == "stage1b":
+    if phase in {"stage1b", "encoder_e1"}:
         shortlists = protocol["training_shortlists"]
         return [str(item) for item in shortlists[subset]]
     return [str(protocol["training_winners"][subset])]
@@ -1994,15 +2049,126 @@ def _head_id(plan: Mapping[str, Any], final_split: int, top_k: int) -> str:
 
 
 def _ranking_key(row: Mapping[str, Any], *, candidate: bool) -> tuple[Any, ...]:
-    identity = (
-        str(row["training_candidate_id"])
-        if candidate
-        else str(row["head_id"])
-    )
+    if candidate:
+        return (
+            -float(row["selection_score"]),
+            str(row["training_candidate_id"]),
+            str(row["head_id"]),
+        )
     return (
         -float(row["selection_score"]),
-        identity,
+        str(row["head_id"]),
     )
+
+
+def _encoder_e1_selection(
+    rows: Sequence[Mapping[str, Any]],
+    plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Select one global encoder using only each dataset's frozen reference head."""
+
+    candidate_encoder = {
+        str(item["id"]): str(item["resolved_parameters"]["encoder_type"])
+        for item in plan["training_candidates"]
+    }
+    reference_heads = plan["metadata"]["reference_selected_heads"]
+    subset_scores: dict[str, dict[str, float]] = {
+        encoder_type: {} for encoder_type in ENCODER_TYPES
+    }
+    for track, datasets in plan["targets"].items():
+        for dataset in datasets:
+            subset = f"{track}/{dataset}"
+            reference = reference_heads[subset]
+            for encoder_type in ENCODER_TYPES:
+                candidates = [
+                    candidate_id
+                    for candidate_id in plan["candidates_by_subset"][subset]
+                    if candidate_encoder[candidate_id] == encoder_type
+                ]
+                if len(candidates) != 1:
+                    raise RuntimeError(
+                        f"{subset} must contain exactly one {encoder_type} candidate"
+                    )
+                matches = [
+                    row
+                    for row in rows
+                    if row["track"] == track
+                    and row["dataset"] == dataset
+                    and row["training_candidate_id"] == candidates[0]
+                    and int(row["final_gb_min_split"])
+                    == int(reference["final_gb_min_split"])
+                    and int(row["top_k"]) == int(reference["top_k"])
+                ]
+                if len(matches) != 1 or int(matches[0]["seeds"]) != 1:
+                    raise RuntimeError(
+                        f"{subset} {encoder_type} lacks its complete frozen-head row"
+                    )
+                subset_scores[encoder_type][subset] = float(
+                    matches[0]["selection_score"]
+                )
+
+    architecture_scores = []
+    subset_count = sum(len(items) for items in plan["targets"].values())
+    for encoder_type in ENCODER_TYPES:
+        scores = subset_scores[encoder_type]
+        if len(scores) != subset_count:
+            raise RuntimeError(
+                f"{encoder_type} lacks complete ten-dataset encoder coverage"
+            )
+        architecture_scores.append(
+            {
+                "encoder_type": encoder_type,
+                "mean_dataset_macro_vus_pr": sum(scores.values()) / len(scores),
+                "dataset_macro_vus_pr": scores,
+            }
+        )
+    architecture_scores.sort(
+        key=lambda item: (
+            -float(item["mean_dataset_macro_vus_pr"]),
+            str(item["encoder_type"]),
+        )
+    )
+    selected_encoder = str(architecture_scores[0]["encoder_type"])
+
+    selected_heads: dict[str, dict[str, Any]] = {}
+    for track, datasets in plan["targets"].items():
+        for dataset in datasets:
+            subset = f"{track}/{dataset}"
+            selected_candidate = next(
+                candidate_id
+                for candidate_id in plan["candidates_by_subset"][subset]
+                if candidate_encoder[candidate_id] == selected_encoder
+            )
+            candidates = [
+                row
+                for row in rows
+                if row["track"] == track
+                and row["dataset"] == dataset
+                and row["training_candidate_id"] == selected_candidate
+            ]
+            if len(candidates) != int(plan["variants_per_unit"]):
+                raise RuntimeError(
+                    f"{subset} selected encoder lacks its complete head grid"
+                )
+            candidates.sort(key=lambda row: _ranking_key(row, candidate=False))
+            winner = candidates[0]
+            selected_heads[subset] = {
+                "training_candidate_id": selected_candidate,
+                "head_id": str(winner["head_id"]),
+                "final_gb_min_split": int(winner["final_gb_min_split"]),
+                "top_k": int(winner["top_k"]),
+                "selection_score": float(winner["selection_score"]),
+            }
+    return {
+        "global_encoder_rule": (
+            "maximize the unweighted mean of ten dataset-level official Tuning "
+            "macro VUS-PR values at the previously frozen dataset-specific heads; "
+            "canonical encoder_type breaks exact ties"
+        ),
+        "architecture_scores": architecture_scores,
+        "selected_encoder_type_global": selected_encoder,
+        "selected_heads_for_global_encoder": selected_heads,
+    }
 
 
 def _rank_groups(
@@ -2320,7 +2486,7 @@ def summarize_results(
             plan, int(row["final_gb_min_split"]), int(row["top_k"])
         )
 
-    if phase in {"stage1a", "stage1b"}:
+    if phase in {"stage1a", "stage1b", "encoder_e1"}:
         rows = _rank_groups(rows, ("track", "dataset"), candidate=True)
         track_seed_fields = (
             "track",
@@ -2402,6 +2568,12 @@ def summarize_results(
                     shortlist_size,
                 )
         selection_payload["training_shortlists"] = training_shortlists
+    elif phase == "encoder_e1":
+        selection_payload.update(
+            **_encoder_e1_selection(rows, plan),
+            seeds=[2026],
+            preliminary_gate=True,
+        )
     elif phase == "stage1b":
         expected_seeds = 3
         shortlist_map = plan["training_shortlists"]
