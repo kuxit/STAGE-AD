@@ -121,10 +121,8 @@ def main() -> int:
             "eval_feedback": False,
         },
     }
-    OUTPUT.write_text(
-        json.dumps(protocol, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    with OUTPUT.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(protocol, indent=2, ensure_ascii=False) + "\n")
     print(
         json.dumps(
             {
