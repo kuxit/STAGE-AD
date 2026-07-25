@@ -74,6 +74,9 @@ class StageConfig:
     alignment_objective: str = "both"
     multiscale_alignment_weight: float = 0.25
     timestamp_pairwise_weight: float = 0.0
+    patch_geometry_mode: str = "moments"
+    order_residual_gate_init: float = 0.10
+    transition_alignment_weight: float = 0.0
     gb_min_split: int = 4
     final_gb_min_split: int | None = None
     gb_max_rounds: int = 64
@@ -123,6 +126,17 @@ class StageConfig:
             raise ValueError("multiscale_alignment_weight must be non-negative")
         if self.timestamp_pairwise_weight < 0.0:
             raise ValueError("timestamp_pairwise_weight must be non-negative")
+        if self.patch_geometry_mode not in {
+            "moments",
+            "ordered_pyramid",
+            "order_relations",
+            "hybrid",
+        }:
+            raise ValueError("unsupported patch_geometry_mode")
+        if not 0.0 < self.order_residual_gate_init < 1.0:
+            raise ValueError("order_residual_gate_init must lie in (0, 1)")
+        if self.transition_alignment_weight < 0.0:
+            raise ValueError("transition_alignment_weight must be non-negative")
         if self.alignment_objective not in {
             "both",
             "timestamp_token_only",
@@ -616,6 +630,91 @@ class StageEncoder(nn.Module):
             nn.LayerNorm(2 * int(config.token_dim)),
             nn.Linear(2 * int(config.token_dim), int(config.embedding_dim)),
         )
+        order_multiplier = {
+            "moments": 0,
+            "ordered_pyramid": 4,
+            "order_relations": 6,
+            "hybrid": 10,
+        }[str(config.patch_geometry_mode)]
+        self.order_feature_dimensions = int(order_multiplier * config.token_dim)
+        if self.order_feature_dimensions:
+            self.order_head: nn.Module | None = nn.Sequential(
+                nn.LayerNorm(self.order_feature_dimensions),
+                nn.Linear(
+                    self.order_feature_dimensions,
+                    int(config.embedding_dim),
+                ),
+                nn.GELU(),
+                nn.Linear(
+                    int(config.embedding_dim),
+                    int(config.embedding_dim),
+                ),
+            )
+            gate_probability = float(config.order_residual_gate_init)
+            gate_logit = math.log(gate_probability / (1.0 - gate_probability))
+            self.order_residual_gate = nn.Parameter(
+                torch.full((int(config.embedding_dim),), gate_logit)
+            )
+        else:
+            self.order_head = None
+            self.register_parameter("order_residual_gate", None)
+
+    @staticmethod
+    def _relative_lags(length: int) -> tuple[int, int, int]:
+        """Return three deterministic lags at roughly 1/8, 1/4 and 1/2."""
+
+        if length < 2:
+            return (0, 0, 0)
+        maximum = int(length) - 1
+        return tuple(
+            min(maximum, max(1, int(round(float(length) * fraction))))
+            for fraction in (0.125, 0.25, 0.50)
+        )
+
+    def order_features(self, tokens: torch.Tensor) -> torch.Tensor:
+        """Extract order-sensitive, shift-local sufficient statistics.
+
+        Ordered pyramid residuals preserve where a state occurs within the
+        interval.  Signed lag differences preserve transition direction, while
+        lag products preserve recurrence and persistence.  No absolute window
+        position is used, so the same shared interval can still be aligned
+        across shifted contexts.
+        """
+
+        if tokens.ndim != 3 or tokens.shape[-1] != self.config.token_dim:
+            raise ValueError("tokens must have shape [batch, time, token_dim]")
+        unit_tokens = F.normalize(tokens, dim=-1)
+        mean = unit_tokens.mean(dim=1, keepdim=True)
+        features: list[torch.Tensor] = []
+        if self.config.patch_geometry_mode in {"ordered_pyramid", "hybrid"}:
+            bins = F.adaptive_avg_pool1d(
+                unit_tokens.transpose(1, 2),
+                output_size=4,
+            ).transpose(1, 2)
+            features.append((bins - mean).flatten(start_dim=1))
+        if self.config.patch_geometry_mode in {"order_relations", "hybrid"}:
+            directional: list[torch.Tensor] = []
+            relational: list[torch.Tensor] = []
+            for lag in self._relative_lags(int(unit_tokens.shape[1])):
+                if lag == 0:
+                    difference = torch.zeros_like(unit_tokens)
+                    product = unit_tokens.square()
+                else:
+                    earlier = unit_tokens[:, :-lag]
+                    later = unit_tokens[:, lag:]
+                    difference = later - earlier
+                    product = earlier * later
+                directional.append(difference.mean(dim=1))
+                relational.append(product.mean(dim=1))
+            features.extend(
+                [
+                    torch.cat(directional, dim=1),
+                    torch.cat(relational, dim=1),
+                ]
+            )
+        if not features:
+            return unit_tokens.new_empty((len(unit_tokens), 0))
+        return torch.cat(features, dim=1)
 
     def embed_tokens(self, tokens: torch.Tensor) -> torch.Tensor:
         """Pool the same directional token geometry used by overlap learning."""
@@ -625,7 +724,14 @@ class StageEncoder(nn.Module):
         unit_tokens = F.normalize(tokens, dim=-1)
         mean = unit_tokens.mean(dim=1)
         std = torch.sqrt(unit_tokens.var(dim=1, unbiased=False).clamp_min(1e-8))
-        return self.embedding_head(torch.cat([mean, std], dim=1))
+        base = self.embedding_head(torch.cat([mean, std], dim=1))
+        if self.order_head is None:
+            return base
+        order = self.order_head(self.order_features(tokens))
+        if self.order_residual_gate is None:
+            raise AssertionError("order residual gate is missing")
+        gate = torch.sigmoid(self.order_residual_gate).reshape(1, -1)
+        return base + gate * order
 
     def encode_tokens(self, x: torch.Tensor) -> torch.Tensor:
         if x.ndim != 3:
@@ -728,6 +834,41 @@ def weighted_cross_correlation_identity_loss(
     return diagonal + redundancy, diagonal, redundancy
 
 
+def majority_local_transition_loss(
+    aligned_left: torch.Tensor,
+    aligned_right: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Align reliable directional changes inside the shared interval.
+
+    Reliability is label-blind and detached from optimization.  A transition
+    contributes in proportion to its current positive cosine agreement across
+    the two shifted contexts; inconsistent transitions are not forcibly
+    collapsed.  This extends majority-local alignment without introducing
+    negatives or an independent prediction task.
+    """
+
+    if aligned_left.ndim != 3 or aligned_right.shape != aligned_left.shape:
+        raise ValueError("transition inputs must be matching token sequences")
+    terms: list[torch.Tensor] = []
+    gates: list[torch.Tensor] = []
+    for lag in StageEncoder._relative_lags(int(aligned_left.shape[1])):
+        if lag == 0:
+            continue
+        left_delta = aligned_left[:, lag:] - aligned_left[:, :-lag]
+        right_delta = aligned_right[:, lag:] - aligned_right[:, :-lag]
+        cosine = (
+            F.normalize(left_delta, dim=-1) * F.normalize(right_delta, dim=-1)
+        ).sum(dim=-1)
+        reliability = cosine.detach().clamp(0.0, 1.0)
+        denominator = reliability.sum().clamp_min(1e-4)
+        terms.append((reliability * (1.0 - cosine)).sum() / denominator)
+        gates.append(reliability.mean())
+    if not terms:
+        zero = aligned_left.new_zeros(())
+        return zero, zero
+    return torch.stack(terms).mean(), torch.stack(gates).mean()
+
+
 def temporal_overlap_loss(
     tokens_left: torch.Tensor,
     tokens_right: torch.Tensor,
@@ -773,6 +914,10 @@ def temporal_overlap_loss(
         ).sum(dim=-1)
     ).mean()
     pairwise_loss = token_pairwise + interval_pairwise
+    transition_loss, transition_gate = majority_local_transition_loss(
+        aligned_left_raw,
+        aligned_right_raw,
+    )
     multiscale_loss = token_loss.new_zeros(())
     multiscale_terms = 0
     multiscale_gate_total = token_loss.new_zeros(())
@@ -835,6 +980,7 @@ def temporal_overlap_loss(
         )
     total = total + float(config.multiscale_alignment_weight) * multiscale_loss
     total = total + float(config.timestamp_pairwise_weight) * pairwise_loss
+    total = total + float(config.transition_alignment_weight) * transition_loss
     diagnostics = {
         "loss": float(total.detach().cpu()),
         "token_cc": float(token_loss.detach().cpu()),
@@ -846,6 +992,9 @@ def temporal_overlap_loss(
         "timestamp_pairwise": float(token_pairwise.detach().cpu()),
         "interval_pairwise": float(interval_pairwise.detach().cpu()),
         "pairwise_weight": float(config.timestamp_pairwise_weight),
+        "transition_consistency": float(transition_loss.detach().cpu()),
+        "transition_gate": float(transition_gate.detach().cpu()),
+        "transition_weight": float(config.transition_alignment_weight),
         "multiscale_cc": float(multiscale_loss.detach().cpu()),
         "multiscale_gate": float(
             (
@@ -1547,6 +1696,9 @@ def fit_encoder(
                 "overlap_embedding_cc": float(loss.detach().cpu()),
                 "overlap_embedding_cc_diagonal": float(diagonal.detach().cpu()),
                 "embedding_redundancy": float(redundancy.detach().cpu()),
+                "transition_consistency": 0.0,
+                "transition_gate": 0.0,
+                "transition_weight": float(config.transition_alignment_weight),
                 "aligned_tokens": 0,
             }
         else:
@@ -1982,6 +2134,9 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         overlap_trim=int(args.overlap_trim),
         multiscale_alignment_weight=float(args.multiscale_alignment_weight),
         timestamp_pairwise_weight=float(args.timestamp_pairwise_weight),
+        patch_geometry_mode=str(args.patch_geometry_mode),
+        order_residual_gate_init=float(args.order_residual_gate_init),
+        transition_alignment_weight=float(args.transition_alignment_weight),
         gb_min_split=int(args.gb_min_split),
         final_gb_min_split=(
             None
@@ -2063,6 +2218,27 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help=(
             "Weight for direct cosine agreement of corresponding timestamp "
             "tokens and shared-interval embeddings."
+        ),
+    )
+    parser.add_argument(
+        "--patch-geometry-mode",
+        choices=("moments", "ordered_pyramid", "order_relations", "hybrid"),
+        default="moments",
+        help="Order-sensitive sufficient statistics used by the patch head.",
+    )
+    parser.add_argument(
+        "--order-residual-gate-init",
+        type=float,
+        default=0.10,
+        help="Initial contribution of the complementary order branch.",
+    )
+    parser.add_argument(
+        "--transition-alignment-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Weight for majority-local consistency of directional token "
+            "changes inside the shared interval."
         ),
     )
     parser.add_argument("--gb-min-split", type=int, default=4)

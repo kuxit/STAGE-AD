@@ -1,0 +1,22 @@
+{
+  "schema_version": "stage-majority-order-o1-expected-identity-v1",
+  "plan_fingerprint": "91c616e36517a5c44c69cb6ad71684e3fbdf78583d0b2f5376f13d82aa8bd8b2",
+  "protocol_sha256": "1dce4ac00fb344d2c4b86341358f2e064be7ab7d522f7fa3dab5ccb2832a07a9",
+  "protocol_fingerprint": "9cf808e370db01b088720f5f5d86894c227cc68c5bb1545b8b8360166d96b13b",
+  "source_sha256": {
+    "STAGE/stage.py": "32a18db30d4a37f47d4f1e77fd8ce04007eed76c321e9eaf28ee1c965bba2fbc",
+    "scripts/stage_vuspr_search.py": "ad04a79b43a017c42632b7ff75a48ebcb557cb50ed937bd124f2db8a1eb752d9",
+    "common.py": "faf3cd91ce45010eddd21512ccbfc6802e260d87b9d2c355bf871246996fc749"
+  },
+  "official_tuning_manifest_sha256": {
+    "U": "7bf24d2ef834bb39ddd1c8c2b02c177339921dce694354e258ed2b77d8d5cd1c",
+    "M": "b388541efcd8972cb2084f0aabe7c36bcf0e1ecd52adc6d0ef874afec335fa51"
+  },
+  "official_evaluator_source_set_fingerprint": "0eba2b74ea9649a4014a697d935587ef2bcae9dfb0a844209aa9b786e66f6f46",
+  "series_count": 4,
+  "expected_physical_units": 16,
+  "expected_logical_units": 16,
+  "variants_per_unit": 1,
+  "selection": "per-dataset complete-coverage official Tuning macro VUS-PR only",
+  "eval_feedback": false
+}

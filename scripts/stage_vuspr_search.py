@@ -7,11 +7,16 @@ the train and full-series embeddings once, rebuilds the final exemplar memory
 for every declared ``final_gb_min_split``, and evaluates every declared
 ``top_k`` from one blocked nearest-neighbour distance pass per memory.
 
-The script never writes checkpoints, embeddings, anomaly scores, or NumPy
-arrays.  It exposes three user-facing commands:
+The script never writes checkpoints or embeddings.  Its standard path writes
+only final unit JSONs.  The isolated ``order_o1`` path may instead write
+transient, SHA-verified point-score caches so GPU work can continue while a
+separate CPU process runs the official metrics; those caches are deleted after
+strict final-unit validation.  It exposes five user-facing commands:
 
 * ``plan`` validates and fingerprints the explicit JSON protocol;
 * ``run`` executes/resumes atomic unit JSONs through isolated GPU subprocesses;
+* ``run-scores`` runs GPU training/scoring without CPU metrics;
+* ``evaluate-caches`` consumes transferred score caches on CPU;
 * ``summarize`` strictly validates all units and emits full-precision aggregates.
 
 An internal ``_worker`` command is used only by ``run`` so that every training
@@ -56,6 +61,7 @@ from STAGE import stage as stage_impl  # noqa: E402
 PROTOCOL_SCHEMA = "stage-vuspr-search-v1"
 PLAN_SCHEMA = "stage-vuspr-search-plan-v1"
 UNIT_SCHEMA = "stage-vuspr-search-unit-v1"
+SCORE_CACHE_SCHEMA = "stage-vuspr-score-cache-v1"
 SUMMARY_SCHEMA = "stage-vuspr-search-summary-v1"
 PLAN_NAME = "stage_vuspr_search_plan.json"
 DATA_PREFLIGHT_NAME = "stage_vuspr_data_preflight.json"
@@ -77,6 +83,10 @@ EXPECTED_TARGETS = {
 GEOMETRY_DIAGNOSTIC_TARGETS = {
     "U": ["MSL", "SED"],
     "M": ["CATSv2", "GHL"],
+}
+ORDER_DIAGNOSTIC_TARGETS = {
+    "U": ["MSL"],
+    "M": ["GHL"],
 }
 EXPECTED_FINAL_SPLITS = [4, 16, 64, 256]
 EXPECTED_TOP_KS = [1, 3, 5, 9, 15]
@@ -129,8 +139,14 @@ FLOAT_CONFIG_FIELDS = {
     "memory_radius_quantile",
     "temporal_support_fraction",
     "temporal_transition_weight",
+    "order_residual_gate_init",
+    "transition_alignment_weight",
 }
-STRING_CONFIG_FIELDS = {"encoder_type", "final_geometry_mode"}
+STRING_CONFIG_FIELDS = {
+    "encoder_type",
+    "final_geometry_mode",
+    "patch_geometry_mode",
+}
 ENCODER_TYPES = (
     "dilated_residual",
     "depthwise_tcn",
@@ -351,10 +367,11 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         "encoder_e1",
         "geometry_d1",
         "geometry_g2",
+        "order_o1",
     }:
         raise ValueError(
             "phase must be stage1a, stage1b, stage2, encoder_e1, "
-            "geometry_d1, or geometry_g2"
+            "geometry_d1, geometry_g2, or order_o1"
         )
     metadata = payload.get("metadata", {})
     if not isinstance(metadata, Mapping):
@@ -365,11 +382,12 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         payload["final_gb_min_splits"], "final_gb_min_splits", minimum=4
     )
     declared_top_ks = _unique_int_list(payload["top_ks"], "top_ks", minimum=1)
-    if phase not in {"geometry_d1", "geometry_g2"} and (
+    compact_diagnostic_phases = {"geometry_d1", "geometry_g2", "order_o1"}
+    if phase not in compact_diagnostic_phases and (
         declared_final_splits != EXPECTED_FINAL_SPLITS
     ):
         raise ValueError(f"final_gb_min_splits must remain {EXPECTED_FINAL_SPLITS}")
-    if phase not in {"geometry_d1", "geometry_g2"} and (
+    if phase not in compact_diagnostic_phases and (
         declared_top_ks != EXPECTED_TOP_KS
     ):
         raise ValueError(f"top_ks must remain {EXPECTED_TOP_KS}")
@@ -377,7 +395,7 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("stage1a seeds are frozen to [2026]")
     if phase == "encoder_e1" and seeds != [2026]:
         raise ValueError("encoder_e1 seeds are frozen to [2026]")
-    if phase in {"geometry_d1", "geometry_g2"} and seeds != [2026]:
+    if phase in compact_diagnostic_phases and seeds != [2026]:
         raise ValueError(f"{phase} seeds are frozen to [2026]")
     if phase == "stage1b" and seeds != [2027, 2028]:
         raise ValueError("stage1b seeds are frozen to [2027, 2028]")
@@ -391,6 +409,13 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             raise ValueError(f"{phase} final_gb_min_splits must be [4, 64]")
         if declared_top_ks != [1, 3]:
             raise ValueError(f"{phase} top_ks must be [1, 3]")
+        final_splits = declared_final_splits
+        top_ks = declared_top_ks
+    elif phase == "order_o1":
+        if declared_final_splits != [4]:
+            raise ValueError("order_o1 final_gb_min_splits must be [4]")
+        if declared_top_ks != [3]:
+            raise ValueError("order_o1 top_ks must be [3]")
         final_splits = declared_final_splits
         top_ks = declared_top_ks
     else:
@@ -418,6 +443,8 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     expected_targets = (
         GEOMETRY_DIAGNOSTIC_TARGETS
         if phase in {"geometry_d1", "geometry_g2"}
+        else ORDER_DIAGNOSTIC_TARGETS
+        if phase == "order_o1"
         else EXPECTED_TARGETS
     )
     if targets != expected_targets:
@@ -451,13 +478,16 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             or not 0.0 <= float(resolved["gb_sampling_power"]) < 1.0
         )
         if family_valid or (
-            phase not in {"geometry_d1", "geometry_g2"}
+            phase not in {"geometry_d1", "geometry_g2", "order_o1"}
             and int(resolved["gb_min_split"]) != 4
         ) or (
             phase == "geometry_d1"
             and int(resolved["gb_min_split"]) not in {4, 32}
         ) or (
             phase == "geometry_g2"
+            and int(resolved["gb_min_split"]) != 4
+        ) or (
+            phase == "order_o1"
             and int(resolved["gb_min_split"]) != 4
         ):
             raise ValueError(
@@ -520,7 +550,11 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         metadata["reference_selected_heads"] = normalized_reference_heads
     shortlist_size = _require_int(payload.get("shortlist_size", 3), "shortlist_size", 1)
     expected_shortlist_size = (
-        4 if phase == "geometry_d1" else 5 if phase == "geometry_g2" else 3
+        4
+        if phase in {"geometry_d1", "order_o1"}
+        else 5
+        if phase == "geometry_g2"
+        else 3
     )
     if shortlist_size != expected_shortlist_size:
         raise ValueError(
@@ -528,7 +562,13 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         )
     raw_shortlists = payload.get("training_shortlists")
     training_shortlists: dict[str, list[str]] | None = None
-    if phase in {"stage1b", "encoder_e1", "geometry_d1", "geometry_g2"}:
+    if phase in {
+        "stage1b",
+        "encoder_e1",
+        "geometry_d1",
+        "geometry_g2",
+        "order_o1",
+    }:
         required_shortlist_keys = subset_keys
         if not isinstance(raw_shortlists, Mapping) or set(raw_shortlists) != required_shortlist_keys:
             raise ValueError(
@@ -551,7 +591,7 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     elif raw_shortlists is not None:
         raise ValueError(
             "training_shortlists is allowed only for stage1b, encoder_e1, "
-            "geometry_d1, or geometry_g2"
+            "geometry_d1, geometry_g2, or order_o1"
         )
 
     raw_winners = payload.get("training_winners")
@@ -659,7 +699,13 @@ def _candidate_ids_for_subset(
     subset = f"{track}/{dataset}"
     if phase == "stage1a":
         return all_ids
-    if phase in {"stage1b", "encoder_e1", "geometry_d1", "geometry_g2"}:
+    if phase in {
+        "stage1b",
+        "encoder_e1",
+        "geometry_d1",
+        "geometry_g2",
+        "order_o1",
+    }:
         shortlists = protocol["training_shortlists"]
         return [str(item) for item in shortlists[subset]]
     return [str(protocol["training_winners"][subset])]
@@ -1223,6 +1269,42 @@ def unit_path(
         / f"seed_{int(seed)}"
         / f"{Path(file_name).stem}.json"
     )
+
+
+def score_cache_paths(
+    result_root: Path,
+    track: str,
+    dataset: str,
+    execution_signature: str,
+    seed: int,
+    file_name: str,
+) -> tuple[Path, Path]:
+    base = (
+        result_root
+        / "score_cache"
+        / track
+        / dataset
+        / f"execution_{execution_signature}"
+        / f"seed_{int(seed)}"
+        / Path(file_name).stem
+    )
+    return base.with_suffix(".json"), base.with_suffix(".npz")
+
+
+def _atomic_npz(path: Path, arrays: Mapping[str, np.ndarray]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        dir=path.parent,
+        prefix=f".{path.stem}.",
+        suffix=".npz",
+        delete=False,
+    ) as handle:
+        temporary = Path(handle.name)
+    try:
+        np.savez_compressed(temporary, **arrays)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _finite_metric_mapping(value: Any) -> bool:
@@ -1912,6 +1994,7 @@ def execute_unit(
     seed: int,
     execution_signature: str,
     physical_gpu: str,
+    defer_metrics: bool = False,
 ) -> Path:
     configure_worker_determinism(physical_gpu)
     if not torch.cuda.is_available():
@@ -2287,6 +2370,121 @@ def execute_unit(
     # anomaly-score vector have completed.  They are used solely by the
     # official Tuning evaluator and never feed back into this worker.
     labels = stage_impl.load_labels_after_scoring(data_path, label_column, len(values))
+    if defer_metrics:
+        if bool(plan.get("metadata", {}).get("diagnostic_projection", False)):
+            raise RuntimeError(
+                "deferred CPU evaluation currently requires "
+                "metadata.diagnostic_projection=false"
+            )
+        cache_manifest_path, cache_array_path = score_cache_paths(
+            result_root,
+            track,
+            dataset,
+            execution_signature,
+            seed,
+            file_name,
+        )
+        if cache_manifest_path.exists() or cache_array_path.exists():
+            raise RuntimeError(
+                "refusing to overwrite an existing deferred score cache: "
+                f"{cache_manifest_path}"
+            )
+        ordered_cache_keys = sorted(
+            point_score_cache,
+            key=lambda item: (str(item[0]), int(item[1])),
+        )
+        cache_index = {
+            key: index for index, key in enumerate(ordered_cache_keys)
+        }
+        cached_pending: list[dict[str, Any]] = []
+        for pending in pending_variants:
+            cache_key = tuple(pending["score_cache_key"])
+            cached_pending.append(
+                {
+                    **{
+                        key: value
+                        for key, value in pending.items()
+                        if key != "score_cache_key"
+                    },
+                    "score_index": int(cache_index[cache_key]),
+                }
+            )
+        cache_arrays = {
+            "labels": np.asarray(labels, dtype=np.int8),
+            **{
+                f"score_{index:03d}": np.asarray(
+                    point_score_cache[key], dtype=np.float64
+                )
+                for index, key in enumerate(ordered_cache_keys)
+            },
+        }
+        _atomic_npz(cache_array_path, cache_arrays)
+        unit_base = {
+            "schema_version": UNIT_SCHEMA,
+            "kind": UNIT_KIND,
+            "method": "STAGE",
+            "selection_split": "Tuning",
+            "eval_feedback": False,
+            "track": track,
+            "dataset": dataset,
+            "file": file_name,
+            "seed": int(seed),
+            "execution_signature": execution_signature,
+            "execution_behavior": plan["execution_behaviors"][
+                f"{track}/{dataset}/{file_name}"
+            ][execution_signature],
+            "canonical_training_candidate_id": group[
+                "canonical_candidate_id"
+            ],
+            "training_candidate_ids": group["candidate_ids"],
+            "training_config_fingerprints": group["config_fingerprints"],
+            "plan_fingerprint": plan["plan_fingerprint"],
+            "protocol_fingerprint": plan["protocol_fingerprint"],
+            "source_sha256": plan["source_sha256"],
+            "data_sha256": expected_data_hash,
+            "training_prefix_policy": "filename_declared_label_blind",
+            "diagnostics": {
+                "points": int(len(values)),
+                "channels": int(values.shape[1]),
+                "train_index": int(train_index),
+                "train_patches": int(len(train_unit)),
+                "full_patches": int(len(full_unit)),
+                "parameter_count": parameter_count,
+                "peak_cuda_bytes": peak_cuda_bytes,
+                "sliding_window": int(sliding_window),
+                "training": training,
+                "final_memories": memory_diagnostics,
+                "visual_diagnostics": None,
+                "visual_diagnostics_by_geometry": None,
+                "unique_final_partitions": len(partition_cache),
+                "unique_effective_heads": len(point_score_cache),
+                "environment": _environment_identity(),
+                "runtime_eligible_for_paper": False,
+                "gpu_cpu_pipeline": "deferred_official_metrics",
+            },
+            "error": None,
+        }
+        cache_manifest = {
+            "schema_version": SCORE_CACHE_SCHEMA,
+            "plan_fingerprint": plan["plan_fingerprint"],
+            "protocol_fingerprint": plan["protocol_fingerprint"],
+            "track": track,
+            "dataset": dataset,
+            "file": file_name,
+            "seed": int(seed),
+            "execution_signature": execution_signature,
+            "sliding_window": int(sliding_window),
+            "score_count": len(ordered_cache_keys),
+            "score_array_sha256": sha256_file(cache_array_path),
+            "pending_variants": cached_pending,
+            "unit_base": unit_base,
+            "created_at": utc_now(),
+        }
+        atomic_json(cache_manifest_path, cache_manifest)
+        del train_unit, full_unit
+        torch.cuda.empty_cache()
+        return cache_manifest_path
+
     variants: list[dict[str, Any]] = []
     metric_cache: dict[tuple[str, int], dict[str, float]] = {}
     for pending in pending_variants:
@@ -2379,6 +2577,168 @@ def execute_unit(
     }
     atomic_json(target, payload)
     torch.cuda.empty_cache()
+    return target
+
+
+def valid_score_cache(
+    manifest: Mapping[str, Any],
+    array_path: Path,
+    *,
+    plan: Mapping[str, Any],
+    track: str,
+    dataset: str,
+    file_name: str,
+    seed: int,
+    execution_signature: str,
+) -> bool:
+    if not all(
+        (
+            manifest.get("schema_version") == SCORE_CACHE_SCHEMA,
+            manifest.get("plan_fingerprint") == plan["plan_fingerprint"],
+            manifest.get("protocol_fingerprint")
+            == plan["protocol_fingerprint"],
+            manifest.get("track") == track,
+            manifest.get("dataset") == dataset,
+            manifest.get("file") == file_name,
+            manifest.get("seed") == int(seed),
+            manifest.get("execution_signature") == execution_signature,
+            isinstance(manifest.get("score_count"), int),
+            int(manifest.get("score_count", 0)) >= 1,
+            isinstance(manifest.get("pending_variants"), list),
+            isinstance(manifest.get("unit_base"), Mapping),
+            array_path.is_file(),
+            manifest.get("score_array_sha256") == sha256_file(array_path),
+        )
+    ):
+        return False
+    unit_base = manifest["unit_base"]
+    if (
+        unit_base.get("plan_fingerprint") != plan["plan_fingerprint"]
+        or unit_base.get("source_sha256") != plan["source_sha256"]
+        or unit_base.get("data_sha256")
+        != plan["data_sha256"].get(f"{track}/{dataset}/{file_name}")
+    ):
+        return False
+    score_count = int(manifest["score_count"])
+    pending = manifest["pending_variants"]
+    if not pending:
+        return False
+    return all(
+        isinstance(item, Mapping)
+        and isinstance(item.get("score_index"), int)
+        and 0 <= int(item["score_index"]) < score_count
+        for item in pending
+    )
+
+
+def evaluate_score_cache(
+    result_root: Path,
+    metrics_root: Path,
+    plan: Mapping[str, Any],
+    *,
+    track: str,
+    dataset: str,
+    file_name: str,
+    seed: int,
+    execution_signature: str,
+    remove_cache: bool,
+) -> Path:
+    group = execution_group(
+        plan, track, dataset, file_name, execution_signature
+    )
+    target = unit_path(
+        result_root, track, dataset, execution_signature, seed, file_name
+    )
+    if target.is_file():
+        if valid_unit(
+            load_json(target),
+            plan=plan,
+            track=track,
+            dataset=dataset,
+            file_name=file_name,
+            seed=seed,
+            group=group,
+        ):
+            return target
+        raise RuntimeError(f"refusing to overwrite invalid existing unit: {target}")
+    manifest_path, array_path = score_cache_paths(
+        result_root, track, dataset, execution_signature, seed, file_name
+    )
+    if not manifest_path.is_file():
+        raise FileNotFoundError(manifest_path)
+    manifest = load_json(manifest_path)
+    if not valid_score_cache(
+        manifest,
+        array_path,
+        plan=plan,
+        track=track,
+        dataset=dataset,
+        file_name=file_name,
+        seed=seed,
+        execution_signature=execution_signature,
+    ):
+        raise RuntimeError(f"invalid deferred score cache: {manifest_path}")
+
+    with np.load(array_path, allow_pickle=False) as arrays:
+        expected_names = {
+            "labels",
+            *{
+                f"score_{index:03d}"
+                for index in range(int(manifest["score_count"]))
+            },
+        }
+        if set(arrays.files) != expected_names:
+            raise RuntimeError(f"score cache array set is invalid: {array_path}")
+        labels = np.asarray(arrays["labels"], dtype=np.int8)
+        score_arrays = {
+            index: np.asarray(arrays[f"score_{index:03d}"], dtype=np.float64)
+            for index in range(int(manifest["score_count"]))
+        }
+    if any(len(scores) != len(labels) for scores in score_arrays.values()):
+        raise RuntimeError(f"score/label length mismatch: {array_path}")
+
+    metric_cache = {
+        index: _metrics_checked(
+            scores,
+            labels,
+            int(manifest["sliding_window"]),
+            metrics_root,
+        )
+        for index, scores in score_arrays.items()
+    }
+    variants = []
+    for pending in manifest["pending_variants"]:
+        score_index = int(pending["score_index"])
+        variants.append(
+            {
+                **{
+                    key: value
+                    for key, value in pending.items()
+                    if key != "score_index"
+                },
+                "metrics": metric_cache[score_index],
+            }
+        )
+    payload = {
+        **dict(manifest["unit_base"]),
+        "variants": variants,
+        "completed_at": utc_now(),
+    }
+    target.parent.mkdir(parents=True, exist_ok=True)
+    atomic_json(target, payload)
+    if not valid_unit(
+        load_json(target),
+        plan=plan,
+        track=track,
+        dataset=dataset,
+        file_name=file_name,
+        seed=seed,
+        group=group,
+    ):
+        raise RuntimeError(f"CPU-evaluated unit failed strict audit: {target}")
+    if remove_cache:
+        manifest_path.unlink()
+        array_path.unlink()
     return target
 
 
@@ -2638,6 +2998,242 @@ def run_parent(
     }
     atomic_json(result_root / STATUS_NAME, status)
     return status
+
+
+def run_scores_parent(
+    repo: Path,
+    protocol_path: Path,
+    result_root: Path,
+    metrics_root: Path,
+    python: Path,
+    gpus: Sequence[str],
+    workers_per_gpu: int,
+) -> dict[str, Any]:
+    """Run only GPU training/scoring and leave official metrics to CPU."""
+
+    plan = ensure_plan(repo, protocol_path, metrics_root, result_root)
+    data_preflight = ensure_data_preflight(repo, result_root, plan)
+    ensure_runtime_preflight(result_root, plan, data_preflight)
+    if plan["phase"] != "order_o1":
+        raise RuntimeError("run-scores is restricted to the isolated order_o1 phase")
+    tasks: list[tuple[str, str, str, int, str]] = []
+    for task in _iter_tasks(plan):
+        track, dataset, file_name, seed, execution_signature = task
+        group = execution_group(
+            plan, track, dataset, file_name, execution_signature
+        )
+        target = unit_path(
+            result_root, track, dataset, execution_signature, seed, file_name
+        )
+        if target.is_file():
+            if valid_unit(
+                load_json(target),
+                plan=plan,
+                track=track,
+                dataset=dataset,
+                file_name=file_name,
+                seed=seed,
+                group=group,
+            ):
+                continue
+            raise RuntimeError(f"invalid existing unit: {target}")
+        manifest_path, array_path = score_cache_paths(
+            result_root,
+            track,
+            dataset,
+            execution_signature,
+            seed,
+            file_name,
+        )
+        if manifest_path.is_file():
+            manifest = load_json(manifest_path)
+            if valid_score_cache(
+                manifest,
+                array_path,
+                plan=plan,
+                track=track,
+                dataset=dataset,
+                file_name=file_name,
+                seed=seed,
+                execution_signature=execution_signature,
+            ):
+                continue
+            raise RuntimeError(f"invalid existing score cache: {manifest_path}")
+        if array_path.exists():
+            raise RuntimeError(f"orphan score array: {array_path}")
+        tasks.append(task)
+    tasks.sort(key=lambda item: _task_priority(plan, repo, item))
+
+    total = int(plan["expected_units"])
+    counter = {"value": total - len(tasks)}
+    counter_lock = threading.Lock()
+    script = Path(__file__).resolve()
+
+    def worker(gpu: str, task: tuple[str, str, str, int, str]) -> None:
+        track, dataset, file_name, seed, execution_signature = task
+        command = [
+            str(python),
+            str(script),
+            "--repo",
+            str(repo),
+            "--protocol",
+            str(protocol_path),
+            "--result-root",
+            str(result_root),
+            "--metrics-root",
+            str(metrics_root),
+            "_score_worker",
+            "--track",
+            track,
+            "--dataset",
+            dataset,
+            "--file",
+            file_name,
+            "--seed",
+            str(seed),
+            "--execution-signature",
+            execution_signature,
+            "--physical-gpu",
+            gpu,
+        ]
+        environment = os.environ.copy()
+        environment["CUDA_VISIBLE_DEVICES"] = gpu
+        environment["CUBLAS_WORKSPACE_CONFIG"] = CUBLAS_WORKSPACE_CONFIG
+        environment.setdefault("OMP_NUM_THREADS", "1")
+        environment.setdefault("MKL_NUM_THREADS", "1")
+        environment.setdefault("OPENBLAS_NUM_THREADS", "1")
+        completed = subprocess.run(
+            command,
+            env=environment,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+        )
+        if completed.returncode:
+            raise RuntimeError(
+                f"order_o1 score unit failed on GPU {gpu} for "
+                f"{track}/{dataset}/{file_name} seed={seed} "
+                f"execution={execution_signature}:\n{completed.stdout[-8000:]}"
+            )
+        with counter_lock:
+            counter["value"] += 1
+            print(
+                f"[STAGE O1 SCORES {counter['value']}/{total}] GPU={gpu} "
+                f"{track}/{dataset} {file_name}",
+                flush=True,
+            )
+
+    _run_lanes(tasks, gpus, workers_per_gpu, worker)
+    cached_or_complete = 0
+    for track, dataset, file_name, seed, execution_signature in _iter_tasks(plan):
+        target = unit_path(
+            result_root, track, dataset, execution_signature, seed, file_name
+        )
+        if target.is_file():
+            cached_or_complete += 1
+            continue
+        manifest_path, array_path = score_cache_paths(
+            result_root,
+            track,
+            dataset,
+            execution_signature,
+            seed,
+            file_name,
+        )
+        if not manifest_path.is_file() or not valid_score_cache(
+            load_json(manifest_path),
+            array_path,
+            plan=plan,
+            track=track,
+            dataset=dataset,
+            file_name=file_name,
+            seed=seed,
+            execution_signature=execution_signature,
+        ):
+            raise RuntimeError(f"post-run score cache audit failed: {manifest_path}")
+        cached_or_complete += 1
+    return {
+        "schema_version": "stage-vuspr-score-status-v1",
+        "status": "scores_complete",
+        "expected_units": total,
+        "cached_or_complete_units": cached_or_complete,
+        "plan_fingerprint": plan["plan_fingerprint"],
+        "completed_at": utc_now(),
+    }
+
+
+def evaluate_caches_parent(
+    repo: Path,
+    protocol_path: Path,
+    result_root: Path,
+    metrics_root: Path,
+    workers: int,
+    remove_cache: bool,
+) -> dict[str, Any]:
+    """Consume transferred score caches without touching CUDA."""
+
+    if workers < 1:
+        raise ValueError("--workers must be positive")
+    plan = ensure_plan(repo, protocol_path, metrics_root, result_root)
+    if plan["phase"] != "order_o1":
+        raise RuntimeError(
+            "evaluate-caches is restricted to the isolated order_o1 phase"
+        )
+    available: list[tuple[str, str, str, int, str]] = []
+    completed = 0
+    missing = 0
+    for task in _iter_tasks(plan):
+        track, dataset, file_name, seed, execution_signature = task
+        target = unit_path(
+            result_root, track, dataset, execution_signature, seed, file_name
+        )
+        if target.is_file():
+            completed += 1
+            continue
+        manifest_path, array_path = score_cache_paths(
+            result_root,
+            track,
+            dataset,
+            execution_signature,
+            seed,
+            file_name,
+        )
+        if manifest_path.is_file() and array_path.is_file():
+            available.append(task)
+        else:
+            missing += 1
+
+    def evaluate(task: tuple[str, str, str, int, str]) -> Path:
+        track, dataset, file_name, seed, execution_signature = task
+        return evaluate_score_cache(
+            result_root,
+            metrics_root,
+            plan,
+            track=track,
+            dataset=dataset,
+            file_name=file_name,
+            seed=seed,
+            execution_signature=execution_signature,
+            remove_cache=remove_cache,
+        )
+
+    with ThreadPoolExecutor(max_workers=min(workers, max(1, len(available)))) as pool:
+        futures = [pool.submit(evaluate, task) for task in available]
+        for future in as_completed(futures):
+            future.result()
+            completed += 1
+    total = int(plan["expected_units"])
+    return {
+        "schema_version": "stage-vuspr-cpu-eval-status-v1",
+        "status": "complete" if completed == total else "partial",
+        "expected_units": total,
+        "completed_units": completed,
+        "missing_score_caches": missing,
+        "evaluated_this_call": len(available),
+        "plan_fingerprint": plan["plan_fingerprint"],
+        "completed_at": utc_now(),
+    }
 
 
 def _selection_statistics(metric_means: Mapping[str, float]) -> tuple[float, float]:
@@ -3160,6 +3756,7 @@ def summarize_results(
         "encoder_e1",
         "geometry_d1",
         "geometry_g2",
+        "order_o1",
     }:
         rows = _rank_groups(rows, ("track", "dataset"), candidate=True)
         track_seed_fields = (
@@ -3223,7 +3820,7 @@ def summarize_results(
         "plan_fingerprint": plan["plan_fingerprint"],
     }
     shortlist_size = int(plan["shortlist_size"])
-    if phase in {"stage1a", "geometry_d1", "geometry_g2"}:
+    if phase in {"stage1a", "geometry_d1", "geometry_g2", "order_o1"}:
         training_shortlists: dict[str, list[str]] = {}
         for track, datasets in plan["targets"].items():
             for dataset in datasets:
@@ -3272,6 +3869,14 @@ def summarize_results(
                 "support_calibrated_local_radius",
                 "combined_support_and_radius",
                 "joint_state_transition_geometry",
+            ]
+        elif phase == "order_o1":
+            selection_payload["diagnostic_only"] = True
+            selection_payload["diagnostic_axes"] = [
+                "moments_control",
+                "ordered_temporal_pyramid_residual",
+                "directional_lag_relation_residual",
+                "hybrid_residual_with_reliability_gated_transition_alignment",
             ]
     elif phase == "encoder_e1":
         selection_payload.update(
@@ -3454,6 +4059,23 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     run.add_argument("--python", type=Path, default=Path(sys.executable))
     run.add_argument("--gpus", default="0,1")
     run.add_argument("--workers-per-gpu", type=int, default=3)
+    run_scores = subparsers.add_parser(
+        "run-scores",
+        help="run GPU training/scoring only and emit compact deferred caches",
+    )
+    run_scores.add_argument("--python", type=Path, default=Path(sys.executable))
+    run_scores.add_argument("--gpus", default="0,1")
+    run_scores.add_argument("--workers-per-gpu", type=int, default=3)
+    evaluate_caches = subparsers.add_parser(
+        "evaluate-caches",
+        help="evaluate transferred score caches on CPU without CUDA",
+    )
+    evaluate_caches.add_argument("--workers", type=int, default=4)
+    evaluate_caches.add_argument(
+        "--keep-cache",
+        action="store_true",
+        help="retain verified transient score caches after final unit creation",
+    )
     subparsers.add_parser("summarize", help="strictly aggregate all completed units")
     worker = subparsers.add_parser("_worker", help=argparse.SUPPRESS)
     worker.add_argument("--track", required=True, choices=("U", "M"))
@@ -3462,6 +4084,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     worker.add_argument("--seed", required=True, type=int)
     worker.add_argument("--execution-signature", required=True)
     worker.add_argument("--physical-gpu", required=True)
+    score_worker = subparsers.add_parser("_score_worker", help=argparse.SUPPRESS)
+    score_worker.add_argument("--track", required=True, choices=("U", "M"))
+    score_worker.add_argument("--dataset", required=True)
+    score_worker.add_argument("--file", required=True)
+    score_worker.add_argument("--seed", required=True, type=int)
+    score_worker.add_argument("--execution-signature", required=True)
+    score_worker.add_argument("--physical-gpu", required=True)
     return parser.parse_args(argv)
 
 
@@ -3471,7 +4100,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     protocol_path = args.protocol.resolve()
     result_root = args.result_root.resolve()
     metrics_root = args.metrics_root.resolve()
-    if args.command == "_worker":
+    if args.command in {"_worker", "_score_worker"}:
         plan = load_frozen_plan_for_worker(
             repo,
             protocol_path,
@@ -3494,8 +4123,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             seed=int(args.seed),
             execution_signature=args.execution_signature,
             physical_gpu=args.physical_gpu,
+            defer_metrics=args.command == "_score_worker",
         )
-        print(json.dumps({"unit": str(target)}, indent=2))
+        print(
+            json.dumps(
+                {
+                    (
+                        "score_cache"
+                        if args.command == "_score_worker"
+                        else "unit"
+                    ): str(target)
+                },
+                indent=2,
+            )
+        )
         return 0
 
     with controller_singleton(result_root):
@@ -3523,6 +4164,30 @@ def main(argv: Sequence[str] | None = None) -> int:
                 python,
                 _parse_gpus(args.gpus),
                 int(args.workers_per_gpu),
+            )
+            print(json.dumps(status, indent=2))
+            return 0
+        if args.command == "run-scores":
+            python = Path(os.path.abspath(args.python))
+            status = run_scores_parent(
+                repo,
+                protocol_path,
+                result_root,
+                metrics_root,
+                python,
+                _parse_gpus(args.gpus),
+                int(args.workers_per_gpu),
+            )
+            print(json.dumps(status, indent=2))
+            return 0
+        if args.command == "evaluate-caches":
+            status = evaluate_caches_parent(
+                repo,
+                protocol_path,
+                result_root,
+                metrics_root,
+                int(args.workers),
+                not bool(args.keep_cache),
             )
             print(json.dumps(status, indent=2))
             return 0
