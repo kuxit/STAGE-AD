@@ -74,6 +74,10 @@ EXPECTED_TARGETS = {
     "U": ["UCR", "Exathlon", "MSL", "SED", "TODS"],
     "M": ["CATSv2", "GHL", "LTDB", "SVDB", "TAO"],
 }
+GEOMETRY_DIAGNOSTIC_TARGETS = {
+    "U": ["MSL", "SED"],
+    "M": ["CATSv2", "GHL"],
+}
 EXPECTED_FINAL_SPLITS = [4, 16, 64, 256]
 EXPECTED_TOP_KS = [1, 3, 5, 9, 15]
 CUBLAS_WORKSPACE_CONFIG = ":4096:8"
@@ -113,10 +117,16 @@ INTEGER_CONFIG_FIELDS = {
 FLOAT_CONFIG_FIELDS = {
     "dropout",
     "gb_activation_fraction",
+    "gb_refresh_fraction",
     "learning_rate",
     "weight_decay",
     "grad_clip",
     "gb_sampling_power",
+    "multiscale_alignment_weight",
+    "timestamp_pairwise_weight",
+    "patch_statistics_weight",
+    "memory_radius_weight",
+    "memory_radius_quantile",
 }
 STRING_CONFIG_FIELDS = {"encoder_type"}
 ENCODER_TYPES = (
@@ -332,9 +342,15 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             raise ValueError(f"selection.{name} must be a non-empty governance statement")
 
     phase = payload.get("phase", "stage1a")
-    if phase not in {"stage1a", "stage1b", "stage2", "encoder_e1"}:
+    if phase not in {
+        "stage1a",
+        "stage1b",
+        "stage2",
+        "encoder_e1",
+        "geometry_d1",
+    }:
         raise ValueError(
-            "phase must be stage1a, stage1b, stage2, or encoder_e1"
+            "phase must be stage1a, stage1b, stage2, encoder_e1, or geometry_d1"
         )
     metadata = payload.get("metadata", {})
     if not isinstance(metadata, Mapping):
@@ -345,14 +361,16 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         payload["final_gb_min_splits"], "final_gb_min_splits", minimum=4
     )
     declared_top_ks = _unique_int_list(payload["top_ks"], "top_ks", minimum=1)
-    if declared_final_splits != EXPECTED_FINAL_SPLITS:
+    if phase != "geometry_d1" and declared_final_splits != EXPECTED_FINAL_SPLITS:
         raise ValueError(f"final_gb_min_splits must remain {EXPECTED_FINAL_SPLITS}")
-    if declared_top_ks != EXPECTED_TOP_KS:
+    if phase != "geometry_d1" and declared_top_ks != EXPECTED_TOP_KS:
         raise ValueError(f"top_ks must remain {EXPECTED_TOP_KS}")
     if phase == "stage1a" and seeds != [2026]:
         raise ValueError("stage1a seeds are frozen to [2026]")
     if phase == "encoder_e1" and seeds != [2026]:
         raise ValueError("encoder_e1 seeds are frozen to [2026]")
+    if phase == "geometry_d1" and seeds != [2026]:
+        raise ValueError("geometry_d1 seeds are frozen to [2026]")
     if phase == "stage1b" and seeds != [2027, 2028]:
         raise ValueError("stage1b seeds are frozen to [2027, 2028]")
     if phase == "stage2" and seeds != [2026, 2027, 2028]:
@@ -360,6 +378,13 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     if phase in {"stage1a", "stage1b"}:
         final_splits = [4]
         top_ks = [3]
+    elif phase == "geometry_d1":
+        if declared_final_splits != [4, 64]:
+            raise ValueError("geometry_d1 final_gb_min_splits must be [4, 64]")
+        if declared_top_ks != [1, 3]:
+            raise ValueError("geometry_d1 top_ks must be [1, 3]")
+        final_splits = declared_final_splits
+        top_ks = declared_top_ks
     else:
         final_splits = declared_final_splits
         top_ks = declared_top_ks
@@ -382,8 +407,13 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         if len(cleaned) != len(set(cleaned)):
             raise ValueError(f"targets.{track} contains duplicate datasets")
         targets[track] = cleaned
-    if targets != EXPECTED_TARGETS:
-        raise ValueError(f"targets must remain the ten frozen subsets: {EXPECTED_TARGETS}")
+    expected_targets = (
+        GEOMETRY_DIAGNOSTIC_TARGETS
+        if phase == "geometry_d1"
+        else EXPECTED_TARGETS
+    )
+    if targets != expected_targets:
+        raise ValueError(f"targets must remain the frozen subsets: {expected_targets}")
 
     raw_candidates = payload["training_candidates"]
     if not isinstance(raw_candidates, list) or not raw_candidates:
@@ -405,13 +435,18 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             raise ValueError(f"parameters for {candidate_id} must be an object")
         normalized_parameters = _normalize_candidate_parameters(raw["parameters"])
         resolved = _resolved_training_parameters(normalized_parameters)
-        if (
+        family_valid = (
             tuple(resolved["dilations"]) != (1, 2, 4, 8, 4, 2)
             or int(resolved["group_norm_groups"]) != 8
-            or int(resolved["gb_min_split"]) != 4
             or int(resolved["gb_max_rounds"]) != 64
             or str(resolved["alignment_objective"]) != "both"
             or not 0.0 <= float(resolved["gb_sampling_power"]) < 1.0
+        )
+        if family_valid or (
+            phase != "geometry_d1" and int(resolved["gb_min_split"]) != 4
+        ) or (
+            phase == "geometry_d1"
+            and int(resolved["gb_min_split"]) not in {4, 32}
         ):
             raise ValueError(
                 f"{candidate_id} violates the frozen story/same-family boundary"
@@ -472,11 +507,14 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         metadata = dict(metadata)
         metadata["reference_selected_heads"] = normalized_reference_heads
     shortlist_size = _require_int(payload.get("shortlist_size", 3), "shortlist_size", 1)
-    if shortlist_size != 3:
-        raise ValueError("shortlist_size must remain 3")
+    expected_shortlist_size = 4 if phase == "geometry_d1" else 3
+    if shortlist_size != expected_shortlist_size:
+        raise ValueError(
+            f"shortlist_size must remain {expected_shortlist_size}"
+        )
     raw_shortlists = payload.get("training_shortlists")
     training_shortlists: dict[str, list[str]] | None = None
-    if phase in {"stage1b", "encoder_e1"}:
+    if phase in {"stage1b", "encoder_e1", "geometry_d1"}:
         required_shortlist_keys = subset_keys
         if not isinstance(raw_shortlists, Mapping) or set(raw_shortlists) != required_shortlist_keys:
             raise ValueError(
@@ -497,7 +535,10 @@ def validate_protocol_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
                 raise ValueError(f"training_shortlists.{key} references an unknown candidate")
             training_shortlists[str(key)] = [str(item) for item in value]
     elif raw_shortlists is not None:
-        raise ValueError("training_shortlists is allowed only for stage1b")
+        raise ValueError(
+            "training_shortlists is allowed only for stage1b, encoder_e1, "
+            "or geometry_d1"
+        )
 
     raw_winners = payload.get("training_winners")
     training_winners: dict[str, str] | None = None
@@ -604,7 +645,7 @@ def _candidate_ids_for_subset(
     subset = f"{track}/{dataset}"
     if phase == "stage1a":
         return all_ids
-    if phase in {"stage1b", "encoder_e1"}:
+    if phase in {"stage1b", "encoder_e1", "geometry_d1"}:
         shortlists = protocol["training_shortlists"]
         return [str(item) for item in shortlists[subset]]
     return [str(protocol["training_winners"][subset])]
@@ -632,12 +673,26 @@ def training_execution_signature(
     )
     activation_step = int(round(effective_steps * float(config.gb_activation_fraction)))
     activation_step = min(max(1, activation_step), max(1, effective_steps - 1))
+    refresh_step = (
+        None
+        if config.gb_refresh_fraction is None
+        else int(round(effective_steps * float(config.gb_refresh_fraction)))
+    )
+    if refresh_step is not None:
+        refresh_step = min(
+            max(activation_step + 1, refresh_step),
+            max(activation_step + 1, effective_steps - 1),
+        )
     behavior = dict(candidate["resolved_parameters"])
     behavior.pop("steps")
     behavior.pop("gb_activation_fraction")
+    behavior.pop("gb_refresh_fraction")
     behavior.update(
         effective_steps=int(effective_steps),
         gb_activation_step=int(activation_step),
+        gb_refresh_step=(
+            None if refresh_step is None else int(refresh_step)
+        ),
         short_series_update_cap=bool(short_series_cap),
     )
     return fingerprint(behavior), behavior
@@ -1158,6 +1213,148 @@ def _finite_metric_mapping(value: Any) -> bool:
     return True
 
 
+def _finite_points(value: Any, *, columns: int, maximum: int) -> bool:
+    if not isinstance(value, list) or len(value) > maximum:
+        return False
+    for row in value:
+        if (
+            not isinstance(row, list)
+            or len(row) != columns
+            or any(
+                isinstance(item, bool)
+                or not isinstance(item, (int, float))
+                or not math.isfinite(float(item))
+                for item in row
+            )
+        ):
+            return False
+    return True
+
+
+def _valid_visual_diagnostics(value: Any) -> bool:
+    if not isinstance(value, Mapping) or not all(
+        (
+            value.get("schema_version")
+            == "stage-geometry-visual-diagnostics-v1",
+            value.get("posthoc_labels_only") is True,
+            value.get("selection_uses_visuals") is False,
+        )
+    ):
+        return False
+    pca = value.get("pca")
+    if not isinstance(pca, Mapping):
+        return False
+    explained = pca.get("explained_variance_ratio")
+    if (
+        not isinstance(explained, list)
+        or len(explained) != 2
+        or any(
+            isinstance(item, bool)
+            or not isinstance(item, (int, float))
+            or not math.isfinite(float(item))
+            or float(item) < 0.0
+            for item in explained
+        )
+    ):
+        return False
+    for key, maximum in (
+        ("train", 1000),
+        ("normal_queries", 1000),
+        ("anomaly_queries", 1000),
+    ):
+        group = pca.get(key)
+        if (
+            not isinstance(group, Mapping)
+            or not isinstance(group.get("indices"), list)
+            or len(group["indices"]) != len(group.get("xy", []))
+            or not _finite_points(group.get("xy"), columns=2, maximum=maximum)
+        ):
+            return False
+    anomaly = pca["anomaly_queries"]
+    if (
+        not isinstance(anomaly.get("anomaly_fraction"), list)
+        or len(anomaly["anomaly_fraction"]) != len(anomaly["indices"])
+    ):
+        return False
+    prototypes = pca.get("prototypes")
+    prototype_fields = (
+        "indices",
+        "region_sizes",
+        "region_radii",
+        "source_starts",
+    )
+    if (
+        not isinstance(prototypes, Mapping)
+        or any(not isinstance(prototypes.get(field), list) for field in prototype_fields)
+        or len({len(prototypes[field]) for field in prototype_fields})
+        != 1
+        or len(prototypes["indices"]) != len(prototypes.get("xy", []))
+        or not _finite_points(prototypes.get("xy"), columns=2, maximum=1500)
+    ):
+        return False
+    raw = value.get("raw_series")
+    if (
+        not isinstance(raw, Mapping)
+        or not isinstance(raw.get("indices"), list)
+        or len(raw["indices"]) > 2500
+        or not isinstance(raw.get("labels"), list)
+        or len(raw["labels"]) != len(raw["indices"])
+        or not isinstance(raw.get("selected_channels"), list)
+        or not 1 <= len(raw["selected_channels"]) <= 3
+        or not _finite_points(
+            raw.get("z_values"),
+            columns=len(raw["selected_channels"]),
+            maximum=2500,
+        )
+        or len(raw["z_values"]) != len(raw["indices"])
+        or isinstance(raw.get("train_index"), bool)
+        or not isinstance(raw.get("train_index"), int)
+    ):
+        return False
+    separation = value.get("score_separation")
+    if not isinstance(separation, Mapping):
+        return False
+    for key in ("normal", "anomaly"):
+        quantiles = separation.get(key)
+        if not isinstance(quantiles, Mapping) or set(quantiles) != {
+            "count",
+            "q10",
+            "median",
+            "q90",
+        }:
+            return False
+        count = quantiles["count"]
+        if isinstance(count, bool) or not isinstance(count, int) or count < 0:
+            return False
+        numbers = (quantiles["q10"], quantiles["median"], quantiles["q90"])
+        if count == 0 and numbers != (None, None, None):
+            return False
+        if count > 0 and any(
+            isinstance(item, bool)
+            or not isinstance(item, (int, float))
+            or not math.isfinite(float(item))
+            for item in numbers
+        ):
+            return False
+    examples = value.get("prototype_examples")
+    if not isinstance(examples, list) or len(examples) > 8:
+        return False
+    for example in examples:
+        if (
+            not isinstance(example, Mapping)
+            or not isinstance(example.get("signal_rms_z"), list)
+            or len(example["signal_rms_z"]) > 64
+            or any(
+                isinstance(item, bool)
+                or not isinstance(item, (int, float))
+                or not math.isfinite(float(item))
+                for item in example["signal_rms_z"]
+            )
+        ):
+            return False
+    return True
+
+
 def valid_unit(
     item: Mapping[str, Any],
     *,
@@ -1291,6 +1488,14 @@ def valid_unit(
     if not isinstance(diagnostics, Mapping) or diagnostics.get(
         "runtime_eligible_for_paper"
     ) is not False:
+        return False
+    visual_required = bool(
+        plan.get("metadata", {}).get("diagnostic_projection", False)
+    )
+    visual = diagnostics.get("visual_diagnostics")
+    if visual_required and not _valid_visual_diagnostics(visual):
+        return False
+    if not visual_required and visual is not None:
         return False
     environment = diagnostics.get("environment")
     if not isinstance(environment, Mapping) or (
@@ -1453,6 +1658,176 @@ def configure_worker_determinism(physical_gpu: str) -> None:
         raise RuntimeError("PyTorch deterministic algorithms could not be enabled")
 
 
+def _spaced_indices(count: int, limit: int) -> np.ndarray:
+    if count <= 0:
+        return np.empty(0, dtype=np.int64)
+    if count <= limit:
+        return np.arange(count, dtype=np.int64)
+    return np.unique(
+        np.rint(np.linspace(0, count - 1, int(limit))).astype(np.int64)
+    )
+
+
+def _patch_anomaly_fraction(labels: np.ndarray, patch_size: int) -> np.ndarray:
+    binary = (np.asarray(labels).reshape(-1) > 0).astype(np.float64)
+    cumulative = np.concatenate([[0.0], np.cumsum(binary)])
+    return (
+        cumulative[int(patch_size) :] - cumulative[: -int(patch_size)]
+    ) / float(patch_size)
+
+
+def _quantiles(values: np.ndarray) -> dict[str, float | None]:
+    array = np.asarray(values, dtype=np.float64)
+    if len(array) == 0:
+        return {"count": 0, "q10": None, "median": None, "q90": None}
+    return {
+        "count": int(len(array)),
+        "q10": float(np.quantile(array, 0.10)),
+        "median": float(np.quantile(array, 0.50)),
+        "q90": float(np.quantile(array, 0.90)),
+    }
+
+
+def build_visual_diagnostics(
+    *,
+    train_unit: np.ndarray,
+    full_unit: np.ndarray,
+    memory: stage_impl.CalibratedExemplarMemory,
+    values: np.ndarray,
+    labels: np.ndarray,
+    train_index: int,
+    patch_size: int,
+    patch_scores: np.ndarray,
+) -> dict[str, Any]:
+    """Emit compact, label-after-scoring evidence without raw embeddings."""
+
+    fit_index = _spaced_indices(len(train_unit), 4096)
+    fit = np.asarray(train_unit[fit_index], dtype=np.float64)
+    center = fit.mean(axis=0, keepdims=True)
+    centered = fit - center
+    _, singular, right = np.linalg.svd(centered, full_matrices=False)
+    basis = right[:2].T
+    variance = np.square(singular)
+    explained = variance[:2] / max(float(variance.sum()), 1e-12)
+
+    fractions = _patch_anomaly_fraction(labels, patch_size)
+    normal_candidates = np.flatnonzero(fractions == 0.0)
+    anomaly_candidates = np.flatnonzero(fractions > 0.0)
+    normal_index = normal_candidates[
+        _spaced_indices(len(normal_candidates), 1000)
+    ]
+    anomaly_index = anomaly_candidates[
+        _spaced_indices(len(anomaly_candidates), 1000)
+    ]
+    train_index_sample = _spaced_indices(len(train_unit), 1000)
+
+    region_sizes = np.asarray(memory.region_sizes, dtype=np.int64)
+    if len(memory) <= 1500:
+        prototype_index = np.arange(len(memory), dtype=np.int64)
+    else:
+        large = np.argsort(region_sizes)[-750:]
+        spread = _spaced_indices(len(memory), 750)
+        prototype_index = np.unique(np.concatenate([large, spread]))
+
+    def project(array: np.ndarray, index: np.ndarray) -> list[list[float]]:
+        if len(index) == 0:
+            return []
+        coordinates = (np.asarray(array[index], dtype=np.float64) - center) @ basis
+        return coordinates.astype(np.float32).tolist()
+
+    standardized_center = np.median(values[:train_index], axis=0)
+    mad = 1.4826 * np.median(
+        np.abs(values[:train_index] - standardized_center[None, :]), axis=0
+    )
+    fallback = np.std(values[:train_index], axis=0)
+    scale = np.where(mad > 1e-6, mad, fallback)
+    scale = np.where(scale > 1e-6, scale, 1.0)
+    standardized = (values - standardized_center[None, :]) / scale[None, :]
+    channel_variance = np.var(standardized[:train_index], axis=0)
+    selected_channels = np.argsort(channel_variance)[-min(3, values.shape[1]) :]
+    raw_index = _spaced_indices(len(values), 2500)
+
+    representative_rows = np.asarray(
+        memory.representative_source_rows, dtype=np.int64
+    )
+    ranked_large = np.argsort(region_sizes)[::-1][:4]
+    ranked_small = np.argsort(region_sizes)[:4]
+    exemplar_examples = []
+    for memory_row in np.unique(np.concatenate([ranked_large, ranked_small])):
+        start = int(representative_rows[memory_row])
+        stop = min(start + int(patch_size), len(values))
+        local = standardized[start:stop, selected_channels]
+        local_signal = np.sqrt(np.mean(np.square(local), axis=1))
+        local_index = _spaced_indices(len(local_signal), 64)
+        exemplar_examples.append(
+            {
+                "memory_row": int(memory_row),
+                "source_start": start,
+                "region_size": int(region_sizes[memory_row]),
+                "region_radius": float(memory.region_radii[memory_row]),
+                "signal_rms_z": local_signal[local_index]
+                .astype(np.float32)
+                .tolist(),
+            }
+        )
+
+    normal_scores = patch_scores[normal_candidates]
+    anomaly_scores = patch_scores[anomaly_candidates]
+    return {
+        "schema_version": "stage-geometry-visual-diagnostics-v1",
+        "posthoc_labels_only": True,
+        "selection_uses_visuals": False,
+        "pca": {
+            "explained_variance_ratio": explained.astype(np.float64).tolist(),
+            "train": {
+                "indices": train_index_sample.tolist(),
+                "xy": project(train_unit, train_index_sample),
+            },
+            "normal_queries": {
+                "indices": normal_index.tolist(),
+                "xy": project(full_unit, normal_index),
+            },
+            "anomaly_queries": {
+                "indices": anomaly_index.tolist(),
+                "anomaly_fraction": fractions[anomaly_index]
+                .astype(np.float32)
+                .tolist(),
+                "xy": project(full_unit, anomaly_index),
+            },
+            "prototypes": {
+                "indices": prototype_index.tolist(),
+                "region_sizes": region_sizes[prototype_index].tolist(),
+                "region_radii": np.asarray(
+                    memory.region_radii[prototype_index], dtype=np.float32
+                ).tolist(),
+                "source_starts": representative_rows[prototype_index].tolist(),
+                "xy": project(memory.vectors, prototype_index),
+            },
+        },
+        "score_separation": {
+            "normal": _quantiles(normal_scores),
+            "anomaly": _quantiles(anomaly_scores),
+            "median_margin": (
+                None
+                if len(normal_scores) == 0 or len(anomaly_scores) == 0
+                else float(
+                    np.median(anomaly_scores) - np.median(normal_scores)
+                )
+            ),
+        },
+        "raw_series": {
+            "indices": raw_index.tolist(),
+            "labels": (np.asarray(labels)[raw_index] > 0).astype(np.int8).tolist(),
+            "selected_channels": selected_channels.tolist(),
+            "z_values": standardized[raw_index][:, selected_channels]
+            .astype(np.float32)
+            .tolist(),
+            "train_index": int(train_index),
+        },
+        "prototype_examples": exemplar_examples,
+    }
+
+
 def execute_unit(
     repo: Path,
     result_root: Path,
@@ -1514,11 +1889,29 @@ def execute_unit(
         raise RuntimeError(f"Tuning series metadata drift: {data_path}")
     if train_index < training_config.patch_size + max(training_config.overlap_deltas):
         raise ValueError(f"training prefix is too short in {file_name}")
+    train_values = values[:train_index]
+    feature_center, feature_scale = stage_impl.robust_feature_calibration(
+        train_values
+    )
+    statistics_center, statistics_scale = (
+        stage_impl.robust_patch_statistics_calibration(
+            train_values,
+            training_config.patch_size,
+            feature_center,
+            feature_scale,
+        )
+    )
     stage_impl.seed_everything(seed)
-    model = stage_impl.StageEncoder(values.shape[1], training_config).to(device)
+    model = stage_impl.StageEncoder(
+        values.shape[1],
+        training_config,
+        feature_center=feature_center,
+        feature_scale=feature_scale,
+        statistics_center=statistics_center,
+        statistics_scale=statistics_scale,
+    ).to(device)
     parameter_count = int(sum(parameter.numel() for parameter in model.parameters()))
     torch.cuda.reset_peak_memory_stats(device)
-    train_values = values[:train_index]
     train_window_bank = stage_impl.DeviceWindowBank(
         train_values, device, training_config.patch_size
     )
@@ -1562,12 +1955,29 @@ def execute_unit(
     memory_diagnostics: list[dict[str, Any]] = []
     partition_cache: dict[str, dict[str, Any]] = {}
     point_score_cache: dict[tuple[str, int], np.ndarray] = {}
+    diagnostic_memory: stage_impl.CalibratedExemplarMemory | None = None
+    diagnostic_patch_scores: np.ndarray | None = None
+    diagnostic_split = int(
+        plan.get("metadata", {}).get(
+            "diagnostic_final_gb_min_split",
+            plan["final_gb_min_splits"][0],
+        )
+    )
+    diagnostic_k = int(
+        plan.get("metadata", {}).get(
+            "diagnostic_top_k",
+            plan["top_ks"][0],
+        )
+    )
     for final_split in plan["final_gb_min_splits"]:
         final_config = replace(training_config, gb_min_split=int(final_split))
         memory_started = time.perf_counter()
-        memory, partition = stage_impl.build_gb_exemplar_memory(
-            train_unit, final_config, seed=int(seed) + 29
+        calibrated_memory, partition = (
+            stage_impl.build_calibrated_exemplar_memory(
+                train_unit, final_config, seed=int(seed) + 29
+            )
         )
+        memory = calibrated_memory.vectors
         build_seconds = float(time.perf_counter() - memory_started)
         partition_fingerprint = final_partition_fingerprint(partition)
         memory_fingerprint = array_fingerprint(memory)
@@ -1581,6 +1991,12 @@ def execute_unit(
             patch_scores_by_effective = score_embeddings_multi_k(
                 full_unit, memory, device, final_config, unique_effective_top_ks
             )
+            if int(final_split) == diagnostic_split:
+                effective_diagnostic_k = min(diagnostic_k, int(len(memory)))
+                diagnostic_memory = calibrated_memory
+                diagnostic_patch_scores = patch_scores_by_effective[
+                    effective_diagnostic_k
+                ].copy()
             query_seconds = float(time.perf_counter() - query_started)
             for effective_k, patch_score in patch_scores_by_effective.items():
                 point_score_cache[(partition_fingerprint, int(effective_k))] = (
@@ -1655,7 +2071,7 @@ def execute_unit(
     train_patches = int(len(train_unit))
     full_patches = int(len(full_unit))
     peak_cuda_bytes = int(torch.cuda.max_memory_allocated(device))
-    del model, train_raw, train_unit, full_unit
+    del model, train_raw
     torch.cuda.empty_cache()
 
     # Labels are loaded only after training, memory construction, and every
@@ -1671,6 +2087,22 @@ def execute_unit(
                 point_score_cache[cache_key], labels, sliding_window, metrics_root
             )
         variants.append({**pending, "metrics": metric_cache[cache_key]})
+
+    visual_diagnostics = None
+    if bool(plan.get("metadata", {}).get("diagnostic_projection", False)):
+        if diagnostic_memory is None or diagnostic_patch_scores is None:
+            raise RuntimeError("diagnostic memory/score head was not generated")
+        visual_diagnostics = build_visual_diagnostics(
+            train_unit=train_unit,
+            full_unit=full_unit,
+            memory=diagnostic_memory,
+            values=values,
+            labels=labels,
+            train_index=train_index,
+            patch_size=training_config.patch_size,
+            patch_scores=diagnostic_patch_scores,
+        )
+    del train_unit, full_unit
 
     payload = {
         "schema_version": UNIT_SCHEMA,
@@ -1706,6 +2138,7 @@ def execute_unit(
             "sliding_window": int(sliding_window),
             "training": training,
             "final_memories": memory_diagnostics,
+            "visual_diagnostics": visual_diagnostics,
             "unique_final_partitions": len(partition_cache),
             "unique_effective_heads": len(metric_cache),
             "environment": _environment_identity(),
@@ -2486,7 +2919,7 @@ def summarize_results(
             plan, int(row["final_gb_min_split"]), int(row["top_k"])
         )
 
-    if phase in {"stage1a", "stage1b", "encoder_e1"}:
+    if phase in {"stage1a", "stage1b", "encoder_e1", "geometry_d1"}:
         rows = _rank_groups(rows, ("track", "dataset"), candidate=True)
         track_seed_fields = (
             "track",
@@ -2549,7 +2982,7 @@ def summarize_results(
         "plan_fingerprint": plan["plan_fingerprint"],
     }
     shortlist_size = int(plan["shortlist_size"])
-    if phase == "stage1a":
+    if phase in {"stage1a", "geometry_d1"}:
         training_shortlists: dict[str, list[str]] = {}
         for track, datasets in plan["targets"].items():
             for dataset in datasets:
@@ -2568,6 +3001,13 @@ def summarize_results(
                     shortlist_size,
                 )
         selection_payload["training_shortlists"] = training_shortlists
+        if phase == "geometry_d1":
+            selection_payload["diagnostic_only"] = True
+            selection_payload["diagnostic_axes"] = [
+                "robust_level_scale",
+                "direct_timestamp_pairwise",
+                "coarser_refreshed_intermediate_geometry",
+            ]
     elif phase == "encoder_e1":
         selection_payload.update(
             **_encoder_e1_selection(rows, plan),

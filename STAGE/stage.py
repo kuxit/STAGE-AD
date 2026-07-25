@@ -73,10 +73,12 @@ class StageConfig:
     overlap_trim: int = 8
     alignment_objective: str = "both"
     multiscale_alignment_weight: float = 0.25
+    timestamp_pairwise_weight: float = 0.0
     gb_min_split: int = 4
     final_gb_min_split: int | None = None
     gb_max_rounds: int = 64
     gb_sampling_power: float = 0.5
+    gb_refresh_fraction: float | None = None
     patch_statistics_weight: float = 0.0
     memory_radius_weight: float = 0.0
     memory_radius_quantile: float = 0.90
@@ -116,6 +118,8 @@ class StageConfig:
             raise ValueError("overlap_trim removes the complete aligned region")
         if self.multiscale_alignment_weight < 0.0:
             raise ValueError("multiscale_alignment_weight must be non-negative")
+        if self.timestamp_pairwise_weight < 0.0:
+            raise ValueError("timestamp_pairwise_weight must be non-negative")
         if self.alignment_objective not in {
             "both",
             "timestamp_token_only",
@@ -129,6 +133,13 @@ class StageConfig:
             raise ValueError("final_gb_min_split must be at least four")
         if not 0.0 <= self.gb_sampling_power <= 1.0:
             raise ValueError("gb_sampling_power must be in [0, 1]")
+        if self.gb_refresh_fraction is not None and not (
+            self.gb_activation_fraction < self.gb_refresh_fraction < 1.0
+        ):
+            raise ValueError(
+                "gb_refresh_fraction must lie strictly between "
+                "gb_activation_fraction and one"
+            )
         if self.patch_statistics_weight < 0.0:
             raise ValueError("patch_statistics_weight must be non-negative")
         if self.memory_radius_weight < 0.0:
@@ -732,6 +743,21 @@ def temporal_overlap_loss(
             overlap_embedding_right,
         )
     )
+    token_pairwise = (
+        1.0
+        - (
+            F.normalize(aligned_left_raw, dim=-1)
+            * F.normalize(aligned_right_raw, dim=-1)
+        ).sum(dim=-1)
+    ).mean()
+    interval_pairwise = (
+        1.0
+        - (
+            F.normalize(overlap_embedding_left, dim=-1)
+            * F.normalize(overlap_embedding_right, dim=-1)
+        ).sum(dim=-1)
+    ).mean()
+    pairwise_loss = token_pairwise + interval_pairwise
     multiscale_loss = token_loss.new_zeros(())
     multiscale_terms = 0
     multiscale_gate_total = token_loss.new_zeros(())
@@ -793,6 +819,7 @@ def temporal_overlap_loss(
             "fit_encoder handles that matched-budget control directly"
         )
     total = total + float(config.multiscale_alignment_weight) * multiscale_loss
+    total = total + float(config.timestamp_pairwise_weight) * pairwise_loss
     diagnostics = {
         "loss": float(total.detach().cpu()),
         "token_cc": float(token_loss.detach().cpu()),
@@ -801,6 +828,9 @@ def temporal_overlap_loss(
         "overlap_embedding_cc": float(embedding_loss.detach().cpu()),
         "overlap_embedding_cc_diagonal": float(embedding_diagonal.detach().cpu()),
         "embedding_redundancy": float(embedding_redundancy.detach().cpu()),
+        "timestamp_pairwise": float(token_pairwise.detach().cpu()),
+        "interval_pairwise": float(interval_pairwise.detach().cpu()),
+        "pairwise_weight": float(config.timestamp_pairwise_weight),
         "multiscale_cc": float(multiscale_loss.detach().cpu()),
         "multiscale_gate": float(
             (
@@ -1208,15 +1238,53 @@ def fit_encoder(
     rng = np.random.default_rng(int(config.seed))
     gb_activation_step = int(round(effective_steps * config.gb_activation_fraction))
     gb_activation_step = min(max(1, gb_activation_step), max(1, effective_steps - 1))
+    gb_refresh_step = (
+        None
+        if config.gb_refresh_fraction is None
+        else int(round(effective_steps * float(config.gb_refresh_fraction)))
+    )
+    if gb_refresh_step is not None:
+        gb_refresh_step = min(
+            max(gb_activation_step + 1, gb_refresh_step),
+            max(gb_activation_step + 1, effective_steps - 1),
+        )
+    partition_build_steps = {gb_activation_step}
+    if gb_refresh_step is not None:
+        partition_build_steps.add(gb_refresh_step)
     partition: GranularPartition | None = None
     partition_starts: np.ndarray | None = None
     partition_sample_counts: np.ndarray | None = None
+    partition_history: list[dict[str, Any]] = []
     history: list[dict[str, Any]] = []
     peak_grad_norm = 0.0
     started = time.perf_counter()
 
     for step in range(effective_steps):
-        if step == gb_activation_step:
+        if step in partition_build_steps:
+            if partition is not None:
+                partition_history.append(
+                    {
+                        "built_at_step": int(
+                            gb_activation_step
+                            if not partition_history
+                            else gb_refresh_step
+                        ),
+                        "initial_k": partition.initial_k,
+                        "final_k": partition.final_k,
+                        "rounds": partition.rounds,
+                        "rows": partition.source_rows,
+                        "region_sizes": [
+                            int(len(ball)) for ball in partition.balls
+                        ],
+                        "region_sample_counts": (
+                            []
+                            if partition_sample_counts is None
+                            else [
+                                int(item) for item in partition_sample_counts
+                            ]
+                        ),
+                    }
+                )
             warm_local_rows = select_gb_rows(
                 len(eligible_starts), int(config.max_gb_rows)
             )
@@ -1316,14 +1384,38 @@ def fit_encoder(
             )
     if device.type == "cuda":
         torch.cuda.synchronize(device)
+    if partition is not None:
+        partition_history.append(
+            {
+                "built_at_step": int(
+                    gb_activation_step
+                    if len(partition_history) == 0
+                    else gb_refresh_step
+                ),
+                "initial_k": partition.initial_k,
+                "final_k": partition.final_k,
+                "rounds": partition.rounds,
+                "rows": partition.source_rows,
+                "region_sizes": [int(len(ball)) for ball in partition.balls],
+                "region_sample_counts": (
+                    []
+                    if partition_sample_counts is None
+                    else [int(item) for item in partition_sample_counts]
+                ),
+            }
+        )
     return {
         "elapsed_seconds": float(time.perf_counter() - started),
         "gb_activation_step": int(gb_activation_step),
+        "gb_refresh_step": (
+            None if gb_refresh_step is None else int(gb_refresh_step)
+        ),
         "requested_steps": int(requested_steps),
         "total_steps": int(effective_steps),
         "small_data_update_cap": bool(small_data_update_cap),
         "peak_grad_norm": float(peak_grad_norm),
         "history": history,
+        "training_gb_history": partition_history,
         "training_gb": (
             None
             if partition is None
@@ -1693,6 +1785,7 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         overlap_deltas=tuple(int(item) for item in args.overlap_deltas.split(",") if item),
         overlap_trim=int(args.overlap_trim),
         multiscale_alignment_weight=float(args.multiscale_alignment_weight),
+        timestamp_pairwise_weight=float(args.timestamp_pairwise_weight),
         gb_min_split=int(args.gb_min_split),
         final_gb_min_split=(
             None
@@ -1701,6 +1794,11 @@ def build_config(args: argparse.Namespace) -> StageConfig:
         ),
         gb_max_rounds=int(args.gb_max_rounds),
         gb_sampling_power=float(args.gb_sampling_power),
+        gb_refresh_fraction=(
+            None
+            if args.gb_refresh_fraction is None
+            else float(args.gb_refresh_fraction)
+        ),
         patch_statistics_weight=float(args.patch_statistics_weight),
         memory_radius_weight=float(args.memory_radius_weight),
         memory_radius_quantile=float(args.memory_radius_quantile),
@@ -1762,10 +1860,27 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--overlap-deltas", default="24,48")
     parser.add_argument("--overlap-trim", type=int, default=8)
     parser.add_argument("--multiscale-alignment-weight", type=float, default=0.25)
+    parser.add_argument(
+        "--timestamp-pairwise-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Weight for direct cosine agreement of corresponding timestamp "
+            "tokens and shared-interval embeddings."
+        ),
+    )
     parser.add_argument("--gb-min-split", type=int, default=4)
     parser.add_argument("--final-gb-min-split", type=int)
     parser.add_argument("--gb-max-rounds", type=int, default=64)
     parser.add_argument("--gb-sampling-power", type=float, default=0.5)
+    parser.add_argument(
+        "--gb-refresh-fraction",
+        type=float,
+        help=(
+            "Optional fraction of training at which the intermediate geometry "
+            "is rebuilt from the current encoder."
+        ),
+    )
     parser.add_argument(
         "--patch-statistics-weight",
         type=float,
