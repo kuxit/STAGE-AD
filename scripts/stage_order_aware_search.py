@@ -153,6 +153,26 @@ def evaluator_hashes(metrics_root: Path) -> dict[str, str]:
     return hashes
 
 
+def frozen_git_state(repo: Path) -> dict[str, Any]:
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain", "--untracked-files=all"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if dirty:
+        raise RuntimeError("experiment repository must be clean before planning or execution")
+    return {"head": head, "worktree_clean": True}
+
+
 def build_plan(repo: Path, protocol_path: Path, result_root: Path, metrics_root: Path) -> dict[str, Any]:
     protocol = load_json(protocol_path)
     if protocol.get("selection_split") != "official TSB-AD Tuning only":
@@ -186,6 +206,7 @@ def build_plan(repo: Path, protocol_path: Path, result_root: Path, metrics_root:
         "source_sha256": sha256_file(source),
         "orchestrator_sha256": sha256_file(Path(__file__).resolve()),
         "protocol_sha256": sha256_file(protocol_path),
+        "git": frozen_git_state(repo),
         "evaluator_sha256": evaluator_hashes(metrics_root),
         "data_sha256": data_hashes,
         "files": protocol["files"],
@@ -247,6 +268,7 @@ def valid_unit(value: Mapping[str, Any], plan: Mapping[str, Any], task: tuple[st
             and value.get("file") == file_name
             and value.get("selection_split") == "official TSB-AD Tuning only"
             and value.get("eval_feedback") is False
+            and record.get("strict_deterministic_algorithms") is True
             and all(math.isfinite(item) for item in observed)
             and not record.get("checkpoint")
             and not record.get("scores")
@@ -270,6 +292,12 @@ def verify_plan(repo: Path, protocol_path: Path, result_root: Path, metrics_root
     if evaluator_hashes(metrics_root) != plan["evaluator_sha256"]:
         raise RuntimeError("evaluator drift")
     return plan
+
+
+def task_data_size(repo: Path, task: tuple[str, str, int, str]) -> int:
+    subset, _, _, file_name = task
+    track, _ = subset.split("/", 1)
+    return (repo / "data" / f"TSB-AD-{track}" / file_name).stat().st_size
 
 
 @contextmanager
@@ -379,6 +407,9 @@ def run_parent(repo: Path, protocol: Path, result_root: Path, metrics_root: Path
                 continue
             raise RuntimeError(f"invalid existing unit: {target}")
         tasks.append(task)
+    # Longest-first scheduling prevents the largest series from becoming a
+    # CPU-heavy tail after the GPUs have otherwise gone idle.
+    tasks.sort(key=lambda task: (-task_data_size(repo, task), task))
     work: queue.Queue[tuple[str, str, int, str]] = queue.Queue()
     for task in tasks:
         work.put(task)
@@ -443,7 +474,12 @@ def run_parent(repo: Path, protocol: Path, result_root: Path, metrics_root: Path
     if errors:
         raise RuntimeError("\n\n".join(errors))
     report = status(repo, protocol, result_root, metrics_root)
-    if report["valid_units"] != plan["expected_units"] or report["invalid_units"]:
+    if (
+        report["valid_units"] != plan["expected_units"]
+        or report["invalid_units"]
+        or report["unexpected_units"]
+        or report["forbidden_artifacts"]
+    ):
         raise RuntimeError("post-run audit is incomplete")
     atomic_json(result_root / STATUS_NAME, {**report, "status": "complete"})
 
