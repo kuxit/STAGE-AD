@@ -73,3 +73,18 @@ by default.
 
 No checkpoint, embedding array, or raw model state is retained. Score caches
 are transient pipeline artifacts and are excluded from paper runtime claims.
+
+## O1b deterministic CUDA revision
+
+The first 3090 execution produced no valid score cache because PyTorch 2.5.1
+does not provide a deterministic CUDA backward implementation for the adaptive
+pooling kernel used by the ordered-pyramid branch.  The controller fail-stopped
+and the failed result root remains immutable evidence of that engineering
+failure; it is not a performance result.
+
+O1b replaces adaptive pooling with explicit temporal slice means using the
+same adaptive-bin boundaries.  This preserves the intended ordered statistics
+and their forward values while permitting strict deterministic backward on
+CUDA.  The mechanism, datasets, candidates, selection metric, and fixed head
+are otherwise unchanged.  O1b uses a new plan fingerprint and result root and
+must pass a CUDA backward smoke before any full run.

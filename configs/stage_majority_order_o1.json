@@ -1,7 +1,7 @@
 {
   "schema_version": "stage-vuspr-search-v1",
   "phase": "order_o1",
-  "study_id": "stage-majority-local-order-aware-o1-20260725",
+  "study_id": "stage-majority-local-order-aware-o1b-20260726",
   "status": "posthoc_development_only",
   "selection_split": "official TSB-AD Tuning only",
   "eval_feedback_used_by_runner": false,
@@ -15,7 +15,7 @@
     "implementation_flexible": true,
     "main_selection_excludes_controls": true
   },
-  "expected_source_sha256": "32a18db30d4a37f47d4f1e77fd8ce04007eed76c321e9eaf28ee1c965bba2fbc",
+  "expected_source_sha256": "f9b1731c124355b5c69544131e21de2e380d63b95c6ff6e611cb0ccd8787cb52",
   "seeds": [2026],
   "targets": {
     "U": ["SED"],

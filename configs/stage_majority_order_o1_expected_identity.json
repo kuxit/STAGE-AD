@@ -1,10 +1,10 @@
 {
   "schema_version": "stage-majority-order-o1-expected-identity-v1",
-  "plan_fingerprint": "8c2ce2f90a612265d84c1a43ccad9927bb3719517515438591729a9e17c2c43f",
-  "protocol_sha256": "6d35ef7606172dc4f383a9ac44520ebbb940aa474262dbadcdd10dc3c5cff5da",
-  "protocol_fingerprint": "d205b80cc2c919d433e13fced4ce77f6679fbb7e016a4e3db237698ec4735daa",
+  "plan_fingerprint": "cccd070b219353c10011926f8b07b80329665317afe1e5301cfd25e86b1ebc80",
+  "protocol_sha256": "ad5f07b981d8fb213cc572b24c5f3ad39fa7d58d962e860175e7d36279e59f8e",
+  "protocol_fingerprint": "acd3f4b0c62b3bd65f4936f302c60db26f4e1368ff80c68507ddffdb139d4d52",
   "source_sha256": {
-    "STAGE/stage.py": "32a18db30d4a37f47d4f1e77fd8ce04007eed76c321e9eaf28ee1c965bba2fbc",
+    "STAGE/stage.py": "f9b1731c124355b5c69544131e21de2e380d63b95c6ff6e611cb0ccd8787cb52",
     "scripts/stage_vuspr_search.py": "b1c81cb42fa73826395150b66bd585d3a15c98c362afb8bde64e75002ca3caa5",
     "common.py": "faf3cd91ce45010eddd21512ccbfc6802e260d87b9d2c355bf871246996fc749"
   },
