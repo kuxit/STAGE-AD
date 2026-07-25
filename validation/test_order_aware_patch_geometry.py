@@ -66,6 +66,19 @@ class OrderAwarePatchGeometryTests(unittest.TestCase):
         reversed_features = model.order_features(tokens.flip(1))
         self.assertGreater(float((original - reversed_features).abs().mean()), 0.02)
 
+    def test_deterministic_temporal_bins_match_adaptive_pool_forward(self) -> None:
+        torch.manual_seed(8)
+        for length in (16, 31, 32, 40, 56, 64, 96):
+            tokens = torch.randn(3, length, 7, requires_grad=True)
+            actual = stage.StageEncoder._deterministic_temporal_bins(tokens, 4)
+            expected = F.adaptive_avg_pool1d(
+                tokens.transpose(1, 2),
+                output_size=4,
+            ).transpose(1, 2)
+            torch.testing.assert_close(actual, expected, rtol=1e-6, atol=1e-6)
+            actual.square().mean().backward()
+            self.assertTrue(torch.isfinite(tokens.grad).all())
+
     def test_signed_transition_features_flip_under_reversal(self) -> None:
         angles = torch.linspace(-1.1, 1.2, 40)
         tokens = torch.stack([torch.cos(angles), torch.sin(angles)], dim=1)

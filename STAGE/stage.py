@@ -671,6 +671,33 @@ class StageEncoder(nn.Module):
             for fraction in (0.125, 0.25, 0.50)
         )
 
+    @staticmethod
+    def _deterministic_temporal_bins(
+        tokens: torch.Tensor,
+        output_size: int,
+    ) -> torch.Tensor:
+        """Pool ordered temporal bins without adaptive-pooling CUDA kernels.
+
+        ``adaptive_avg_pool1d`` dispatches through an adaptive 2-D backward
+        kernel on CUDA.  That kernel has no deterministic implementation in
+        PyTorch 2.5, so strict reproducibility fails before an O1 candidate
+        can finish training.  Explicit slice means implement the same bin
+        boundaries while keeping autograd on deterministic reductions.
+        """
+
+        if tokens.ndim != 3:
+            raise ValueError("tokens must have shape [batch, time, features]")
+        bins = int(output_size)
+        length = int(tokens.shape[1])
+        if bins < 1 or length < bins:
+            raise ValueError("temporal pooling requires length >= output_size")
+        pooled: list[torch.Tensor] = []
+        for index in range(bins):
+            start = (index * length) // bins
+            end = ((index + 1) * length + bins - 1) // bins
+            pooled.append(tokens[:, start:end].mean(dim=1))
+        return torch.stack(pooled, dim=1)
+
     def order_features(self, tokens: torch.Tensor) -> torch.Tensor:
         """Extract order-sensitive, shift-local sufficient statistics.
 
@@ -687,10 +714,7 @@ class StageEncoder(nn.Module):
         mean = unit_tokens.mean(dim=1, keepdim=True)
         features: list[torch.Tensor] = []
         if self.config.patch_geometry_mode in {"ordered_pyramid", "hybrid"}:
-            bins = F.adaptive_avg_pool1d(
-                unit_tokens.transpose(1, 2),
-                output_size=4,
-            ).transpose(1, 2)
+            bins = self._deterministic_temporal_bins(unit_tokens, output_size=4)
             features.append((bins - mean).flatten(start_dim=1))
         if self.config.patch_geometry_mode in {"order_relations", "hybrid"}:
             directional: list[torch.Tensor] = []
