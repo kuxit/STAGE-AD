@@ -5,6 +5,35 @@ STAGE, a framework for debiased time-series anomaly detection. It contains the
 model, frozen experiment controller, per-method adapters, protocol, local
 validation evidence, and server deployment entry point.
 
+## Version map
+
+The repository keeps model releases separate from diagnostic branches:
+
+- `main` / tag `stage-original-v1`: original frozen STAGE implementation.
+- tag `stage-majority-local-v1`: current strongest verified majority-local
+  STAGE model. It preserves the token and embedding heads, selective
+  timestamp/interval alignment, adaptive intermediate sampling, and observed
+  exemplar memory.
+- branch `stage-majority-order-aware` / tag
+  `stage-majority-order-aware-o1`: lightweight pre-release diagnostic that
+  adds a gated order-sensitive residual to majority-local. It is not yet the
+  reported model and must pass official-Tuning validation first.
+
+For the O1 3090 screen, start with:
+
+- [`docs/STAGE_ORDER_AWARE_O1.md`](docs/STAGE_ORDER_AWARE_O1.md)
+- [`configs/stage_majority_order_o1.json`](configs/stage_majority_order_o1.json)
+- [`configs/stage_majority_order_o1_expected_identity.json`](configs/stage_majority_order_o1_expected_identity.json)
+- [`scripts/stage_vuspr_search.py`](scripts/stage_vuspr_search.py)
+- [`scripts/launch_stage_majority_order_o1.sh`](scripts/launch_stage_majority_order_o1.sh)
+- [`scripts/pull_and_evaluate_order_o1.ps1`](scripts/pull_and_evaluate_order_o1.ps1)
+- [`checksums/stage-majority-order-o1.sha256`](checksums/stage-majority-order-o1.sha256)
+
+Raw datasets are deliberately absent. On a server, link the existing
+`data/TSB-AD-U`, `data/TSB-AD-M`, and `data/File_List` assets into the clone.
+Transient score caches, checkpoints, embeddings, logs, and large result
+archives are ignored and must not be pushed.
+
 ## Active development protocol (2026-07-24)
 
 The active branch is `stage-vuspr-tuning`. It runs STAGE only; every baseline

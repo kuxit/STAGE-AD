@@ -1,11 +1,11 @@
 {
   "schema_version": "stage-majority-order-o1-expected-identity-v1",
-  "plan_fingerprint": "91c616e36517a5c44c69cb6ad71684e3fbdf78583d0b2f5376f13d82aa8bd8b2",
-  "protocol_sha256": "1dce4ac00fb344d2c4b86341358f2e064be7ab7d522f7fa3dab5ccb2832a07a9",
-  "protocol_fingerprint": "9cf808e370db01b088720f5f5d86894c227cc68c5bb1545b8b8360166d96b13b",
+  "plan_fingerprint": "8c2ce2f90a612265d84c1a43ccad9927bb3719517515438591729a9e17c2c43f",
+  "protocol_sha256": "6d35ef7606172dc4f383a9ac44520ebbb940aa474262dbadcdd10dc3c5cff5da",
+  "protocol_fingerprint": "d205b80cc2c919d433e13fced4ce77f6679fbb7e016a4e3db237698ec4735daa",
   "source_sha256": {
     "STAGE/stage.py": "32a18db30d4a37f47d4f1e77fd8ce04007eed76c321e9eaf28ee1c965bba2fbc",
-    "scripts/stage_vuspr_search.py": "ad04a79b43a017c42632b7ff75a48ebcb557cb50ed937bd124f2db8a1eb752d9",
+    "scripts/stage_vuspr_search.py": "b1c81cb42fa73826395150b66bd585d3a15c98c362afb8bde64e75002ca3caa5",
     "common.py": "faf3cd91ce45010eddd21512ccbfc6802e260d87b9d2c355bf871246996fc749"
   },
   "official_tuning_manifest_sha256": {

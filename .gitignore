@@ -26,6 +26,7 @@ results/smoke/
 # Local result backup archives; final reviewed metrics remain trackable
 results/backups/
 results/staging/
+**/score_cache/
 
 # Forbidden experiment artifacts
 **/score/

@@ -32,10 +32,11 @@ The production hybrid adds 46,528 parameters to 627,968 parameters
 
 ## Frozen O1 screen
 
-- Datasets: U/MSL and M/GHL.
-- Reason: MSL previously showed useful score separation, while GHL showed
-  normal/anomaly manifold overlap. Together they distinguish preservation
-  from representation failure without spending GPU time on all ten datasets.
+- Datasets: U/SED, M/LTDB, and M/GHL.
+- Reason: SED and LTDB are relatively favorable sentinels on different
+  tracks, while GHL showed normal/anomaly manifold overlap. A mechanism must
+  preserve the first two and improve the third before spending GPU time on
+  hard MSL/CATSv2 or the remaining datasets.
 - Seed: 2026.
 - Selection: per-dataset macro VUS-PR on complete official Tuning coverage.
 - Head: fixed `final_gb_min_split=4`, `top_k=3`.
@@ -44,20 +45,25 @@ The production hybrid adds 46,528 parameters to 627,968 parameters
   - ordered pyramid;
   - order relations;
   - hybrid plus reliability-gated transition alignment.
-- Expected work: four Tuning series, 16 independent GPU score units, one head
+- Expected work: four Tuning series (one SED, two GHL, one LTDB), 16
+  independent GPU score units, one head
   each.
 
-If no order-aware candidate improves GHL while preserving MSL, the next
+If no order-aware candidate improves GHL while preserving SED and LTDB, the next
 mechanism should not add more prototype counts. The evidence would instead
 support revisiting token-level learning or the definition of normal temporal
 state. If one branch wins, it must next pass a separately frozen multi-seed,
-all-dataset Tuning protocol before any Eval.
+all-dataset Tuning protocol before any Eval. TODS and SVDB are the next
+favorable expansion set; MSL and CATSv2 are intentionally deferred until the
+mechanism passes this first causal screen.
 
 ## GPU/CPU pipeline
 
 The server command is `run-scores`. GPU workers train, build the frozen memory,
 and emit only compact point-score caches. They do not run PaAno metrics.
 Therefore a slow CATSv2-style CPU evaluator cannot occupy a GPU lane.
+`scripts/launch_stage_majority_order_o1.sh` verifies every frozen hash and the
+real-manifest plan identity before it starts a single 3090 GPU.
 
 The local PowerShell puller copies the frozen plan and available caches, checks
 their SHA-256 identities, and runs official metrics with

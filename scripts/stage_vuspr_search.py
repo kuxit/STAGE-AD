@@ -85,8 +85,8 @@ GEOMETRY_DIAGNOSTIC_TARGETS = {
     "M": ["CATSv2", "GHL"],
 }
 ORDER_DIAGNOSTIC_TARGETS = {
-    "U": ["MSL"],
-    "M": ["GHL"],
+    "U": ["SED"],
+    "M": ["GHL", "LTDB"],
 }
 EXPECTED_FINAL_SPLITS = [4, 16, 64, 256]
 EXPECTED_TOP_KS = [1, 3, 5, 9, 15]

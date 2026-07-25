@@ -161,14 +161,18 @@ class DeferredScorePipelineTests(unittest.TestCase):
         )
         protocol, _, _ = search.load_and_validate_protocol(protocol_path)
         self.assertEqual(protocol["phase"], "order_o1")
-        self.assertEqual(protocol["targets"], {"U": ["MSL"], "M": ["GHL"]})
+        self.assertEqual(
+            protocol["targets"],
+            {"U": ["SED"], "M": ["GHL", "LTDB"]},
+        )
         lookup = {
             candidate["id"]: candidate
             for candidate in protocol["training_candidates"]
         }
         for subset, file_name in (
-            ("U/MSL", "x_MSL_tr_530_case.csv"),
+            ("U/SED", "x_SED_tr_2499_case.csv"),
             ("M/GHL", "x_GHL_tr_400_case.csv"),
+            ("M/LTDB", "x_LTDB_tr_4456_case.csv"),
         ):
             signatures = {
                 search.training_execution_signature(
