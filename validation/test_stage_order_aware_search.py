@@ -59,3 +59,36 @@ def test_every_resolved_candidate_is_accepted_by_the_exact_model() -> None:
         for row in rows:
             config = model.StageConfig(**row["parameters"])
             config.validate()
+
+
+def test_unit_validation_reads_strict_flag_from_atomic_unit_envelope() -> None:
+    task = ("U/SED", "oa00_balanced_default", 2026, "series.csv")
+    plan = {
+        "plan_fingerprint": "plan",
+        "source_sha256": "source",
+        "candidates_by_subset": {
+            "U/SED": [
+                {
+                    "id": "oa00_balanced_default",
+                    "config_fingerprint": "candidate",
+                }
+            ]
+        },
+    }
+    method = {name: 0.5 for name in MODULE.SIX_METRICS}
+    method["method"] = "STAGE"
+    value = {
+        "schema_version": "stage-order-aware-unit-v1",
+        "plan_fingerprint": "plan",
+        "source_sha256": "source",
+        "subset": "U/SED",
+        "candidate_id": "oa00_balanced_default",
+        "candidate_fingerprint": "candidate",
+        "seed": 2026,
+        "file": "series.csv",
+        "selection_split": "official TSB-AD Tuning only",
+        "eval_feedback": False,
+        "strict_deterministic_algorithms": True,
+        "record": {"methods": [method]},
+    }
+    assert MODULE.valid_unit(value, plan, task)

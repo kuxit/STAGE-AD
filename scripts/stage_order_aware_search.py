@@ -268,7 +268,7 @@ def valid_unit(value: Mapping[str, Any], plan: Mapping[str, Any], task: tuple[st
             and value.get("file") == file_name
             and value.get("selection_split") == "official TSB-AD Tuning only"
             and value.get("eval_feedback") is False
-            and record.get("strict_deterministic_algorithms") is True
+            and value.get("strict_deterministic_algorithms") is True
             and all(math.isfinite(item) for item in observed)
             and not record.get("checkpoint")
             and not record.get("scores")
